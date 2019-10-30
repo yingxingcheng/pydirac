@@ -132,3 +132,6 @@ master_log.txt
 master_details.txt
 Alkemiems/widgets/data/domin_box_1.txt
 Alkemiems/widgets/data/test/output/*
+
+#dirac output file
+*.out
