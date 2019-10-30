@@ -172,6 +172,120 @@ def get_d_X2C_NOSPIN_SCF(elec_conf, atom_type, *arg, **kwarg):
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
 
+def get_q_DOSSSS_SCF(elec_conf, atom_type, *arg, **kwarg):
+    context = """**DIRAC
+.TITLE
+ {atom_type}, DOSSSS, SCF
+.WAVE F
+.4INDEX
+.ANALYZE
+.PROPERTIES
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
+1..oo
+**HAMILTONIAN
+.DOSSSS
+.OPERATOR
+ 'Theta quadru-field'
+ DIAGONAL
+ ZZTHETA
+ COMFACTOR
+ zff
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
+*SCF
+{elec_conf}
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+90
+**PROPERTIES
+.QUADRUPOLE
+*END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
+    return context
+
+def get_q_X2C_SCF(elec_conf, atom_type, *arg, **kwarg):
+    context = """**DIRAC
+.TITLE
+ {atom_type}, X2C, SCF
+.WAVE F
+.4INDEX
+.ANALYZE
+.PROPERTIES
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
+1..oo
+**HAMILTONIAN
+.X2C
+.OPERATOR
+ 'Theta quadru-field'
+ DIAGONAL
+ ZZTHETA
+ COMFACTOR
+ zff
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
+*SCF
+{elec_conf}
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+90
+**PROPERTIES
+.QUADRUPOLE
+*END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
+    return context
+
+def get_q_X2C_NOSPIN_SCF(elec_conf, atom_type, *arg, **kwarg):
+    context = """**DIRAC
+.TITLE
+ {atom_type}, X2C_NOSPIN, SCF
+.WAVE F
+.4INDEX
+.ANALYZE
+.PROPERTIES
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
+1..oo
+**HAMILTONIAN
+.X2C
+.NOSPIN
+.OPERATOR
+ 'Theta quadru-field'
+ DIAGONAL
+ ZZTHETA
+ COMFACTOR
+ zff
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
+*SCF
+{elec_conf}
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+90
+**PROPERTIES
+.QUADRUPOLE
+*END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
+    return context
 
 def get_mol_by_custom_basis(atom_type, atom_index, basis_choice, basis_info):
     template = """INTGRL

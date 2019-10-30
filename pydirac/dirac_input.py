@@ -58,10 +58,17 @@ class Inpobj(object):
         """
         if not isinstance(keywords, tuple):
             raise TypeError('Wrong type for keywords, it should be tuple')
+        
+        # for k, v in self.keywords_list:
+        #     for i in range(len(v)):
+        #         v[i] = v[i].strip()
 
         if keywords[0] in ['**RELCC', '*KRCICALC', '*SCF']:
             for k,v in self.keywords_list:
                 if k.startswith('**WAVE'):
+                    # if keywords[0] in [_keywords.strip() for _keywords in v]:
+                    #     break
+
                     str_added  = '#'
                     if keywords[0] == '*KRCICALC':
                         str_added = '.KR CI'
@@ -78,6 +85,42 @@ class Inpobj(object):
                 else:
                     # add '**WAVE'
                     pass
+
+        for k, v in self.keywords_list:
+            if k.startswith('**HAMI'):
+                # change COMFACTOR
+                for idx, value in enumerate(v):
+                    if value.strip() in ['COMFACTOR', 'ZDIPLEN']:
+                        v[idx] = ' '+value.strip()
+
+                for idx, value in enumerate(v):
+                    if value.strip() == 'COMFACTOR':
+                        v[idx+1] = ' zff'
+                        break
+                break
+
+        print('check resolved')
+        for k, v in self.keywords_list:
+            if k.startswith('**WAVE'):
+                # check resolved
+                if '.RESOLVE' in [_keywords.strip() for _keywords in v]:
+                    break
+
+                for idx, value in enumerate(v):
+                    if value.startswith('*'):
+                        v.insert(idx,'.RESOLVE')
+                        break
+                break
+        
+        print('check VECPOP')
+        for k, v in self.keywords_list:
+            if k.startswith('**ANAL'):
+                # check .VECPOP
+                for idx, value in enumerate(v):
+                    if value.strip() == '.VECPOP':
+                        v[idx+1] = '1..oo'
+                        break
+                break
 
         self.keywords_list.insert(-1, keywords)
 

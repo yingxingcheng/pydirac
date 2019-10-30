@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from config import *
+from pydirac.config import *
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -205,7 +205,7 @@ def get_dirac_shell_str(nb_elec, f=None):
 
 def create_input_files(atom_type='He', basis_type='dyall.v2z', basis_choice='BASIS',
                        field_value=None, scratch_dir=None,
-                       create_script=True, suffix=None):
+                       create_script=True, suffix=None, input_type=None):
     """Create input file according atom type and basis specified by users.
     """
     if scratch_dir is None:
@@ -239,7 +239,24 @@ def create_input_files(atom_type='He', basis_type='dyall.v2z', basis_choice='BAS
 
     # create input file of DIRAC
     elec_conf = get_dirac_shell_str(atom_index)
-    context = get_d_DOSSSS_SCF(elec_conf, atom_type)
+
+    input_type = input_type or 0
+    input_func = ['get_d_DOSSS_SCF', 'get_d_X2C_SCF', 'get_d_X2C_NOSPIN_SCF',
+                  'get_q_DOSSSS_SCF', 'get_q_X2C_NOSPIN_SCF']
+    if input_type == 0:
+        context = get_d_DOSSSS_SCF(elec_conf, atom_type)
+    elif input_type == 1:
+        context = get_d_X2C_SCF(elec_conf, atom_type)
+    elif input_type == 2:
+        context = get_d_X2C_NOSPIN_SCF(elec_conf, atom_type)
+    elif input_type == 3:
+        context = get_q_DOSSSS_SCF(elec_conf, atom_type)
+    elif input_type == 4:
+        context = get_q_X2C_NOSPIN_SCF(elec_conf, atom_type)
+    elif input_type == 5:
+        context = get_q_X2C_SCF(elec_conf, atom_type)
+    else:
+        raise RuntimeError('Wrong input type!!!!')
 
     inp_fname = atom_type + '_' + basis_type + '.inp'
     #inp_fname = atom_type + '_' + 'Ml0.inp'
