@@ -246,9 +246,6 @@ class Atom(object):
         #fo
         #    print(i)
         return Atom(res_list)
-        
-
-
 
 
 if __name__ == '__main__':

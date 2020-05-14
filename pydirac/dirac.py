@@ -11,7 +11,6 @@ __all__ = ['DiracJob']
 class DiracJob:
     """A class representing a single computational job with DIRAC."""
 
-    _result_type = DiracResults
     _top = ['dirac']
     _filenames = {'inp':'$JN.inp', 'run':'$JN.run', 'out':'$JN.out', 'err': '$JN.err'}
 
@@ -69,7 +68,6 @@ class DiracJob:
         return inp
 
 
-
     def get_runscript(self):
         """Generate a runscript. Returned string is a ``pam`` call followed 
         by option flags generated based on ``self.settings.runscript.pam`` 
@@ -104,5 +102,4 @@ class DiracJob:
                     suffix = 'b={block}' if hasattr(atom,'block') else ''
                     f.write(atom.str(suffix=suffix)+'\n')
         s.inp = self._filename('inp')
-        SingleJob._get_ready(self)
 
