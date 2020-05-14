@@ -26,6 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 pydirac/tests/
+pydirac/unit_tests/data
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

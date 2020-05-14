@@ -13,7 +13,7 @@ if __name__ == "__main__":
         version='1.0.0',
         description='DIRAC interface',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
-        url='https://github/yxcheng/pygace',
+        url='https://github/yxcheng/pydirac',
         author='Yingxing Cheng',
         author_email='Yingxing.Cheng@ugent.be',
         license='modified BSD',
