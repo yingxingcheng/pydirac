@@ -230,20 +230,19 @@ Contents of the input file
 **ANALYZE                                                                                           
 .MULPOP                                                                                             
 *MULPOP                                                                                             
-.VECPOP                                                                                             
-1..oo                                                                                               
+.VECPOP                                                       
+1..100
 **HAMILTONIAN                                                                                       
 .DOSSSS                                                                                             
 .OPERATOR                                                                                           
- ZDIPLEN                                                                                            
- COMFACTOR                                                                                          
- 0.0000                                                                                             
+ZDIPLEN                                                                                            
+COMFACTOR                                                                                          
+0.0000                                                                                             
 **INTEGRALS                                                                                         
 *READINP                                                                                            
 .UNCONTRACT                                                                                         
 **WAVE FUNCTIONS                                                                                    
 .SCF                                                                                                
-.RESOLVE                                                                                            
 #.KR CI                                                                                             
 *SCF                                                                                                
 # Fl atom and Econf: 1s^2 2s^2 2p^6 3s^2 3p^6 4s^2 3d^10 4p^6 5s^2 4d^10 5p^6 6s^2 4f^14 5d^10 6p^6 

@@ -159,7 +159,8 @@ class Inpobj(object):
         cur_1st_level = ''
         #cur_2nd_level = ''
         for l in inp_lines:
-            l = l.strip()
+            #l = l.strip() # yxcheng 02/15/2020
+            l = l.strip('\n')
             if l.startswith('**'):
                 cur_1st_level = l
                 if l not in keyword_dict.keys():

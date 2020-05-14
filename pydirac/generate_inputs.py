@@ -242,7 +242,7 @@ def create_input_files(atom_type='He', basis_type='dyall.v2z', basis_choice='BAS
 
     input_type = input_type or 0
     input_func = ['get_d_DOSSS_SCF', 'get_d_X2C_SCF', 'get_d_X2C_NOSPIN_SCF',
-                  'get_q_DOSSSS_SCF', 'get_q_X2C_NOSPIN_SCF']
+                  'get_q_DOSSSS_SCF', 'get_q_X2C_NOSPIN_SCF', 'get_d_X2C_NOSPIN_RELCCSD']
     if input_type == 0:
         context = get_d_DOSSSS_SCF(elec_conf, atom_type)
     elif input_type == 1:
@@ -255,6 +255,8 @@ def create_input_files(atom_type='He', basis_type='dyall.v2z', basis_choice='BAS
         context = get_q_X2C_NOSPIN_SCF(elec_conf, atom_type)
     elif input_type == 5:
         context = get_q_X2C_SCF(elec_conf, atom_type)
+    elif input_type == 6:
+        context = get_d_X2C_NOSPIN_RELCCSD(elec_conf, atom_type)
     else:
         raise RuntimeError('Wrong input type!!!!')
 

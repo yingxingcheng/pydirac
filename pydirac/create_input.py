@@ -21,6 +21,7 @@ def create_mrci_inp(fin, fout='PYDIRAC.inp'):
 
     # obtain orbit info
     res_orbits = atom.orbit_count(res_virtual=True, v_min_e=-1, v_max_e=10.0)
+    #res_orbits = atom.orbit_count(res_virtual=True, v_min_e=-1, v_max_e=2.0)
     nb_openshell_orbit = res_orbits[1]
     nb_virtual = res_orbits[-1]
 
@@ -58,21 +59,34 @@ def create_mrci_inp(fin, fout='PYDIRAC.inp'):
             ciroot1 = '3 3'
             ciroot2 = '4 3'
     elif open_elec == 2:
+        # # IV A elements
+        # ciroot1 = '1 1'
+        # ciroot2 = '2 1'
         # IV A elements
-        ciroot1 = '1 1'
-        ciroot2 = '2 1'
+        ciroot1 = '1 9'
+        ciroot2 = '2 6'
     elif open_elec == 3:
+        # # V A elements
+        # ciroot1 = '3 2'
+        # ciroot2 = '4 2'
         # V A elements
-        ciroot1 = '3 2'
-        ciroot2 = '4 2'
+        ciroot1 = '3 10'
+        ciroot2 = '4 10'
     elif open_elec == 4:
+        # # VI A elements
+        # ciroot1 = '1 2'
+        # ciroot2 = '2 2'
         # VI A elements
-        ciroot1 = '1 2'
-        ciroot2 = '2 2'
+        ciroot1 = '1 9'
+        ciroot2 = '2 6'
     elif open_elec == 5:
         # VII A elements
         ciroot1 = '3 3'
         ciroot2 = '4 3'
+    elif open_elec == 0:
+        # closed-shell elementss
+        ciroot1 = '1 1'
+        ciroot2 = '2 1'
     else:
         raise RuntimeError('This script only support main group elements')
 
