@@ -7,6 +7,7 @@ Date: 10/20/2019
 """
 
 import re
+from mendeleev import element
 
 
 class OrbitInfo(object):
@@ -78,6 +79,9 @@ class Atom(object):
             OrbitInfo_list = list(OrbitInfo_list)
             for o_info in OrbitInfo_list:
                 self._extract_info(o_info)
+
+        total_nb_elec = self.total_nb_elec()
+        self.info = element(total_nb_elec)
 
     def _extract_info(self, o_info):
         if 'close' in o_info.get_type():
@@ -157,6 +161,12 @@ class Atom(object):
         nb_elec= int(round(sum([ o.orbit_degenerate * o.orbit_frac for o in self.open_shells])))
         print('The number of open-shell electrons is : {0}'.format(nb_elec))
         return nb_elec
+
+    def total_nb_elec(self):
+        """
+        Get total number of electrons
+        """
+        return self.closed_elec() + self.openshell_elec()
         
     def virtualshell_elec(self):
         print('The number of virtual electrons is : 0')

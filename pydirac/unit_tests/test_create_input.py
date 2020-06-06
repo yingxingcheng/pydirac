@@ -5,18 +5,15 @@ import os
 
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.dirname(os.path.join(module_dir, 'data'))
+data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
 
 
-class Test_Inpobj(unittest.TestCase):
+def test_write_file():
     """
-    Test class for Inpobj
+    test write_file
     """
-
-    def test_write_file(self, filename):
-        """
-        test write_file
-        """
-        inp = Inpobj.from_file(filename)
-        inp.write_to_file(filename)
+    fname = os.path.join(data_dir, 'Ba_DHF.out')
+    inp = Inpobj.from_file(filename=fname)
+    fname_out = os.path.join(data_dir, 'tmp.inp')
+    inp.write_to_file(filename=fname_out)
 
