@@ -5,10 +5,11 @@ Function: Create input file from the previous output file, e.g., SCF calculation
 Author: Yingxing Cheng
 Date: 10/21/2019
 """
-from pydirac.get_orbit_info import OrbitInfo, Atom
-from pydirac.dirac_input import Inpobj
-from mendeleev import Element
+from pydirac.utility.get_orbit_info import Atom
+from pydirac.input.helper import Inpobj
 
+
+__all__ = ['get_mrci_inp']
 
 def get_info_for_s_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
     """
@@ -394,12 +395,12 @@ def get_info_for_f_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
 
 
 
-def create_mrci_inp(fin, fout='PYDIRAC.inp', v_min_e=-1, v_max_e=10.0):
+def get_mrci_inp(filename_input, filename_out='PYDIRAC.inp', v_min_e=-1, v_max_e=10.0):
     """
     Create MRCI input based on the previous SCF calculation.
     """
 
-    atom = Atom.from_file(fin)
+    atom = Atom.from_file(filename_input)
 
     # this is for p block elements
     if atom.info.block == 'p':
@@ -433,9 +434,9 @@ def create_mrci_inp(fin, fout='PYDIRAC.inp', v_min_e=-1, v_max_e=10.0):
 
     krci = ('*KRCICALC', krci_setup)
 
-    inp = Inpobj.from_file(fin)
+    inp = Inpobj.from_file(filename_input)
     inp.add_keywords(krci)
-    inp.write_to_file(fout)
+    inp.write_to_file(filename_out)
 
 
 if __name__ == '__main__':
@@ -443,4 +444,4 @@ if __name__ == '__main__':
 
     argv = sys.argv[1:]
     for filename in argv:
-        create_mrci_inp(fin=filename)
+        get_mrci_inp(fin=filename)

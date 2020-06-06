@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-import unittest
-from pydirac.dirac_input import Inpobj
-from pydirac.get_orbit_info import Atom
-from pydirac.create_input import create_mrci_inp
-import mendeleev
+from pydirac.input.helper import Inpobj
 import os
 
 
@@ -11,21 +7,14 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
 
 
-def test_write_file():
+def test_get_orbital_info():
     """
-    test write_file
+    test get orbital info
     """
-    fname = os.path.join(data_dir, 'Cu_DHF.out')
-    atom = Atom.from_file(fname)
-    print(atom.closed_elec(), atom.openshell_elec())
-    print(atom.info.symbol)
-    print(atom.info.period)
-    if atom.info.group:
-        print(atom.info.group.symbol)
-    print(atom.info.block)
-
-    fout = os.path.join(data_dir, 'PYDIRAC.inp')
-    create_mrci_inp(fname, fout)
+    fname = os.path.join(data_dir, 'Kr_DHF.out')
+    inp = Inpobj.from_file(filename=fname)
+    fname_out = os.path.join(data_dir, 'tmp.inp')
+    inp.write_to_file(filename=fname_out)
 
 
 

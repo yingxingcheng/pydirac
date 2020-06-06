@@ -46,10 +46,16 @@ class OrbitInfo(object):
         return self.orbit_degenerate
 
     def __str__(self):
-        return str(self.orbit_sym) + ' ' + str(self.orbit_type) + ' ' +str(self.orbit_energy) + ' ' + str(self.orbit_degenerate) + ' ' + str(self.orbit_frac)
+        return str(self.orbit_sym) + ' ' + str(self.orbit_type) + \
+               ' ' +str(self.orbit_energy) + ' ' + \
+               str(self.orbit_degenerate) +\
+               ' ' + str(self.orbit_frac)
 
     def __repr__(self):
-        return str(self.orbit_sym) + ' ' + str(self.orbit_type) + ' ' +str(self.orbit_energy) + ' ' + str(self.orbit_degenerate) + ' ' + str(self.orbit_frac)
+        return str(self.orbit_sym) + ' ' + str(self.orbit_type) + \
+               ' ' +str(self.orbit_energy) + ' ' + \
+               str(self.orbit_degenerate) + ' ' + \
+               str(self.orbit_frac)
 
     def __eq__(self, other):
         is_equal = True
@@ -88,17 +94,20 @@ class Atom(object):
             if o_info not in self.closed_shells:
                 self.closed_shells.append(o_info)
             else:
-                raise RuntimeWarning("I've met a similar orbit in closed_shells, SKIP it!")
+                raise RuntimeWarning("I've met a similar orbit "
+                                     "in closed_shells, SKIP it!")
         elif 'open' in o_info.get_type():
             if o_info not in self.open_shells:
                 self.open_shells.append(o_info)
             else:
-                raise RuntimeWarning("I've met a similar orbit in open_shells, SKIP it!")
+                raise RuntimeWarning("I've met a similar orbit "
+                                     "in open_shells, SKIP it!")
         elif 'virtual' in o_info.get_type():
             if o_info not in self.virtual_shells:
                 self.virtual_shells.append(o_info)
             else:
-                raise RuntimeWarning("I've met a similar orbit in virtual_shells, SKIP it!")
+                raise RuntimeWarning("I've met a similar orbit "
+                                     "in virtual_shells, SKIP it!")
         else:
             raise RuntimeError('There is a unknown type orbit!')
 
@@ -107,35 +116,59 @@ class Atom(object):
         self._extract_info(orbit)
 
 
-    def orbit_count(self,  res_all = False, min_e = -999999999, max_e= 999999999,res_closed=False,
-                    c_min_e = 0.0, c_max_e = 0.0, res_open =False, o_min_e = 0.0, o_max_e = 0.0,
+    def orbit_count(self,  res_all = False, min_e = -999999999,
+                    max_e= 999999999,res_closed=False,
+                    c_min_e = 0.0, c_max_e = 0.0, res_open =False,
+                    o_min_e = 0.0, o_max_e = 0.0,
                     res_virtual=  False,v_min_e = 0.0, v_max_e = 0.0):
+        """
+        Get orbital info based on energy range specified by user.
+        :param res_all: (bool) if true, all orbitals will be taken into consider
+        :param min_e:
+        :param max_e:
+        :param res_closed:
+        :param c_min_e:
+        :param c_max_e:
+        :param res_open:
+        :param o_min_e:
+        :param o_max_e:
+        :param res_virtual:
+        :param v_min_e:
+        :param v_max_e:
+        :return:
+        """
 
         if res_closed:
-            res_closed_shells = [o for o in self.closed_shells if o.orbit_energy >= c_min_e
+            res_closed_shells = [o for o in self.closed_shells
+                                 if o.orbit_energy >= c_min_e
                                  and o.orbit_energy <=c_max_e]
         elif res_all:
-            res_closed_shells = [o for o in self.closed_shells if o.orbit_energy >= min_e
+            res_closed_shells = [o for o in self.closed_shells
+                                 if o.orbit_energy >= min_e
                                  and o.orbit_energy <= max_e]
         else:
             res_closed_shells = [o for o in self.closed_shells]
 
 
         if res_open:
-            res_open_shells = [o for o in self.open_shells if o.orbit_energy >=o_min_e
+            res_open_shells = [o for o in self.open_shells
+                               if o.orbit_energy >=o_min_e
                                and o.orbit_energy <= o_max_e]
         elif res_all:
-            res_open_shells = [o for o in self.open_shells if o.orbit_energy >= min_e
+            res_open_shells = [o for o in self.open_shells
+                               if o.orbit_energy >= min_e
                                and o.orbit_energy <= max_e]
         else:
             res_open_shells = [o for o in self.open_shells]
 
 
         if res_virtual:
-            res_virtual_shells= [o for o in self.virtual_shells if o.orbit_energy >= v_min_e
+            res_virtual_shells= [o for o in self.virtual_shells
+                                 if o.orbit_energy >= v_min_e
                                  and o.orbit_energy <= v_max_e]
         elif res_all:
-            res_virtual_shells= [o for o in self.virtual_shells if o.orbit_energy >= min_e
+            res_virtual_shells= [o for o in self.virtual_shells
+                                 if o.orbit_energy >= min_e
                                  and o.orbit_energy <= max_e]
         else:
             res_virtual_shells= [o for o in self.virtual_shells]
@@ -148,17 +181,20 @@ class Atom(object):
         print('The number of closed-shell orbits is : {0}'.format(c_closed))
         print('The number of open-shell orbits is : {0}'.format(c_open))
         print('The number of virtual orbits is : {0}'.format(c_virtual))
-        print('The total number of orbits is: {0}'.format(sum([c_closed, c_open,c_virtual])))
+        print('The total number of orbits is: {0}'.format(sum([c_closed,
+                                                               c_open,c_virtual])))
         return c_closed, c_open, c_virtual
 
     def closed_elec(self):
-        nb_elec = int(round(sum([ o.orbit_degenerate * o.orbit_frac for o in self.closed_shells])))
+        nb_elec = int(round(sum([ o.orbit_degenerate * o.orbit_frac
+                                  for o in self.closed_shells])))
         print('The number of closed-shell electrons is : {0}'.format(nb_elec))
         return nb_elec
 
 
     def openshell_elec(self):
-        nb_elec= int(round(sum([ o.orbit_degenerate * o.orbit_frac for o in self.open_shells])))
+        nb_elec= int(round(sum([ o.orbit_degenerate *
+                                 o.orbit_frac for o in self.open_shells])))
         print('The number of open-shell electrons is : {0}'.format(nb_elec))
         return nb_elec
 

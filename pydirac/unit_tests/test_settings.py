@@ -1,4 +1,4 @@
-from pydirac.settings import Settings
+from pydirac.core.settings import Settings
 
 s = Settings()
 
