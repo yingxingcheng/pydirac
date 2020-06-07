@@ -185,24 +185,26 @@ class Atom(object):
                                                                c_open,c_virtual])))
         return c_closed, c_open, c_virtual
 
-    def closed_elec(self):
+    def closed_elec(self, verbos=True):
         nb_elec = int(round(sum([ o.orbit_degenerate * o.orbit_frac
                                   for o in self.closed_shells])))
-        print('The number of closed-shell electrons is : {0}'.format(nb_elec))
+        if verbos:
+            print('The number of closed-shell electrons is : {0}'.format(nb_elec))
         return nb_elec
 
 
-    def openshell_elec(self):
+    def openshell_elec(self, verbos=True):
         nb_elec= int(round(sum([ o.orbit_degenerate *
                                  o.orbit_frac for o in self.open_shells])))
-        print('The number of open-shell electrons is : {0}'.format(nb_elec))
+        if verbos:
+            print('The number of open-shell electrons is : {0}'.format(nb_elec))
         return nb_elec
 
     def total_nb_elec(self):
         """
         Get total number of electrons
         """
-        return self.closed_elec() + self.openshell_elec()
+        return self.closed_elec(verbos=False) + self.openshell_elec(verbos=False)
         
     def virtualshell_elec(self):
         print('The number of virtual electrons is : 0')
