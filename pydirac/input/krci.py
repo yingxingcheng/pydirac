@@ -430,7 +430,8 @@ def get_mrci_inp(filename_input, filename_out='PYDIRAC.inp', v_min_e=-1, v_max_e
     for i in range(nb_root_sym):
         krci_setup.append('.CIROOTS')
         krci_setup.append(root_list[i])
-    krci_setup.extend(['.MAX CI', '120', '.MXCIVE', '60', '.ANALYZ', '.RSTRCI', 'rstr', '.CHECKP'])
+    krci_setup.extend(['.MAX CI', '120', '.MXCIVE', '60', '.ANALYZ',
+                       '.RSTRCI', 'rstr', '.CHECKP', '.NOOCCN'])
 
     krci = ('*KRCICALC', krci_setup)
 
