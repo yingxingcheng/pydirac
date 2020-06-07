@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 
-from pydirac.utility.get_orbit_info import Atom
+from pydirac.core.atom import Atom
 from pydirac.input.krci import get_mrci_inp
 
 module_dir = os.path.dirname(os.path.abspath(__file__))

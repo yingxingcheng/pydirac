@@ -5,8 +5,8 @@ Function: Create input file from the previous output file, e.g., SCF calculation
 Author: Yingxing Cheng
 Date: 10/21/2019
 """
-from pydirac.utility.get_orbit_info import Atom
-from pydirac.input.helper import Inpobj
+from pydirac.core.atom import Atom
+from pydirac.input.jobs import Inpobj
 
 
 __all__ = ['get_mrci_inp']

@@ -5,7 +5,7 @@ from pydirac.utility.config import *
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 __all__ = ['get_dossss_scf_inp', 'get_x2c_relccsd_inp', 'get_x2c_scf_inp',
-           'input_from_calctype']
+           'input_from_calctype', 'get_dossss_relccsd_inp']
 
 
 def input_from_calctype(atom_info:Element, calc_type:str,
@@ -59,6 +59,27 @@ def get_dossss_scf_inp(atom_type, filename_out=None, is_dipole=True):
     input_from_calctype(element(atom_type), filename_out=filename_out,
                         calc_type=calc_str)
 
+
+def get_dossss_relccsd_inp(atom_type, filename_out=None, is_dipole=True):
+    """
+    Get DOSSSS RELCCSD input file
+    Parameters
+    ----------
+    atom_type (int or str): aotm type
+    filename_out (str or None): output filename
+    is_dipole (bool): True for dipole and False for quadrupole
+
+    Returns
+    -------
+    None
+    """
+    calc_str = 'DOSSSS_RELCCSD'
+    if is_dipole:
+        calc_str = 'd_' + calc_str
+    else:
+        calc_str = 'q_' + calc_str
+    input_from_calctype(element(atom_type), filename_out=filename_out,
+                        calc_type=calc_str)
 
 def get_x2c_scf_inp(atom_type, filename_out=None, is_dipole=True,
                     is_nospin=False):

@@ -1,6 +1,6 @@
 import os
 from pydirac.core.settings import Settings
-from pydirac.input.helper import DiracJob
+from pydirac.input.jobs import DiracJob
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))

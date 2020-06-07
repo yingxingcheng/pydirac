@@ -226,10 +226,10 @@ def get_d_DOSSSS_SCF_str(elec_conf, atom_type, *arg, **kwarg):
     return context
 
 
-def get_d_X2C_SCF_str(elec_conf, atom_type, *arg, **kwarg):
+def get_q_DOSSSS_SCF_str(elec_conf, atom_type, *arg, **kwarg):
     context = """**DIRAC
 .TITLE
- {atom_type}, X2C, SCF
+ {atom_type}, DOSSSS, SCF
 .WAVE F
 .ANALYZE
 **ANALYZE
@@ -238,9 +238,11 @@ def get_d_X2C_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 .VECPOP
 1..oo
 **HAMILTONIAN
-.X2C
+.DOSSSS
 .OPERATOR
- ZDIPLEN
+ 'Theta quadru-field'
+ DIAGONAL
+ ZZTHETA
  COMFACTOR
  zff
 **INTEGRALS
@@ -254,16 +256,17 @@ def get_d_X2C_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 .EVCCNV
 1.0D-9  5.0D-8
 .MAXITR
-90
+60
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
 
 
-def get_d_X2C_NOSPIN_SCF_str(elec_conf, atom_type, *arg, **kwarg):
+def get_d_DOSSSS_RELCCSD_str(elec_conf, atom_type, *arg, **kwarg):
     context = """**DIRAC
 .TITLE
- {atom_type}, scalar relativistic, SCF
+ {atom_type}, DC, RELCC
 .WAVE F
+.4INDEX
 .ANALYZE
 **ANALYZE
 .MULPOP
@@ -271,10 +274,11 @@ def get_d_X2C_NOSPIN_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 .VECPOP
 1..oo
 **HAMILTONIAN
-.X2C
-.NOSPIN
+.DOSSSS
 .OPERATOR
- ZDIPLEN
+ 'Theta quadru-field'
+ DIAGONAL
+ ZZTHETA
  COMFACTOR
  zff
 **INTEGRALS
@@ -283,14 +287,79 @@ def get_d_X2C_NOSPIN_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 **WAVE FUNCTIONS
 .SCF
 .RESOLVE
+.RELCCSD
 *SCF
 {elec_conf}
 .EVCCNV
 1.0D-9  5.0D-8
 .MAXITR
-90
+60
+**MOLTRA
+.ACTIVE
+-20 2 0.1
+**RELCC
+.ENERGY
+.PRINT
+1
+*CCENER
+.MAXIT
+60
+.NTOL
+14
+.NOSDT
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
+
+
+def get_q_DOSSSS_RELCCSD_str(elec_conf, atom_type, *arg, **kwarg):
+    context = """**DIRAC
+.TITLE
+ {atom_type}, DC, RELCC
+.WAVE F
+.4INDEX
+.ANALYZE
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
+1..oo
+**HAMILTONIAN
+.DOSSSS
+.OPERATOR
+ 'Theta quadru-field'
+ DIAGONAL
+ ZZTHETA
+ COMFACTOR
+ zff
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
+.RELCCSD
+*SCF
+{elec_conf}
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+60
+**MOLTRA
+.ACTIVE
+-20 2 0.1
+**RELCC
+.ENERGY
+.PRINT
+1
+*CCENER
+.MAXIT
+60
+.NTOL
+14
+.NOSDT
+*END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
+    return context
+
 
 def get_q_DOSSSS_SCF_property_str(elec_conf, atom_type, *arg, **kwarg):
     context = """**DIRAC
@@ -329,10 +398,11 @@ def get_q_DOSSSS_SCF_property_str(elec_conf, atom_type, *arg, **kwarg):
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
 
-def get_q_DOSSSS_SCF_str(elec_conf, atom_type, *arg, **kwarg):
+
+def get_d_X2C_SCF_str(elec_conf, atom_type, *arg, **kwarg):
     context = """**DIRAC
 .TITLE
- {atom_type}, DOSSSS, SCF
+ {atom_type}, X2C, SCF
 .WAVE F
 .ANALYZE
 **ANALYZE
@@ -341,11 +411,9 @@ def get_q_DOSSSS_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 .VECPOP
 1..oo
 **HAMILTONIAN
-.DOSSSS
+.X2C
 .OPERATOR
- 'Theta quadru-field'
- DIAGONAL
- ZZTHETA
+ ZDIPLEN
  COMFACTOR
  zff
 **INTEGRALS
@@ -359,9 +427,10 @@ def get_q_DOSSSS_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 .EVCCNV
 1.0D-9  5.0D-8
 .MAXITR
-60
+90
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
+
 
 def get_q_X2C_SCF_str(elec_conf, atom_type, *arg, **kwarg):
     context = """**DIRAC
@@ -399,6 +468,41 @@ def get_q_X2C_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 .QUADRUPOLE
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
+
+
+def get_d_X2C_NOSPIN_SCF_str(elec_conf, atom_type, *arg, **kwarg):
+    context = """**DIRAC
+.TITLE
+ {atom_type}, scalar relativistic, SCF
+.WAVE F
+.ANALYZE
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
+1..oo
+**HAMILTONIAN
+.X2C
+.NOSPIN
+.OPERATOR
+ ZDIPLEN
+ COMFACTOR
+ zff
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
+*SCF
+{elec_conf}
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+90
+*END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
+    return context
+
 
 def get_q_X2C_NOSPIN_SCF_str(elec_conf, atom_type, *arg, **kwarg):
     context = """**DIRAC
@@ -484,10 +588,11 @@ def get_d_X2C_NOSPIN_RELCCSD_str(elec_conf, atom_type, *arg, **kwarg):
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
 
-def get_d_DOSSSS_RELCCSD_str(elec_conf, atom_type, *arg, **kwarg):
+
+def get_q_X2C_NOSPIN_RELCCSD_str(elec_conf, atom_type, *arg, **kwarg):
     context = """**DIRAC
 .TITLE
- {atom_type}, DC, RELCC
+ {atom_type}, scalar relativistic, RELCC
 .WAVE F
 .4INDEX
 .ANALYZE
@@ -497,7 +602,8 @@ def get_d_DOSSSS_RELCCSD_str(elec_conf, atom_type, *arg, **kwarg):
 .VECPOP
 1..oo
 **HAMILTONIAN
-.DOSSSS
+.X2C
+.NOSPIN
 .OPERATOR
  'Theta quadru-field'
  DIAGONAL
@@ -517,9 +623,6 @@ def get_d_DOSSSS_RELCCSD_str(elec_conf, atom_type, *arg, **kwarg):
 1.0D-9  5.0D-8
 .MAXITR
 60
-**MOLTRA
-.ACTIVE
--20 2 0.1
 **RELCC
 .ENERGY
 .PRINT

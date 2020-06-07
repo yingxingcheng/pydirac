@@ -10,15 +10,14 @@ Date: 10/21/2019
 
 from collections import OrderedDict
 import re
-import os
 from os.path import join as opj
-from mendeleev import element, Element
+from mendeleev import element
 from pydirac.core.settings import Settings
 from pydirac.utility.config import *
 from pydirac.input.mole import get_mole_file
 from pydirac.input.basic import input_from_calctype
 
-__all__ = ['DiracJob', 'Inpobj', 'Molobj']
+__all__ = ['DiracJob', 'Inpobj', 'Molobj', 'OldDiracJob', 'JobType']
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -204,6 +203,20 @@ class Molobj(object):
         pass
 
 
+class JobType:
+    d_DOSSSS_SCF = 0
+    q_DOSSSS_SCF = 1
+    d_DOSSSS_RELCCSD = 2
+    q_DOSSSS_RELCCSD = 3
+    d_X2C_SCF =  4
+    q_X2C_SCF = 5
+    d_X2C_NOSPIN_SCF = 6
+    q_X2C_NOSPIN_SCF = 7
+    d_X2C_NOSPIN_RELCCSD = 8
+    q_X2C_NOSPIN_RELCCSD = 9
+
+
+
 class OldDiracJob:
 
     @staticmethod
@@ -218,6 +231,13 @@ class OldDiracJob:
                 scratch_dir = atom_type + suffix
             else:
                 scratch_dir = atom_type
+        elif suffix:
+                basename = os.path.basename(scratch_dir)
+                dirname = os.path.dirname(scratch_dir)
+                scratch_dir = os.path.join(dirname, basename + "_"+ suffix)
+        else:
+            pass
+
         if not os.path.exists(scratch_dir):
             os.makedirs(scratch_dir)
 
@@ -231,9 +251,12 @@ class OldDiracJob:
 
         # create input file of DIRAC
         calc_type = calc_type or 0
-        calc_funcs = ['d_DOSSS_SCF', 'd_X2C_SCF', 'd_X2C_NOSPIN_SCF',
-                      'q_DOSSSS_SCF', 'q_X2C_NOSPIN_SCF',
-                      'd_X2C_NOSPIN_RELCCSD']
+        calc_funcs = ['d_DOSSSS_SCF', 'q_DOSSSS_SCF',
+                      'd_DOSSSS_RELCCSD', 'q_DOSSSS_RELCCSD',
+                      'd_X2C_SCF', 'q_X2C_SCF',
+                      'd_X2C_NOSPIN_SCF', 'q_X2C_NOSPIN_SCF',
+                      'd_X2C_NOSPIN_RELCCSD', 'd_X2C_NOSPIN_RELCCSD',
+                      ]
 
         inp_fname = atom_type + '_' + basis_type + '.inp'
         inp_fname = os.path.join(scratch_dir, inp_fname)
