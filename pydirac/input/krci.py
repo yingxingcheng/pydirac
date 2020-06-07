@@ -444,4 +444,4 @@ if __name__ == '__main__':
 
     argv = sys.argv[1:]
     for filename in argv:
-        get_mrci_inp(fin=filename)
+        get_mrci_inp(filename_input=filename)
