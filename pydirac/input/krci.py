@@ -339,7 +339,7 @@ def get_info_for_d_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
     if nb_open_elec == 1:
         if nb_open_shell == 2:
             # only s is open
-            ciroot1 = '1 1'
+            ciroot1 = '3 1'
             # ciroot2 = '2 1'
             root_list.extend([ciroot1])
         elif nb_open_shell == 12:
