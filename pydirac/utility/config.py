@@ -221,7 +221,7 @@ def get_d_DOSSSS_SCF_str(elec_conf, atom_type, *arg, **kwarg):
 .EVCCNV
 1.0D-9  5.0D-8
 .MAXITR
-90
+60
 *END OF""".format(**{'elec_conf': elec_conf, 'atom_type': atom_type})
     return context
 
