@@ -1,4 +1,4 @@
-from pydirac.utility.read import parser_dirac_input
+from pydirac.utility.read import parse_dirac_input
 from pydirac.input.jobs import DiracJob
 import os
 
@@ -8,7 +8,7 @@ dirac_inp = os.path.join(data_dir, 'tmp.inp')
 
 
 def test_read_func():
-    setting = parser_dirac_input(filename=dirac_inp)
+    setting = parse_dirac_input(file_obj=dirac_inp)
     job = DiracJob(settings=setting)
     print(job)
 

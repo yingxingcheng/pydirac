@@ -115,6 +115,28 @@ class Atom(object):
     def add_orbit(self, orbit):
         self._extract_info(orbit)
 
+    def electron_count(self, e_min, e_max):
+        """
+        Count electron number if energy range given
+        Parameters
+        ----------
+        e_min
+        e_max
+
+        Returns
+        -------
+
+        """
+
+        nb_open_shell= int(round(sum([o.orbit_degenerate *
+                                      o.orbit_frac for o in self.open_shells if
+                                      e_min <= o.orbit_energy <= e_max])))
+
+        nb_closed_shell= int(round(sum([o.orbit_degenerate *
+                                        o.orbit_frac for o in self.closed_shells if
+                                        e_min <= o.orbit_energy <= e_max])))
+
+        return nb_open_shell + nb_closed_shell
 
     def orbit_count(self,  res_all = False, min_e = -999999999,
                     max_e= 999999999,res_closed=False,
@@ -140,36 +162,30 @@ class Atom(object):
 
         if res_closed:
             res_closed_shells = [o for o in self.closed_shells
-                                 if o.orbit_energy >= c_min_e
-                                 and o.orbit_energy <=c_max_e]
+                                 if c_min_e <= o.orbit_energy <= c_max_e]
         elif res_all:
             res_closed_shells = [o for o in self.closed_shells
-                                 if o.orbit_energy >= min_e
-                                 and o.orbit_energy <= max_e]
+                                 if min_e <= o.orbit_energy <= max_e]
         else:
             res_closed_shells = [o for o in self.closed_shells]
 
 
         if res_open:
             res_open_shells = [o for o in self.open_shells
-                               if o.orbit_energy >=o_min_e
-                               and o.orbit_energy <= o_max_e]
+                               if o_min_e <= o.orbit_energy <= o_max_e]
         elif res_all:
             res_open_shells = [o for o in self.open_shells
-                               if o.orbit_energy >= min_e
-                               and o.orbit_energy <= max_e]
+                               if min_e <= o.orbit_energy <= max_e]
         else:
             res_open_shells = [o for o in self.open_shells]
 
 
         if res_virtual:
             res_virtual_shells= [o for o in self.virtual_shells
-                                 if o.orbit_energy >= v_min_e
-                                 and o.orbit_energy <= v_max_e]
+                                 if v_min_e <= o.orbit_energy <= v_max_e]
         elif res_all:
             res_virtual_shells= [o for o in self.virtual_shells
-                                 if o.orbit_energy >= min_e
-                                 and o.orbit_energy <= max_e]
+                                 if min_e <= o.orbit_energy <= max_e]
         else:
             res_virtual_shells= [o for o in self.virtual_shells]
 
@@ -218,7 +234,7 @@ class Atom(object):
     
         start_line = re.compile(r"\s+Eigenvalues\s+")
         symline = re.compile(r"^\* \b(?:Boson|Fermion)\b symmetry (.*)")
-        open_shell = re.compile(r"^\s+\*\s+Open shell \#\d+, f = (\d+(\.\d*)?)")
+        open_shell = re.compile(r"^\s+\*\s+Open shell #\d+, f = (\d+(\.\d*)?)")
         close_shell = re.compile(r"^\s+\*\s+Closed shell, f = (\d+(\.\d*)?)")
         virtual_shell = re.compile(r"\s+\*\s+Virtual eigenvalues, f = (\d+(\.\d*)?)")
         number = re.compile(r"(?P<num>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+\(\s*(?P<degenerate>\d+)\)")

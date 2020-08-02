@@ -1,3 +1,4 @@
+import os
 from pydirac.core.settings import Settings
 from pydirac.input.jobs import DiracJob
 
@@ -63,12 +64,20 @@ def add_sub_node(settinging_obj, dir_node, subdir_node,
     return is_set
 
 
-def parser_dirac_input(filename='tmp.inp'):
+def parse_dirac_input(file_obj='tmp.inp'):
     """
-    Parser DIRAC input file to restore python Settings object
+    Parse DIRAC input file to restore python Settings object
     """
-    with open(filename, 'r') as f:
-        lines = f.readlines()
+    if type(file_obj) == str:
+        if os.path.isfile(file_obj):
+            with open(file_obj, 'r') as f:
+                lines = f.readlines()
+        else:
+            lines = [ l + '\n' for l in file_obj.split('\n')]
+    elif type(file_obj) == list:
+        lines = file_obj
+    else:
+        raise TypeError('Type of file_obj is invalid!')
 
     setting = Settings()
     setting.input.dirac = Settings()
