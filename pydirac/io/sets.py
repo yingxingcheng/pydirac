@@ -1,15 +1,37 @@
-#!/usr/bin/env python
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  Pydirac: PYthon tool for DIRAC software.
+#  Copyright (C) 2020-2020 The Pydirac Development Team
+#
+#  This file is part of Pydirac.
+#
+#  Pydirac is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 3
+#  of the License, or (at your option) any later version.
+#
+#  Pydirac is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, see <http://www.gnu.org/licenses/>
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 """
-Function: read and write DIRAC input files based on parameters specified by
-user.
-Author: Yingxing Cheng
-Email: Yingxing.Cheng@ugent.be
-Date: 10/21/2019
+This module defines the DiracInputSet abstract base class and a concrete
+implementation for the parameters developed and tested by the author.
+The basic concept behind an input set is to specify a scheme to generate
+a consistent set of DIRAC inputs from a structure without further user
+intervention. This ensures comparability across runs.
 """
 
+
+import abc
 from collections import OrderedDict
 import re
+from monty.json import MSONable
 from os.path import join as opj
 from mendeleev import element
 from pydirac.core.settings import Settings
@@ -20,6 +42,10 @@ from pydirac.io.basic import input_from_calctype
 __all__ = ['DiracJob', 'Inpobj', 'Molobj', 'OldDiracJob', 'JobType']
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
+
+
+class DiracInputSet(MSONable, metaclass=abc.ABCMeta):
+    pass
 
 
 class Inpobj(object):

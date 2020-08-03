@@ -1,12 +1,26 @@
-#!/usr/bin/env python
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#  Pydirac: PYthon tool for DIRAC software.
+#  Copyright (C) 2020-2020 The Pydirac Development Team
+#
+#  This file is part of Pydirac.
+#
+#  Pydirac is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 3
+#  of the License, or (at your option) any later version.
+#
+#  Pydirac is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, see <http://www.gnu.org/licenses/>
+#
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-"""
-Function: Create input file from the previous output file, e.g., SCF calculation.
-Author: Yingxing Cheng
-Date: 10/21/2019
-"""
-from pydirac.core.atom import Atom
-from pydirac.io.jobs import Inpobj
+from pydirac.core.molecule import Molecule
+from pydirac.io.sets import Inpobj
 
 
 __all__ = ['get_mrci_inp']
@@ -400,7 +414,7 @@ def get_mrci_inp(filename_input, filename_out='PYDIRAC.inp', v_min_e=-1, v_max_e
     Create MRCI input based on the previous SCF calculation.
     """
 
-    atom = Atom.from_file(filename_input)
+    atom = Molecule.from_file(filename_input)
 
     # this is for p block elements
     if atom.info.block == 'p':
