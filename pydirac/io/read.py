@@ -1,6 +1,6 @@
 import os
 from pydirac.core.settings import Settings
-from pydirac.input.jobs import DiracJob
+from pydirac.io.jobs import DiracJob
 
 
 def add_sub_node(settinging_obj, dir_node, subdir_node,

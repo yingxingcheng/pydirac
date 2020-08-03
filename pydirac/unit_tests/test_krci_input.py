@@ -2,7 +2,7 @@
 import os
 
 from pydirac.core.atom import Atom
-from pydirac.input.krci import get_mrci_inp
+from pydirac.io.krci import get_mrci_inp
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))

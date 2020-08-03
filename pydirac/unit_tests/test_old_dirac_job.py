@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 
-from pydirac.input.jobs import OldDiracJob, JobType
+from pydirac.io.jobs import OldDiracJob, JobType
 
 
 module_dir = os.path.dirname(os.path.abspath(__file__))

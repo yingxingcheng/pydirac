@@ -7,10 +7,11 @@ Date: 10/20/2019
 """
 
 import re
+from monty.json import MSONable, jsanitize
 from mendeleev import element
 
 
-class OrbitInfo(object):
+class OrbitInfo(MSONable):
     """
     Orbit object to restore basis information about given orbit.
     """
@@ -72,8 +73,16 @@ class OrbitInfo(object):
 
         return is_equal
 
+    def as_dict(self) -> dict:
+        d = {'orbit_degenderate': self.orbit_degenerate,
+             'orbit_energy': self.orbit_energy,
+             'orbit_frac': self.orbit_frac,
+             'orbit_sym': self.orbit_sym,
+             'orbit_type': self.orbit_type}
+        return jsanitize(d, strict=True)
 
-class Atom(object):
+
+class Atom(MSONable):
 
     def __init__(self, OrbitInfo_list = None):
         self.closed_shells = []
@@ -87,7 +96,10 @@ class Atom(object):
                 self._extract_info(o_info)
 
         total_nb_elec = self.total_nb_elec()
-        self.info = element(total_nb_elec)
+        if total_nb_elec:
+            self.info = element(total_nb_elec)
+        else:
+            self.info = 'NULL'
 
     def _extract_info(self, o_info):
         if 'close' in o_info.get_type():
@@ -310,6 +322,14 @@ class Atom(object):
         #fo
         #    print(i)
         return Atom(res_list)
+
+    def as_dict(self) -> dict:
+        d = {'closed_shells': self.closed_shells,
+             'info': self.info,
+             'occ_open_shell': self.occ_open_shell,
+             'open_shells':self.open_shells,
+             'virtual_shells': self.virtual_shells}
+        return jsanitize(d, strict=True)
 
 
 if __name__ == '__main__':

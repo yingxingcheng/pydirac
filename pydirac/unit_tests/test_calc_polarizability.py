@@ -1,4 +1,4 @@
-from pydirac.analyse.calc_polarizability import *
+from pydirac.analysis.polarizability.calc_polarizability import *
 import os
 import glob
 

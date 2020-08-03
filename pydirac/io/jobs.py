@@ -14,8 +14,8 @@ from os.path import join as opj
 from mendeleev import element
 from pydirac.core.settings import Settings
 from pydirac.utility.config import *
-from pydirac.input.mole import get_mole_file
-from pydirac.input.basic import input_from_calctype
+from pydirac.io.mole import get_mole_file
+from pydirac.io.basic import input_from_calctype
 
 __all__ = ['DiracJob', 'Inpobj', 'Molobj', 'OldDiracJob', 'JobType']
 

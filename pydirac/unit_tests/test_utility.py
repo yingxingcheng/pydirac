@@ -1,4 +1,4 @@
-from pydirac.analyse.utility import *
+from pydirac.analysis.utility import *
 import os
 import glob
 
@@ -77,7 +77,14 @@ def test_output_object_CI():
                     #settings = output_obj.parse_orbit()
                     #output_obj.parse_results()
                     #print(output_obj.energy_settings)
-                    print(output_obj.get_task_type())
+                    #print(output_obj.get_task_type())
+
+                    res = output_obj.parse_results()
+                    print(output_obj.energy_settings)
+
+                    res_dict = output_obj.as_dict()
+                    print(res_dict)
+
 
             os.chdir('..')
     os.chdir(current)

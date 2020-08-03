@@ -1,5 +1,5 @@
-from pydirac.utility.read import parse_dirac_input
-from pydirac.input.jobs import DiracJob
+from pydirac.io.read import parse_dirac_input
+from pydirac.io.jobs import DiracJob
 import os
 
 module_dir = os.path.dirname(os.path.abspath(__file__))

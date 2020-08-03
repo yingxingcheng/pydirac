@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from pydirac.input.jobs import Inpobj
+from pydirac.io.jobs import Inpobj
 import os
 
 

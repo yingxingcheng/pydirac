@@ -6,7 +6,7 @@ Author: Yingxing Cheng
 Date: 10/21/2019
 """
 from pydirac.core.atom import Atom
-from pydirac.input.jobs import Inpobj
+from pydirac.io.jobs import Inpobj
 
 
 __all__ = ['get_mrci_inp']
