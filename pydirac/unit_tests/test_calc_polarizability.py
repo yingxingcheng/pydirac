@@ -19,7 +19,7 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from pydirac.analysis.polarizability.calc_polarizability import *
+from pydirac.analysis.polarizability import *
 import os
 import glob
 
