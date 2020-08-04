@@ -21,7 +21,7 @@
 
 import re
 from monty.json import MSONable, jsanitize
-from mendeleev import element
+from mendeleev import element, Element
 from pydirac.core.molecular_orbitals import AtomicOrbital
 
 
@@ -265,8 +265,19 @@ class Molecule(MSONable):
         return Molecule(res_list)
 
     def as_dict(self) -> dict:
+        info_dict = {}
+        if type(self.info) == Element:
+            for attr in ['atomic_number', 'symbol', 'dipole_polarizability']:
+                info_dict[attr] = getattr(self.info, attr)
+            # TODO:
+            # for k in [ key for key in dir(self.info) if not key.startswith('_')]:
+            #     if not callable(getattr(self.info, k)):
+            #         info_dict[k] = getattr(self.info, k)
+        else:
+            info_dict = 'null'
+
         d = {'closed_shells': self.closed_shells,
-             'info': self.info,
+             'info': info_dict,
              'occ_open_shell': self.occ_open_shell,
              'open_shells': self.open_shells,
              'virtual_shells': self.virtual_shells}

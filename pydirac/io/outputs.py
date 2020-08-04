@@ -58,7 +58,7 @@ class Output(MSONable):
         self.mol_settings = None
         self.nb_atoms = 0
         self.nuclei_id = None
-        self.atom_info = None
+        self.molecule_info = None
 
         self.parse()
 
@@ -162,9 +162,22 @@ class Output(MSONable):
         elif self.has_hamiltonian and 'KRCICALC' in self.inp_settings.input['WAVE FUNCTIONS'] \
                 and 'KR CI'in self.inp_settings.input['WAVE FUNCTIONS']:
             self.calc_method = 'CI'
+        elif self.has_hamiltonian and 'SCF' in self.inp_settings.input[
+            'WAVE FUNCTIONS']:
+            if self.inp_settings.input['WAVE FUNCTIONS']['SCF']['_en']:
+                self.calc_method = 'SCF'
+            else:
+                self.calc_method = None
+        # TODO: visual module calculation
         else:
             self.calc_method = None
             pass
+
+        for f in ['WAVE FUNC', 'WAVE FUNCTION', 'WAVE FUNCTIONS', 'WAVE F']:
+            if f in self.inp_settings.input.dirac: break
+        else:
+            self.calc_method = None
+            warnings.warn('there is no wave function to compute')
 
         # check dipole or quadrupole
         if self.has_hamiltonian and 'OPERATOR' in self.inp_settings.input.hamiltonian:
@@ -186,7 +199,7 @@ class Output(MSONable):
             self.electric_field = self.inp_settings.input.hamiltonian.operator[pos+1]
         else:
             warnings.warn('Did not find electric field!')
-            self.electric_field = 'NULL'
+            self.electric_field = 'null'
 
     def parse_mol(self):
         """Parse mol from output file
@@ -247,10 +260,10 @@ class Output(MSONable):
             None
         """
 
-        self.atom_info = Molecule.from_file(self.filename)
-        if self.atom_info:
-            print('The number of electrons at range ({0}, {1}): {2} '.format(
-                e_min, e_max, self.atom_info.electron_count(-20, 25)))
+        self.molecule_info = Molecule.from_file(self.filename)
+        # if self.molecule_info:
+        #     print('The number of electrons at range ({0}, {1}): {2} '.format(
+        #         e_min, e_max, self.molecule_info.electron_count(-20, 25)))
 
         # TODO: get atom information and restore to a Settings object
 
@@ -277,9 +290,19 @@ class Output(MSONable):
         else:
             self.energy_settings = Settings()
 
+        self.calc_type = self.calc_type or 'null'
+        self.hamiltonian = self.hamiltonian or 'null'
+        self.calc_method = self.calc_method or 'null'
+        self.basis_type = self.basis_type or 'null'
+        self.electric_field = self.electric_field or 'null'
+
+        # self.task_type = '-'.join([self.calc_type,self.hamiltonian,
+        #                            self.calc_method]) + '@' + self.basis_type.strip() + \
+        #                  '@' + self.electric_field.strip()
+
+        # for a set of calculations, this task_type can be regarded as an id
         self.task_type = '-'.join([self.calc_type,self.hamiltonian,
-                                   self.calc_method]) + '@' + self.basis_type.strip() + \
-                         '@' + self.electric_field.strip()
+                                   self.calc_method]) + '@' + self.basis_type.strip()
 
     def get_task_type(self):
         """Get a task type from an output file
@@ -352,6 +375,11 @@ class Output(MSONable):
 
         Notes:
             CI example:
+                &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                &&& KRCI calculation for symmetry no.    3
+                &&& Number of CI roots for this symmetry       3
+                &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
                 Final CI energies  =  -5880.8481422675641  -5880.8380283826846  -5880.8380141759062
 
                 root    1 ...... converged!
@@ -366,17 +394,31 @@ class Output(MSONable):
         #start_line = re.compile(r'Final CI energies\s+=\s+(?P<energy>([-+]?(\d+(\.\d*)?|\d*\.\d+)\s+)+)\s+')
         energy_line = re.compile(r'Final CI energies\s+=\s+(?P<energy>(?:[-+]?(?:\d+(?:\.\d*)?|\d*\.\d+)\s+)+)\s+')
         conv_line = re.compile(r'(?:\s*root\s+\d+\s+\.+\s+(?:converged|unconverged)!\s*)+')
+        sym_line = re.compile(r'\s*&+\s+KRCI calculation for symmetry no\.\s+(\d+)\s+&+\s+Number of CI roots for this symmetry\s+(\d+)\s+')
 
         with open(self.filename, 'r') as fin:
             context = fin.read()
 
         res_list = energy_line.findall(context, re.MULTILINE|re.DOTALL)
         conv_list = conv_line.findall(context, re.MULTILINE|re.DOTALL)
+        sym_list = sym_line.findall(context, re.MULTILINE|re.DOTALL)
 
-        energies = []
+        energies = {}
+        nb_sym = len(sym_list)
+        nb_root = int(len(sym_list[0][1]))
+
+        all_e = []
         for e_str in res_list:
             e_roots = [float(e) for e in e_str.split()]
-            energies.append(e_roots)
+            all_e.append(e_roots)
+
+        for i, sym_rt in enumerate(sym_list):
+            tag_sym = sym_rt[0]
+            nb_root = int(sym_rt[1])
+            for r in range(1, nb_root+1):
+                key = '_'.join(['sym', str(tag_sym), 'root',str(r)])
+                energies[key] = float(all_e[i][r-1])
+
 
         convergeds = []
         for syms in conv_list:
@@ -423,7 +465,8 @@ class Output(MSONable):
              "electric_field": self.electric_field,
              "energy_settings": self.energy_settings.as_dict(),
              "filename": self.filename,
-             'hamilton': self.hamiltonian,
+             'hamiltonian': self.hamiltonian,
+             'has_hamiltonian': self.has_hamiltonian,
              #'inp_settings': self.input.as_dict(),
              #'mol_settings': self.mol.as_dict(),
              'inp_settings': self.inp_settings.as_dict(),
@@ -431,7 +474,7 @@ class Output(MSONable):
              'nb_atoms': self.nb_atoms,
              'nuclei_id': self.nuclei_id,
              'task_type': self.task_type,
-             'atom_info': self.atom_info.as_dict()
+             'molecule_info': self.molecule_info.as_dict()
              }
         return jsanitize(d, strict=True)
 

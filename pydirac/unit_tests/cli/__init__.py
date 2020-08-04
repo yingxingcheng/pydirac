@@ -19,15 +19,3 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-"""
-TODO:
-This module is used to generate input for a DIRAC calculation, including a
-original SCF calculation, or CI or CC type calculation which require the
-previous SCF output file to.
-"""
-
-def get_inp(args):
-    if args.dirname:
-        print('dirname is {0}'.format(args.dirname))
-    print('We are working on this to generate inputs for DIRAC')
-    pass

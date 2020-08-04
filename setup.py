@@ -56,4 +56,9 @@ if __name__ == "__main__":
         #test_suite='nose.collector',
         #tests_require=['nose'],
         #scripts=[os.path.join('scripts', f) for f in os.listdir(os.path.join(module_dir, 'scripts'))]
+        entry_points={
+            'console_scripts': [
+                'pypam = pydirac.cli.pypam:main',
+            ]
+        }
     )

@@ -19,15 +19,24 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-"""
-TODO:
-This module is used to generate input for a DIRAC calculation, including a
-original SCF calculation, or CI or CC type calculation which require the
-previous SCF output file to.
-"""
+from pydirac.cli.pypam_atom_db import get_polarizabiltiy
 
-def get_inp(args):
-    if args.dirname:
-        print('dirname is {0}'.format(args.dirname))
-    print('We are working on this to generate inputs for DIRAC')
-    pass
+
+import os
+import glob
+import pathlib
+
+module_dir = pathlib.Path(__file__).resolve().parent.parent
+data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
+# dirac_inp = os.path.join(data_dir, 'tmp.inp')
+In_res_dir = os.path.abspath(os.path.join(data_dir, 'In_so_res'))
+In_q_so_dir = os.path.abspath(os.path.join(data_dir, 'In_q_so'))
+In_q_mrci_dir = os.path.abspath(os.path.join(data_dir, 'In_q_mrci_res'))
+Br_q_mrci_dir = os.path.abspath(os.path.join(data_dir, 'Br_q_mrci'))
+
+
+def test_get_polarizability():
+    print(module_dir)
+    # get_polarizabiltiy(In_q_so_dir)
+    # get_polarizabiltiy(In_res_dir)
+    get_polarizabiltiy(Br_q_mrci_dir, deepth=1)
