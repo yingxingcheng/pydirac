@@ -37,7 +37,7 @@ if __name__ == "__main__":
         url='https://github/yxcheng/pydirac',
         author='Yingxing Cheng',
         author_email='Yingxing.Cheng@ugent.be',
-        license='modified BSD',
+        license='GNU',
         packages=find_packages(),
         #package_data={'pygace': ['examples/*']},
         zip_safe=False,

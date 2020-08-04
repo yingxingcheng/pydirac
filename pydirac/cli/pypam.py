@@ -44,7 +44,8 @@ def main():
     parser_atomdb = subparsers.add_parser(
         "atomdb", help="Tools for compute polarizability "
                        "from a calculation directory")
-    parser_atomdb.add_argument('-d', '--dirname', required=True)
+    parser_atomdb.add_argument('dirname', default='./',
+                               help='specify a directory to compute polarizability')
     parser_atomdb.add_argument(
         '-t', '--sub_dir_tag', help="to specify which kind of "
                                     "directory should be considered",

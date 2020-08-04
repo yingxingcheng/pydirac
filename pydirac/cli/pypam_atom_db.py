@@ -204,7 +204,6 @@ def calc_from_sub_dir(dirname, exclude, deepth):
 
 
 def get_atomDB(args):
-    print(args)
     dir_fullname = os.path.abspath(args.dirname)
     get_polarizabiltiy(dir_fullname, sub_dir_tag=args.sub_dir_tag,
                        deepth=args.deepth )
