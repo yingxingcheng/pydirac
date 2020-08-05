@@ -33,7 +33,8 @@ from collections import OrderedDict
 import re
 from monty.json import MSONable
 from os.path import join as opj
-from mendeleev import element
+# from mendeleev import element
+from pydirac.core.periodic_table import Element
 from pydirac.core.settings import Settings
 from pydirac.utility.config import *
 from pydirac.io.mole import get_mole_file
@@ -267,7 +268,7 @@ class OldDiracJob:
         if not os.path.exists(scratch_dir):
             os.makedirs(scratch_dir)
 
-        atom_info = element(atom_type)
+        atom_info = Element(atom_type)
         atom_type = atom_info.symbol
 
         fname = atom_type + '_' + basis_type + '.mol'

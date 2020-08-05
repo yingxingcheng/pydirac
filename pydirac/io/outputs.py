@@ -49,16 +49,17 @@ class Output(MSONable):
         self.calc_method = None
         self.calc_type = None
         self.electric_field = None
-        self.energy_settings = None
+        self.energy_settings = Settings()
         self.hamiltonian = None
         self.has_hamiltonian = False
-        self.inp_settings = None
+        self.inp_settings = Settings()
         self.input = None
         self.mol = None
-        self.mol_settings = None
+        self.mol_settings = Settings()
         self.nb_atoms = 0
         self.nuclei_id = None
-        self.molecule_info = None
+        self.molecule_info = Molecule()
+        self.is_ok = False
 
         self.parse()
 
@@ -83,16 +84,19 @@ class Output(MSONable):
             None
         """
 
-        self.parse_input()
-        self.parse_mol()
-        self.parse_orbit()
+        self.check_valid()
 
-        self.parse_results()
+        if self.is_ok:
+            self.parse_input()
+            self.parse_mol()
+            self.parse_orbit()
 
-        if not self.inp_settings:
-            self.input = Inp(self.inp_settings)
-        if not self.mol_settings:
-            self.mol = Mol(self.mol_settings)
+            self.parse_results()
+
+            if not self.inp_settings:
+                self.input = Inp(self.inp_settings)
+            if not self.mol_settings:
+                self.mol = Mol(self.mol_settings)
 
 
     def parse_input(self):
@@ -281,7 +285,7 @@ class Output(MSONable):
         if not self.mol_settings:
             self.parse_mol()
 
-
+        # check if calculation is finished
         if self.calc_method in ['CI', 'CC']:
             if self.calc_method == 'CC':
                 self.energy_settings = self._parse_coupled_cluster()
@@ -311,6 +315,20 @@ class Output(MSONable):
         """
         return self.task_type
 
+    def check_valid(self):
+        """
+            ********** E N D   of   D I R A C  output  **********
+        Returns:
+
+        """
+        end_pattern = re.compile(r'\s*\*+\s+E N D\s+of\s+D I R A C\s+output\s+\*+')
+        with open(self.filename, 'r') as f:
+            context = f.read()
+        if end_pattern.search(context):
+            self.is_ok = True
+        else:
+            self.is_ok = False
+        return self.is_ok
 
     def _parse_coupled_cluster(self, has_T=True):
         """Deal with RELCCSD calculations
@@ -399,39 +417,46 @@ class Output(MSONable):
         with open(self.filename, 'r') as fin:
             context = fin.read()
 
-        res_list = energy_line.findall(context, re.MULTILINE|re.DOTALL)
-        conv_list = conv_line.findall(context, re.MULTILINE|re.DOTALL)
-        sym_list = sym_line.findall(context, re.MULTILINE|re.DOTALL)
+        energy_l = energy_line.findall(context, re.MULTILINE|re.DOTALL)
+        conv_l = conv_line.findall(context, re.MULTILINE|re.DOTALL)
+        sym_l = sym_line.findall(context, re.MULTILINE|re.DOTALL)
 
         energies = {}
-        nb_sym = len(sym_list)
-        nb_root = int(len(sym_list[0][1]))
 
         all_e = []
-        for e_str in res_list:
+        for e_str in energy_l:
             e_roots = [float(e) for e in e_str.split()]
             all_e.append(e_roots)
 
-        for i, sym_rt in enumerate(sym_list):
+        if len(sym_l) != len(all_e):
+            warnings.warn('The shape of energy and symmetry are not '
+                               'the same! Check results!')
+            return Settings()
+
+        for i, sym_rt in enumerate(sym_l):
             tag_sym = sym_rt[0]
             nb_root = int(sym_rt[1])
+            if nb_root != len(all_e[i]):
+                warnings.warn('The number of root energies and the number of '
+                              'roots are not the same! Check results!')
+                return Settings()
+
             for r in range(1, nb_root+1):
                 key = '_'.join(['sym', str(tag_sym), 'root',str(r)])
                 energies[key] = float(all_e[i][r-1])
 
-
         convergeds = []
-        for syms in conv_list:
+        for line in conv_l:
             converged = []
-            for sym_res in syms.split('\n'):
-                if not len(sym_res.strip()):
+            for wrd in line.split('\n'):
+                if not len(wrd.strip()):
                     continue
-                if 'unconverged' in sym_res:
+                if 'unconverged' in wrd:
                     converged.append(False)
-                elif 'converged' in sym_res:
+                elif 'converged' in wrd:
                     converged.append(True)
                 else:
-                    print(sym_res)
+                    print(wrd)
                     raise RuntimeError('There is no converged info')
             convergeds.append(converged)
 
@@ -474,7 +499,8 @@ class Output(MSONable):
              'nb_atoms': self.nb_atoms,
              'nuclei_id': self.nuclei_id,
              'task_type': self.task_type,
-             'molecule_info': self.molecule_info.as_dict()
+             'molecule_info': self.molecule_info.as_dict(),
+             'is_ok': self.is_ok
              }
         return jsanitize(d, strict=True)
 

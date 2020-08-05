@@ -21,7 +21,7 @@
 
 import re
 from monty.json import MSONable, jsanitize
-from mendeleev import element, Element
+from pydirac.core.periodic_table import Element
 from pydirac.core.molecular_orbitals import AtomicOrbital
 
 
@@ -40,29 +40,32 @@ class Molecule(MSONable):
 
         total_nb_elec = self.total_nb_elec()
         if total_nb_elec:
-            self.info = element(total_nb_elec)
+            self.info = Element(total_nb_elec)
         else:
             self.info = 'NULL'
 
     def _extract_info(self, o_info):
         if 'close' in o_info.get_type():
-            if o_info not in self.closed_shells:
-                self.closed_shells.append(o_info)
-            else:
-                raise RuntimeWarning("I've met a similar orbit "
-                                     "in closed_shells, SKIP it!")
+            self.closed_shells.append(o_info)
+            # if o_info not in self.closed_shells:
+            #     self.closed_shells.append(o_info)
+            # else:
+            #     raise warnings.warn("I've met a similar orbit "
+            #                          "in closed_shells, SKIP it!")
         elif 'open' in o_info.get_type():
-            if o_info not in self.open_shells:
-                self.open_shells.append(o_info)
-            else:
-                raise RuntimeWarning("I've met a similar orbit "
-                                     "in open_shells, SKIP it!")
+            self.open_shells.append(o_info)
+            # if o_info not in self.open_shells:
+            #     self.open_shells.append(o_info)
+            # else:
+            #     raise warnings.warn("I've met a similar orbit "
+            #                          "in open_shells, SKIP it!")
         elif 'virtual' in o_info.get_type():
-            if o_info not in self.virtual_shells:
-                self.virtual_shells.append(o_info)
-            else:
-                raise RuntimeWarning("I've met a similar orbit "
-                                     "in virtual_shells, SKIP it!")
+            self.virtual_shells.append(o_info)
+            # if o_info not in self.virtual_shells:
+            #     self.virtual_shells.append(o_info)
+            # else:
+            #     raise warnings.warn("I've met a similar orbit "
+            #                          "in virtual_shells, SKIP it!")
         else:
             raise RuntimeError('There is a unknown type orbit!')
 

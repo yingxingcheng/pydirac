@@ -19,24 +19,30 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from pydirac.cli.pypam_atom_db import get_polarizabiltiy
+from pydirac.cli.pypam_atom_db import get_polarizability
 
 
 import os
-import glob
 import pathlib
 
 module_dir = pathlib.Path(__file__).resolve().parent.parent
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
-# dirac_inp = os.path.join(data_dir, 'tmp.inp')
 In_res_dir = os.path.abspath(os.path.join(data_dir, 'In_so_res'))
 In_q_so_dir = os.path.abspath(os.path.join(data_dir, 'In_q_so'))
 In_q_mrci_dir = os.path.abspath(os.path.join(data_dir, 'In_q_mrci_res'))
 Br_q_mrci_dir = os.path.abspath(os.path.join(data_dir, 'Br_q_mrci'))
+acv4z_new_dir = os.path.abspath(os.path.join(data_dir, 'acv4z_new'))
+wrong_dir = os.path.abspath(os.path.join(data_dir, 'wrong'))
+Rn_q_so_dir = os.path.abspath(os.path.join(data_dir, 'Rn_q_so'))
+K_mrci_dir = os.path.abspath(os.path.join(data_dir, 'K_mrci'))
 
 
 def test_get_polarizability():
     print(module_dir)
-    # get_polarizabiltiy(In_q_so_dir)
-    # get_polarizabiltiy(In_res_dir)
-    get_polarizabiltiy(Br_q_mrci_dir, deepth=1)
+    # get_polarizability(In_q_so_dir)
+    # get_polarizability(In_res_dir)
+    get_polarizability(Br_q_mrci_dir, deepth=1)
+    # get_polarizability(acv4z_new_dir, deepth=1)
+    # get_polarizability(wrong_dir, deepth=1)
+    # get_polarizability(Rn_q_so_dir, deepth=1)
+    # get_polarizability(K_mrci_dir, deepth=1)

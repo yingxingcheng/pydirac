@@ -20,9 +20,10 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from mendeleev import element
+# from mendeleev import element
 import numpy as np
 import csv
+from pydirac.core.periodic_table import Element
 
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +55,7 @@ def get_data(data_type: int) -> list:
     fname = os.path.join(module_dir, fname)
     with open(fname, 'r') as f:
         reader = csv.reader(f)
-        data = [(element(row[0]).atomic_number - 1, row[1] ) for row in reader]
+        data = [(Element(row[0]).atomic_number - 1, row[1] ) for row in reader]
 
     for atomic_nb, v in data:
         atomic_info[atomic_nb] = float(v)

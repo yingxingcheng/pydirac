@@ -22,7 +22,8 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import sys
-from mendeleev import element, Element
+# from mendeleev import element, Element
+from pydirac.core.periodic_table import Element
 from pydirac.utility.config import *
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -78,7 +79,7 @@ def get_dossss_scf_inp(atom_type, filename_out=None, is_dipole=True):
         calc_str = 'd_' + calc_str
     else:
         calc_str = 'q_' + calc_str
-    input_from_calctype(element(atom_type), filename_out=filename_out,
+    input_from_calctype(Element(atom_type), filename_out=filename_out,
                         calc_type=calc_str)
 
 
@@ -100,7 +101,7 @@ def get_dossss_relccsd_inp(atom_type, filename_out=None, is_dipole=True):
         calc_str = 'd_' + calc_str
     else:
         calc_str = 'q_' + calc_str
-    input_from_calctype(element(atom_type), filename_out=filename_out,
+    input_from_calctype(Element(atom_type), filename_out=filename_out,
                         calc_type=calc_str)
 
 def get_x2c_scf_inp(atom_type, filename_out=None, is_dipole=True,
@@ -129,7 +130,7 @@ def get_x2c_scf_inp(atom_type, filename_out=None, is_dipole=True,
     else:
         calc_str += '_SCF'
 
-    input_from_calctype(element(atom_type), filename_out=filename_out,
+    input_from_calctype(Element(atom_type), filename_out=filename_out,
                         calc_type=calc_str)
 
 
@@ -158,9 +159,9 @@ def get_x2c_relccsd_inp(atom_type, filename_out=None, is_dipole=True,
 
     calc_str += '_RELCCSD'
 
-    input_from_calctype(element(atom_type), filename_out=filename_out,
+    input_from_calctype(Element(atom_type), filename_out=filename_out,
                         calc_type=calc_str)
 
 
 if __name__ == '__main__':
-    input_from_calctype(element('He'), 'd_DOSSSS_SCF')
+    input_from_calctype(Element('He'), 'd_DOSSSS_SCF')

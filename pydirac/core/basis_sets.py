@@ -20,7 +20,7 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
-from pydirac.utility.config import get_element_by_id
+from pydirac.utility.config import Element
 
 
 def basis_helper(filename = 'ANO-RCC'):
@@ -68,8 +68,8 @@ def basis_helper(filename = 'ANO-RCC'):
 
     assert(len(res_list) == 96)
     for i in range(1,97):
-        name = get_element_by_id(i)
-        with open('basis/{0}.dat'.format(name),'w') as f:
+        symbol = Element(i).symbol
+        with open('basis/{0}.dat'.format(symbol),'w') as f:
             nb_block = res_list[i-1].count('functions')
             f.write('LARGE EXPLICIT {0} {1}\n'.format(nb_block, '1 '*nb_block))
             f.write(res_list[i-1])

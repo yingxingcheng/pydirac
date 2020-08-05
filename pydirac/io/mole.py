@@ -19,9 +19,10 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from mendeleev import Element, element
+#from mendeleev import Element, element
 from pydirac.utility.config import get_mol_by_custom_basis, \
     get_mol_by_default_basis
+from pydirac.core.periodic_table import Element
 
 
 def get_mole_file(atom_info:Element, basis_type:str, filename_out:str,

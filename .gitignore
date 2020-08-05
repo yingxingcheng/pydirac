@@ -27,6 +27,7 @@ share/python-wheels/
 MANIFEST
 pydirac/tests/
 pydirac/unit_tests/data
+dist/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -137,3 +138,7 @@ Alkemiems/widgets/data/test/output/*
 
 #dirac output file
 *.out
+
+# script
+# python3 setup.py sdist bdist_wheel
+pack.sh

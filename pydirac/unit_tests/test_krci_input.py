@@ -38,9 +38,8 @@ def test_write_file():
     atom = Molecule.from_file(fname)
     print(atom.closed_elec(), atom.openshell_elec())
     print(atom.info.symbol)
-    print(atom.info.period)
     if atom.info.group:
-        print(atom.info.group.symbol)
+        print(atom.info.group_symbol)
     print(atom.info.block)
 
     fout = os.path.join(data_dir, 'PYDIRAC.inp')

@@ -28,20 +28,27 @@ table and write it in a tex file.
 """
 
 import os
-import shutil
 import glob
 import numpy as np
-from pathlib import Path
 import warnings
 from monty.os import cd
 from pydirac.io.outputs import Output
 from pydirac.analysis.polarizability import PolarizabilityCalculator
 
 
-def get_polarizabiltiy(dirname: str = './',
+def get_polarizability(dirname: str = './',
                        sub_dir_tag: str ='*dyall*',
                        deepth: int =0) -> None:
     """Get polarizability from a directory
+
+    A calculation directory may contain some information as followings:
+        (1) no more calculation directory (calc_dir_list) but several output files (curr_dir_output_list)
+        (2) several output files (curr_dir_output_list) with other calculation directories (calc_dir_list)
+        (3) several output files (curr_dir_output_list) with subdirectories (sub_dir_list) --> call self again when deepth > 0
+        (4) only calculations directories (calc_dir_list)
+        (5) calculations directories (calc_dir_list) and (sub_dir_list)
+        (6) only subdirectories (sub_dir_list)
+        (7) all (calc_dir_list), (curr_dir_output_list) and (sub_dir_list)
 
     Args:
         dirname: dirname
@@ -50,68 +57,74 @@ def get_polarizabiltiy(dirname: str = './',
     Returns:
         None
     """
+    # deepth = 0: only calc current output files
+    if deepth < 0: deepth = 0
+    do_curr_dir = False
+    do_clc_dir = False
+    do_sub_dir = deepth > 0
 
-    output_lis = []
+    # for debug
+    print('cd {0}'.format(dirname))
+
+    curr_dir_output_lis = []
+    calc_dir_output_lis = []
     with cd(dirname):
-        # here, maybe 'JOB_DONE' is not the file which specify the end of
-        # a calculation, e.g., basis_set_JOB_DONE
-        #
-        # but, for q_mrci type calculation, JOB_DONE exists and the output
-        # is a SCF calculation normally.
-        find_dir = False
-        if 'JOB_DONE' in glob.glob('*'):
-            for f in glob.glob('*.out'):
-                output_lis.append(Output(filename=f))
+        # Step 1. deal with all current output files
+        # ------------------------------
+        for f in glob.glob('*.out'):
+            obj = Output(filename=f)
+            if obj.is_ok:
+                curr_dir_output_lis.append(Output(filename=f))
 
-            # check all there file if they are all 'CC' or 'CI' calculations
-            for o in output_lis:
-                if not o.calc_method in ['CC' or 'CI']:
-                    find_dir = False
-                    output_lis = []
-                    break
+        if is_valid(curr_dir_output_lis):
+            do_curr_dir = True
+
+        # Step 2. deal with all calc_dir
+        # ------------------------------
+        clc_dirs = [d for d in glob.glob('*' + sub_dir_tag + '*') if
+                      os.path.isdir(d)]
+        # if has calc_dir then I would try
+        for clc_d in clc_dirs:
+            with cd(clc_d):
+                outs = glob.glob('*.out')
+                if len(outs) > 1:
+                    warnings.warn('there are more than two output file '
+                                  'in this directory {0}, and we take '
+                                  'the first one {1}'.format(clc_d,
+                                                             outs[0]))
+                elif len(outs) == 1:
+                    obj = Output(filename=outs[0])
+                    if obj.is_ok:
+                        calc_dir_output_lis.append(obj)
                 else:
-                    find_dir = True
+                    warnings.warn('there is no output file in this'
+                                  ' directory {0}'.format(clc_d))
 
-        find_sub_dir = False
-        if not find_dir:
-            # check *dyall* type directory which contains individual calculation
-            # with a different electric field
-            #
-            # but, maybe there exist two basis-set type calculations
-            for sub_dir in glob.glob('*' + sub_dir_tag + '*'):
-                sub_dir_fullname = os.path.join(dirname, sub_dir)
-                if os.path.isdir(sub_dir_fullname):
-                    with cd(sub_dir):
-                        all_out = glob.glob('*.out')
-                        if len(all_out) > 1:
-                            warnings.warn('there are more than two output file '
-                                          'in this directory {0}, and we take '
-                                          'the first one {1}'.format(sub_dir,
-                                                                     all_out[0]))
-                        elif len(all_out) == 1:
-                            output_lis.append(Output(filename=all_out[0]))
-                        else:
-                            warnings.warn('there is no output file in this'
-                                          ' directory {0}'.format(sub_dir))
+        # check if all output obj in calc_dir_output_lis is valid and
+        # do we need to go on
+        if is_valid(calc_dir_output_lis):
+            do_clc_dir = True
 
-        if len(output_lis):
-            find_sub_dir = True
+        if do_curr_dir:
+            get_polarizability_from_output_list(dirname, curr_dir_output_lis, tag='curr_dir')
+        if do_clc_dir:
+            get_polarizability_from_output_list(dirname, calc_dir_output_lis, tag='clc_dir')
 
-        if not find_sub_dir:
-            warnings.warn('current directory does not have any calc directory '
-                          'whose name contain "dyall" and useful output file '
-                          'please check it')
-            return
+        # Step 3. deal with all sub_dir
+        if do_sub_dir:
+            sub_dirs = [d for d in glob.glob('*') if os.path.isdir(d)
+                        and d not in clc_dirs]
 
+            for sd in sub_dirs:
+                get_polarizability(os.path.join(dirname, sd), sub_dir_tag, deepth-1)
+
+
+def get_polarizability_from_output_list(dirname, output_lis, tag=None):
     def _deal_with_single_basis(output_lis):
         # here, we are do the one basis_set
         if not len(output_lis):
             warnings.warn('there is no valid output file here')
             return
-
-        # for o in output_lis:
-        #     print(o.task_type)
-        # return
 
         # check the calc_type from the first output file
         calc_type = output_lis[0].calc_type
@@ -161,6 +174,15 @@ def get_polarizabiltiy(dirname: str = './',
                         energies[k] = []
                     energies[k].append(v)
 
+        del_k_lis = []
+        for k, v in energies.items():
+            if len(v) != len(fields):
+                warnings.warn('The length of energy set "{0}" {1} does '
+                              'not equal the length of field {2}'.format(k, len(v), len(fields)))
+                del_k_lis.append(k)
+        for k in del_k_lis:
+            energies.pop(k)
+
         res = {}
         for k, v in energies.items():
             res[k] = pc.get_svd_from_array(v, fields)
@@ -176,12 +198,25 @@ def get_polarizabiltiy(dirname: str = './',
 
     e_res = {}
     for k, v in all_basis_res.items():
-        e_res[k] = _deal_with_single_basis(v)
+        single_res = _deal_with_single_basis(v)
+        if single_res:
+            e_res[k] = single_res
 
     for k, v in e_res.items():
-        print('Table: results of {0} \n\tfrom {1}'.format(k, dirname))
+        if tag:
+            print('Table: results of {0} from \n "{1}" ({2})'.format(k, dirname, str(tag)))
+        else:
+            print('Table: results of {0} from \n "{1}"'.format(k, dirname))
         print('='*80)
-        print('  {0:<20s} {1:<20s} {2:<20s}'.format('calc_method', 'momentum', 'polarizability'))
+        if k.startswith('D'):
+            print(
+                '  {0:<20s} {1:<20s} {2:<20s}'.format('method', 'polarizability',
+                                                      'hyper-polarizability'))
+        else:
+            print(
+                '  {0:<20s} {1:<20s} {2:<20s}'.format('method', 'momentum',
+                                                      'polarizability'))
+
         print('-'*80)
         for i_k, i_v in v.items():
             print('  {0:<20s} {1:<20.3f} {2:<20.3f}'.format(i_k, i_v[0], i_v[1]))
@@ -189,23 +224,39 @@ def get_polarizabiltiy(dirname: str = './',
         print()
 
 
-    if deepth > 0:
-        calc_from_sub_dir(dirname,sub_dir_tag, deepth-1)
+def is_valid(output_lis):
+    """Check whether a output_lis is valid
 
+    Args:
+        output_lis: a list of Output obj
 
-def calc_from_sub_dir(dirname, exclude, deepth):
-    sub_dirs = [ sub_path for sub_path in glob.glob('{0}/*'.format(dirname))
-                 if os.path.isdir(sub_path) and exclude not in sub_path]
+    Returns:
+        True or False
+    """
 
-    for sub_dir in sub_dirs:
-        sub_dir_fullname = os.path.join(dirname, sub_dir)
-        get_polarizabiltiy(sub_dir_fullname, sub_dir_tag=exclude, deepth=deepth)
+    if len(output_lis) < 3:
+        return False
 
+    # check all there file if they are all 'CC' or 'CI' calculations
+    task_record = {}
+    for o in output_lis:
+        if not o.calc_method in ['CC', 'CI']:
+            continue
+        else:
+            if not o.task_type in task_record:
+                task_record[o.task_type] = 0
+            else:
+                task_record[o.task_type] += 1
+    for v in task_record.values():
+        if v >= 3:
+            return True
+    else:
+        return False
 
 
 def get_atomDB(args):
     dir_fullname = os.path.abspath(args.dirname)
-    get_polarizabiltiy(dir_fullname, sub_dir_tag=args.sub_dir_tag,
+    get_polarizability(dir_fullname, sub_dir_tag=args.sub_dir_tag,
                        deepth=args.deepth )
 
 
