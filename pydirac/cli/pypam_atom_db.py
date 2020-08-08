@@ -37,8 +37,8 @@ from pydirac.analysis.polarizability import PolarizabilityCalculator
 
 
 def get_polarizability(dirname: str = './',
-                       sub_dir_tag: str ='*dyall*',
-                       deepth: int =0) -> None:
+                       calc_dir_patters=None,
+                       deepth: int =0, verbos=True) -> None:
     """Get polarizability from a directory
 
     A calculation directory may contain some information as followings:
@@ -58,13 +58,23 @@ def get_polarizability(dirname: str = './',
         None
     """
     # deepth = 0: only calc current output files
+    if calc_dir_patters is None:
+        calc_dir_patters = ['*dyall*']
+
+    if isinstance(calc_dir_patters, (str, list)):
+        if isinstance(calc_dir_patters, str):
+            calc_dir_patters = [calc_dir_patters]
+    else:
+        raise TypeError('calc_dir_patters can only be <str> or <list>')
+
     if deepth < 0: deepth = 0
     do_curr_dir = False
     do_clc_dir = False
     do_sub_dir = deepth > 0
 
     # for debug
-    print('cd {0}'.format(dirname))
+    if verbos:
+        print('cd {0}'.format(dirname))
 
     curr_dir_output_lis = []
     calc_dir_output_lis = []
@@ -81,8 +91,10 @@ def get_polarizability(dirname: str = './',
 
         # Step 2. deal with all calc_dir
         # ------------------------------
-        clc_dirs = [d for d in glob.glob('*' + sub_dir_tag + '*') if
-                      os.path.isdir(d)]
+        clc_dirs = []
+        for ptn in calc_dir_patters:
+            clc_dirs.extend([d for d in glob.glob('*' + ptn + '*') if
+                          os.path.isdir(d)])
         # if has calc_dir then I would try
         for clc_d in clc_dirs:
             with cd(clc_d):
@@ -116,7 +128,7 @@ def get_polarizability(dirname: str = './',
                         and d not in clc_dirs]
 
             for sd in sub_dirs:
-                get_polarizability(os.path.join(dirname, sd), sub_dir_tag, deepth-1)
+                get_polarizability(os.path.join(dirname, sd), calc_dir_patters, deepth-1)
 
 
 def get_polarizability_from_output_list(dirname, output_lis, tag=None):
@@ -216,15 +228,18 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
             print(
                 '  {0:<20s} {1:<20s} {2:<20s}'.format('method', 'momentum',
                                                       'polarizability'))
+            # In DIRAC, the correct quadrupole polarizability should be divided 4
+            for _k in v.keys():
+                v[_k] = v[_k]/4.
 
         print('-'*80)
         for i_k, i_v in v.items():
-            print('  {0:<20s} {1:<20.3f} {2:<20.3f}'.format(i_k, i_v[0], i_v[1]))
+            print('  {0:<20s} {1:<20.3f} {2:<20.3f}'.format(i_k.strip('_e'), i_v[0], i_v[1]))
         print('='*80)
         print()
 
 
-def is_valid(output_lis):
+def is_valid(output_lis, verbos=False):
     """Check whether a output_lis is valid
 
     Args:
@@ -235,6 +250,8 @@ def is_valid(output_lis):
     """
 
     if len(output_lis) < 3:
+        if verbos:
+            warnings.warn('the nubmer of output objects is less than 3')
         return False
 
     # check all there file if they are all 'CC' or 'CI' calculations
@@ -244,19 +261,30 @@ def is_valid(output_lis):
             continue
         else:
             if not o.task_type in task_record:
-                task_record[o.task_type] = 0
+                task_record[o.task_type] = 1
             else:
                 task_record[o.task_type] += 1
     for v in task_record.values():
         if v >= 3:
             return True
     else:
+        if verbos:
+            print(task_record)
+            warnings.warn('the maximum of output objects with the same type '
+                          'is less than 3')
         return False
 
 
 def get_atomDB(args):
-    dir_fullname = os.path.abspath(args.dirname)
-    get_polarizability(dir_fullname, sub_dir_tag=args.sub_dir_tag,
-                       deepth=args.deepth )
+    if isinstance(args.dir_list, str):
+        dirname_lis = [args.dir_list]
+    else:
+        dirname_lis = args.dir_list
+
+    for d in dirname_lis:
+        dir_fullname = os.path.abspath(d)
+        get_polarizability(dir_fullname, calc_dir_patters=args.patterns,
+                           deepth=args.deepth)
 
 
+# TODO: Rb_mrci, d-aug-dyall.cv3z directory

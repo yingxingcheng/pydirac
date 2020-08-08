@@ -44,18 +44,19 @@ def main():
     parser_atomdb = subparsers.add_parser(
         "atomdb", help="Tools for compute polarizability "
                        "from a calculation directory")
-    parser_atomdb.add_argument('dirname', default='./',
-                               help='specify a directory to compute polarizability')
+    parser_atomdb.add_argument('dir_list', nargs="+", type=str,
+                               help='A list of directories to compute polarizability')
     parser_atomdb.add_argument(
-        '-t', '--sub_dir_tag', help="to specify which kind of "
-                                    "directory should be considered",
-        default='dyall')
+        '-p', '--patterns', nargs="+", type=str,
+        help="to specify which kind of directory should be considered")
     parser_atomdb.add_argument(
         '--deepth', type=int, default=0,
         help="how deep of directory with respect to current directory specified "
              "by '--dirname' to find the calculation information")
 
     parser_atomdb.set_defaults(func=get_atomDB)
+    parser_atomdb.set_defaults(patterns=['dyall'])
+    parser_atomdb.set_defaults(dir_list=['./'])
 
     try:
         import argcomplete
@@ -66,7 +67,9 @@ def main():
 
     args = pypam_parser.parse_args()
     #args = pypam_parser.parse_args(['input', '-d', './'])
-    #args = pypam_parser.parse_args(['atomdb', '-d', './'])
+    #args = pypam_parser.parse_args(['atomdb', './', '-p', 'faegri', 'dyall'])
+    #args = pypam_parser.parse_args(['atomdb', './'])
+    #print(args)
 
     try:
         getattr(args, "func")

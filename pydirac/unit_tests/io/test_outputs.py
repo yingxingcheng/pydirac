@@ -19,11 +19,11 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from pydirac.cli.pypam_atom_db import get_polarizability
 
 
 import os
 import pathlib
+from pydirac.io.outputs import Output
 
 module_dir = pathlib.Path(__file__).resolve().parent.parent
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
@@ -35,16 +35,10 @@ acv4z_new_dir = os.path.abspath(os.path.join(data_dir, 'acv4z_new'))
 wrong_dir = os.path.abspath(os.path.join(data_dir, 'wrong'))
 Rn_q_so_dir = os.path.abspath(os.path.join(data_dir, 'Rn_q_so'))
 K_mrci_dir = os.path.abspath(os.path.join(data_dir, 'K_mrci'))
-B_mrci_dir = os.path.abspath(os.path.join(data_dir, 'B_mrci_wrong'))
+
+output_wrong_file = os.path.abspath(os.path.join(data_dir, 'parse_output_wrong.out'))
 
 
-def test_get_polarizability():
-    print(module_dir)
-    # get_polarizability(In_q_so_dir)
-    # get_polarizability(In_res_dir)
-    # get_polarizability(Br_q_mrci_dir, deepth=1)
-    # get_polarizability(acv4z_new_dir, deepth=1)
-    # get_polarizability(wrong_dir, deepth=1)
-    # get_polarizability(Rn_q_so_dir, deepth=1)
-    # get_polarizability(K_mrci_dir, deepth=1)
-    get_polarizability(B_mrci_dir, deepth=0)
+def test_output():
+       o = Output(output_wrong_file)
+       print(o.as_dict())

@@ -60,6 +60,7 @@ class Output(MSONable):
         self.nuclei_id = None
         self.molecule_info = Molecule()
         self.is_ok = False
+        self.use_wavefunc = False
 
         self.parse()
 
@@ -109,6 +110,7 @@ class Output(MSONable):
         start_line = re.compile(r"^Contents of the input file\s*")
         dash_line = re.compile(r"^-+")
         empty_line = re.compile(r"^$")
+        comment_line = re.compile(r"^[#|!]+")
         inp_start_line = re.compile(r"^\*\*DIRAC\s*")
         endline = re.compile(r"^\s*\*END OF")
 
@@ -127,13 +129,35 @@ class Output(MSONable):
             elif inp_start_line.match(line):
                 is_start = True
                 inp_str.append(line)
-            elif dash_line.match(line) or empty_line.match(line):
+            elif dash_line.match(line) or empty_line.match(line) or \
+                    comment_line.match(line):
                 continue
             else:
                 inp_str.append(line)
                 break
 
         self.inp_settings = parse_dirac_input(''.join(inp_str))
+
+
+        wf_tag = None
+        for dk in self.inp_settings.input.dirac:
+            if 'WAVE F' in dk:
+                self.use_wavefunc = True
+                for k in self.inp_settings.input:
+                    if 'WAVE F' in k:
+                        wf_tag = k
+                break
+        else:
+            self.use_wavefunc = False
+            warnings.warn('without using wave function, dir: '
+                          '{0}'.format(self.filename))
+            self.has_hamiltonian = False
+            self.hamiltonian = None
+            self.calc_type = None
+            self.calc_method = None
+            self.electric_field = None
+            return
+
 
         # check Hamiltonian
         if 'HAMILTONIAN' in self.inp_settings.input:
@@ -161,14 +185,13 @@ class Output(MSONable):
 
         # check if CC or CI calculation
         if self.has_hamiltonian and 'RELCC' in self.inp_settings.input and \
-                'RELCCSD' in self.inp_settings.input['WAVE FUNCTIONS']:
+                'RELCCSD' in self.inp_settings.input[wf_tag]:
             self.calc_method = 'CC'
-        elif self.has_hamiltonian and 'KRCICALC' in self.inp_settings.input['WAVE FUNCTIONS'] \
-                and 'KR CI'in self.inp_settings.input['WAVE FUNCTIONS']:
+        elif self.has_hamiltonian and 'KRCICALC' in self.inp_settings.input[wf_tag] \
+                and 'KR CI'in self.inp_settings.input[wf_tag]:
             self.calc_method = 'CI'
-        elif self.has_hamiltonian and 'SCF' in self.inp_settings.input[
-            'WAVE FUNCTIONS']:
-            if self.inp_settings.input['WAVE FUNCTIONS']['SCF']['_en']:
+        elif self.has_hamiltonian and 'SCF' in self.inp_settings.input[wf_tag]:
+            if self.inp_settings.input[wf_tag]['SCF']['_en']:
                 self.calc_method = 'SCF'
             else:
                 self.calc_method = None
@@ -177,11 +200,6 @@ class Output(MSONable):
             self.calc_method = None
             pass
 
-        for f in ['WAVE FUNC', 'WAVE FUNCTION', 'WAVE FUNCTIONS', 'WAVE F']:
-            if f in self.inp_settings.input.dirac: break
-        else:
-            self.calc_method = None
-            warnings.warn('there is no wave function to compute')
 
         # check dipole or quadrupole
         if self.has_hamiltonian and 'OPERATOR' in self.inp_settings.input.hamiltonian:
@@ -190,10 +208,16 @@ class Output(MSONable):
             elif ' ZDIPLEN' in self.inp_settings.input.hamiltonian.operator:
                 self.calc_type = 'D'
             else:
-                warnings.warn('this is not finite-field calculations')
+                warnings.warn('this is not finite-field calculations, '
+                              'dir: {0}'.format(self.filename))
                 self.calc_type = 'non_finite_field'
         else:
-            warnings.warn('this is not finite-field calculations')
+            if self.has_hamiltonian:
+                warnings.warn('Hamiltonian is invalid, dir: '
+                              '{0}'.format(self.filename))
+            else:
+                warnings.warn('".OPERATOR" is not in Hamiltonian, '
+                              'dir: {0}'.format(self.filename))
             self.calc_type = 'non_finite_field'
 
         # check electric field
@@ -202,7 +226,8 @@ class Output(MSONable):
             pos = self.inp_settings.input.hamiltonian.operator.index(' COMFACTOR')
             self.electric_field = self.inp_settings.input.hamiltonian.operator[pos+1]
         else:
-            warnings.warn('Did not find electric field!')
+            warnings.warn('Did not find electric field, '
+                          'dir: {0}'.format(self.filename))
             self.electric_field = 'null'
 
     def parse_mol(self):
@@ -299,10 +324,6 @@ class Output(MSONable):
         self.calc_method = self.calc_method or 'null'
         self.basis_type = self.basis_type or 'null'
         self.electric_field = self.electric_field or 'null'
-
-        # self.task_type = '-'.join([self.calc_type,self.hamiltonian,
-        #                            self.calc_method]) + '@' + self.basis_type.strip() + \
-        #                  '@' + self.electric_field.strip()
 
         # for a set of calculations, this task_type can be regarded as an id
         self.task_type = '-'.join([self.calc_type,self.hamiltonian,

@@ -267,11 +267,13 @@ class Molecule(MSONable):
 
         return Molecule(res_list)
 
+
     def as_dict(self) -> dict:
         info_dict = {}
         if type(self.info) == Element:
             for attr in ['atomic_number', 'symbol', 'dipole_polarizability']:
-                info_dict[attr] = getattr(self.info, attr)
+                if hasattr(self.info, attr):
+                    info_dict[attr] = getattr(self.info, attr)
             # TODO:
             # for k in [ key for key in dir(self.info) if not key.startswith('_')]:
             #     if not callable(getattr(self.info, k)):
