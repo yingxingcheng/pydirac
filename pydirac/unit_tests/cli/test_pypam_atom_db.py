@@ -40,11 +40,11 @@ B_mrci_dir = os.path.abspath(os.path.join(data_dir, 'B_mrci_wrong'))
 
 def test_get_polarizability():
     print(module_dir)
-    # get_polarizability(In_q_so_dir)
+    get_polarizability(In_q_so_dir, calc_dir_patters=['dyall'], deepth=1)
     # get_polarizability(In_res_dir)
     # get_polarizability(Br_q_mrci_dir, deepth=1)
     # get_polarizability(acv4z_new_dir, deepth=1)
     # get_polarizability(wrong_dir, deepth=1)
-    # get_polarizability(Rn_q_so_dir, deepth=1)
+    #get_polarizability(Rn_q_so_dir, deepth=1)
     # get_polarizability(K_mrci_dir, deepth=1)
     get_polarizability(B_mrci_dir, deepth=0)

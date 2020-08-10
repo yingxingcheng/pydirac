@@ -61,6 +61,7 @@ class Output(MSONable):
         self.molecule_info = Molecule()
         self.is_ok = False
         self.use_wavefunc = False
+        self.calc_orbit = Settings()
 
         self.parse()
 
@@ -177,9 +178,9 @@ class Output(MSONable):
                 self.hamiltonian = '?C'
 
             if 'NOSPIN' in self.inp_settings.input.hamiltonian:
-                self.hamiltonian += ':SR'
+                self.hamiltonian += '-SR'
             else:
-                self.hamiltonian += ':SO'
+                self.hamiltonian += '-SO'
         else:
             self.has_hamiltonian = False
 
@@ -190,6 +191,33 @@ class Output(MSONable):
         elif self.has_hamiltonian and 'KRCICALC' in self.inp_settings.input[wf_tag] \
                 and 'KR CI'in self.inp_settings.input[wf_tag]:
             self.calc_method = 'CI'
+            # here, we can obtain calc_orbit info from input directly
+            gas_tag = None
+            for k in self.inp_settings.input[wf_tag]['KRCICALC'].keys():
+                if 'GAS' in k:
+                    gas_tag = k
+                    break
+            gas_res = self.inp_settings.input[wf_tag]['KRCICALC'][gas_tag]
+            # the first line is the number of GAS shell
+            gas_nb = int(gas_res[0])
+            assert gas_nb == len(gas_res[1:])
+
+            nb_e = 0
+            t_orb = []
+            gas_ptn = re.compile(r'\s*\d+\s+(?P<nb_e>\d+)\s*/\s*(?P<nb_orb>\d+)')
+            for l in gas_res[1:]:
+                m = gas_ptn.match(l)
+                if m:
+                    t_orb.append(int(m.group('nb_orb')))
+            m = gas_ptn.match(gas_res[-1])
+            if m:
+                nb_e = int(m.group('nb_e'))
+            tot_orb = sum(t_orb)
+            occ_orb = nb_e
+            vir_orb = tot_orb * 2 - occ_orb
+            self.calc_orbit = {'occ': occ_orb, 'vir': vir_orb}
+            self._parse_ci_orbit()
+
         elif self.has_hamiltonian and 'SCF' in self.inp_settings.input[wf_tag]:
             if self.inp_settings.input[wf_tag]['SCF']['_en']:
                 self.calc_method = 'SCF'
@@ -269,10 +297,14 @@ class Output(MSONable):
                 # print(self.nuclei_id, self.nb_atoms)
             elif basis_line.match(line):
                 m = basis_line.match(line)
-                self.basis_type = m.group(1)
+                if m:
+                    self.basis_type = m.group(1)
             else:
                 # we do not interest with these lines
                 continue
+
+        if self.basis_type is None:
+            self.basis_type = context[4].strip()
 
         self.mol_settings = Settings({'nuclei_id': self.nuclei_id,
                                       'nb_atoms': self.nb_atoms,
@@ -289,10 +321,9 @@ class Output(MSONable):
             None
         """
 
-        self.molecule_info = Molecule.from_file(self.filename)
-        # if self.molecule_info:
-        #     print('The number of electrons at range ({0}, {1}): {2} '.format(
-        #         e_min, e_max, self.molecule_info.electron_count(-20, 25)))
+        # at present, this info is useless
+        #self.molecule_info = Molecule.from_file(self.filename)
+        self.molecule_info = Settings()
 
         # TODO: get atom information and restore to a Settings object
 
@@ -313,9 +344,9 @@ class Output(MSONable):
         # check if calculation is finished
         if self.calc_method in ['CI', 'CC']:
             if self.calc_method == 'CC':
-                self.energy_settings = self._parse_coupled_cluster()
+                self._parse_coupled_cluster()
             else:
-                self.energy_settings = self._parse_configuration_interaction()
+                self._parse_configuration_interaction()
         else:
             self.energy_settings = Settings()
 
@@ -326,8 +357,8 @@ class Output(MSONable):
         self.electric_field = self.electric_field or 'null'
 
         # for a set of calculations, this task_type can be regarded as an id
-        self.task_type = '-'.join([self.calc_type,self.hamiltonian,
-                                   self.calc_method]) + '@' + self.basis_type.strip()
+        self.task_type = '-'.join([self.calc_type, self.calc_method,
+                                   self.hamiltonian]) + '@' + self.basis_type.strip()
 
     def get_task_type(self):
         """Get a task type from an output file
@@ -405,8 +436,44 @@ class Output(MSONable):
                     energies[k] = float(m.group('energy'))
                     break
 
-        e_settings = Settings(energies)
-        return e_settings
+        self.energy_settings = Settings(energies)
+        self._parse_cc_orbit()
+
+    def _parse_cc_orbit(self):
+        # search orbital info
+        #
+        #  Configuration in highest pointgroup
+        #                                           E    E
+        #  Spinor class : occupied                  13   11
+        #  Spinor class : virtual                  220  222
+        #
+        #  Configuration in abelian subgroup
+        orb_start_pattern = re.compile(r'^\s*Configuration in highest pointgroup')
+        occ_pattern = re.compile(r'^\s*Spinor class : occupied\s+((?:\d+\s+)+)')
+        vir_pattern = re.compile(r'^\s*Spinor class : virtual\s+((?:\d+\s+)+)')
+        orb_end_pattern = re.compile(r'^\s*Configuration in abelian subgroup')
+
+        with open(self.filename, 'r') as f:
+            lines = f.readlines()
+            for i, line in enumerate(lines):
+                if orb_start_pattern.match(line):
+                    lines = lines[i:]
+                    break
+
+        clc_orb = {}
+        keys = ['occ', 'vir']
+        patterns = [occ_pattern, vir_pattern]
+
+        for i, line in enumerate(lines):
+            if orb_end_pattern.match(line):
+                break
+
+            for pattern, k in zip(patterns, keys):
+                m = pattern.match(line)
+                if m:
+                    clc_orb[k] = sum([int(nb) for nb in m.group(1).split()])
+                    break
+        self.calc_orbit = Settings(clc_orb)
 
 
     def _parse_configuration_interaction(self):
@@ -481,8 +548,26 @@ class Output(MSONable):
                     raise RuntimeError('There is no converged info')
             convergeds.append(converged)
 
-        energy_settings = Settings({'ci_e': energies, 'ci_converged':convergeds})
-        return energy_settings
+        self.energy_settings = Settings({'ci_e': energies, 'ci_converged':convergeds})
+        self._parse_ci_orbit()
+
+
+    def _parse_ci_orbit(self):
+        """
+        *KRCICALC
+        .CI PROGRAM
+        LUCIAREL
+        .INACTIVE
+        50
+        .GAS SHELLS
+        3
+        10 12 / 6
+        14 16 / 3
+        16 16 / 124
+        Returns:
+
+        """
+        pass
 
 
     def _parse_hartree_fock(self):

@@ -140,6 +140,10 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
 
         # check the calc_type from the first output file
         calc_type = output_lis[0].calc_type
+        calc_orbit = output_lis[0].calc_orbit
+        precision = 'null'
+        if len(calc_orbit):
+            precision = '(core ' + str(calc_orbit['occ']) + ')[vir ' + str(calc_orbit['vir']) + ']'
         if calc_type not in 'QD':
             warnings.warn('Unknown type calculation!')
             return
@@ -198,7 +202,7 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
         res = {}
         for k, v in energies.items():
             res[k] = pc.get_svd_from_array(v, fields)
-        return res
+        return res, precision
 
     # extract all basis_type info
     all_basis_res = {}
@@ -210,9 +214,10 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
 
     e_res = {}
     for k, v in all_basis_res.items():
-        single_res = _deal_with_single_basis(v)
+        single_res, precision = _deal_with_single_basis(v)
         if single_res:
-            e_res[k] = single_res
+            key = k+'@' + precision
+            e_res[key] = single_res
 
     for k, v in e_res.items():
         if tag:
