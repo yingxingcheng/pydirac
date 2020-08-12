@@ -22,11 +22,11 @@
 import re
 import warnings
 from monty.json import MSONable, jsanitize
-from pydirac.io.inputs import Inp, Mol, parse_dirac_input
-from pydirac.core.settings import Settings
-from pydirac.core.molecule import Molecule
+from pydirac.io.inputs import Inp, Mol
+from pydirac.core.molecular_orbitals import OrbitalType, AtomicOrbital, MoleculeOrbitals
 
-class Output(MSONable):
+
+class Output:
     """Class to parse DIRAC output file
 
     Attributes:
@@ -34,38 +34,21 @@ class Output(MSONable):
             contains `inp` file and `mol` file, thus one can parse them here
             together.
 
-        input (Settings): an `input` settings
-        mol (Settings): an `mol` settings
-        inp_settings (Settings): an input settings
-        mol_settings (Settings): a mol settings
-
     """
 
     def __init__(self, filename):
         self.filename = filename
-        self.input = None
+
+        self.inp = None
         self.mol = None
-        self.basis_type = None
-        self.calc_method = None
-        self.calc_type = None
-        self.electric_field = None
-        self.energy_settings = Settings()
-        self.hamiltonian = None
-        self.has_hamiltonian = False
-        self.inp_settings = Settings()
-        self.input = None
-        self.mol = None
-        self.mol_settings = Settings()
-        self.nb_atoms = 0
-        self.nuclei_id = None
-        self.molecule_info = Molecule()
+
+        # these are attributes of Output
         self.is_ok = False
-        self.use_wavefunc = False
-        self.calc_orbit = Settings()
+        self.energy_settings = {}
 
-        self.parse()
+        self.parse_energy()
 
-    def parse(self):
+    def parse_energy(self):
         """Parse the whole output file
 
         Parse the whole output file including `inp` file and `mol` file and
@@ -91,15 +74,9 @@ class Output(MSONable):
         if self.is_ok:
             self.parse_input()
             self.parse_mol()
-            self.parse_orbit()
+            # self.parse_orbit()
 
             self.parse_results()
-
-            if not self.inp_settings:
-                self.input = Inp(self.inp_settings)
-            if not self.mol_settings:
-                self.mol = Mol(self.mol_settings)
-
 
     def parse_input(self):
         """Parse input from output file
@@ -137,126 +114,7 @@ class Output(MSONable):
                 inp_str.append(line)
                 break
 
-        self.inp_settings = parse_dirac_input(''.join(inp_str))
-
-
-        wf_tag = None
-        for dk in self.inp_settings.input.dirac:
-            if 'WAVE F' in dk:
-                self.use_wavefunc = True
-                for k in self.inp_settings.input:
-                    if 'WAVE F' in k:
-                        wf_tag = k
-                break
-        else:
-            self.use_wavefunc = False
-            warnings.warn('without using wave function, dir: '
-                          '{0}'.format(self.filename))
-            self.has_hamiltonian = False
-            self.hamiltonian = None
-            self.calc_type = None
-            self.calc_method = None
-            self.electric_field = None
-            return
-
-
-        # check Hamiltonian
-        if 'HAMILTONIAN' in self.inp_settings.input:
-            self.has_hamiltonian =  True
-            if 'DOSSSS' in self.inp_settings.input.hamiltonian:
-                # this is 4-component Hamiltonian
-                self.hamiltonian = '4C'
-            elif 'X2C' in self.inp_settings.input.hamiltonian:
-                # this is 2-component Hamiltonian
-                self.hamiltonian = '2C'
-            elif 'X2Cmmf' in self.inp_settings.input.hamiltonian:
-                # need to do
-                self.hamiltonian = '2C'
-            else:
-                warnings.warn('We do not know how many components, '
-                              'please check inp file')
-                self.hamiltonian = '?C'
-
-            if 'NOSPIN' in self.inp_settings.input.hamiltonian:
-                self.hamiltonian += '-SR'
-            else:
-                self.hamiltonian += '-SO'
-        else:
-            self.has_hamiltonian = False
-
-        # check if CC or CI calculation
-        if self.has_hamiltonian and 'RELCC' in self.inp_settings.input and \
-                'RELCCSD' in self.inp_settings.input[wf_tag]:
-            self.calc_method = 'CC'
-        elif self.has_hamiltonian and 'KRCICALC' in self.inp_settings.input[wf_tag] \
-                and 'KR CI'in self.inp_settings.input[wf_tag]:
-            self.calc_method = 'CI'
-            # here, we can obtain calc_orbit info from input directly
-            gas_tag = None
-            for k in self.inp_settings.input[wf_tag]['KRCICALC'].keys():
-                if 'GAS' in k:
-                    gas_tag = k
-                    break
-            gas_res = self.inp_settings.input[wf_tag]['KRCICALC'][gas_tag]
-            # the first line is the number of GAS shell
-            gas_nb = int(gas_res[0])
-            assert gas_nb == len(gas_res[1:])
-
-            nb_e = 0
-            t_orb = []
-            gas_ptn = re.compile(r'\s*\d+\s+(?P<nb_e>\d+)\s*/\s*(?P<nb_orb>\d+)')
-            for l in gas_res[1:]:
-                m = gas_ptn.match(l)
-                if m:
-                    t_orb.append(int(m.group('nb_orb')))
-            m = gas_ptn.match(gas_res[-1])
-            if m:
-                nb_e = int(m.group('nb_e'))
-            tot_orb = sum(t_orb)
-            occ_orb = nb_e
-            vir_orb = tot_orb * 2 - occ_orb
-            self.calc_orbit = {'occ': occ_orb, 'vir': vir_orb}
-            self._parse_ci_orbit()
-
-        elif self.has_hamiltonian and 'SCF' in self.inp_settings.input[wf_tag]:
-            if self.inp_settings.input[wf_tag]['SCF']['_en']:
-                self.calc_method = 'SCF'
-            else:
-                self.calc_method = None
-        # TODO: visual module calculation
-        else:
-            self.calc_method = None
-            pass
-
-
-        # check dipole or quadrupole
-        if self.has_hamiltonian and 'OPERATOR' in self.inp_settings.input.hamiltonian:
-            if ' ZZTHETA' in self.inp_settings.input.hamiltonian.operator:
-                self.calc_type = 'Q'
-            elif ' ZDIPLEN' in self.inp_settings.input.hamiltonian.operator:
-                self.calc_type = 'D'
-            else:
-                warnings.warn('this is not finite-field calculations, '
-                              'dir: {0}'.format(self.filename))
-                self.calc_type = 'non_finite_field'
-        else:
-            if self.has_hamiltonian:
-                warnings.warn('Hamiltonian is invalid, dir: '
-                              '{0}'.format(self.filename))
-            else:
-                warnings.warn('".OPERATOR" is not in Hamiltonian, '
-                              'dir: {0}'.format(self.filename))
-            self.calc_type = 'non_finite_field'
-
-        # check electric field
-        if self.calc_type in 'QD':
-            # this is finit-field
-            pos = self.inp_settings.input.hamiltonian.operator.index(' COMFACTOR')
-            self.electric_field = self.inp_settings.input.hamiltonian.operator[pos+1]
-        else:
-            warnings.warn('Did not find electric field, '
-                          'dir: {0}'.format(self.filename))
-            self.electric_field = 'null'
+        self.inp = Inp.from_string(inp_str)
 
     def parse_mol(self):
         """Parse mol from output file
@@ -264,7 +122,6 @@ class Output(MSONable):
         Returns:
             Mol settings
         """
-
         start_line = re.compile(r"^Contents of the molecule file\s*")
         dash_line = re.compile(r"^-+")
         empty_line = re.compile(r"^$")
@@ -273,59 +130,32 @@ class Output(MSONable):
             r"\s*(?P<nuclei>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+(?P<nb_atoms>\d+)")
         basis_line = re.compile(r"^\b(?:LARGE|EXPLICIT)\b\s+BASIS\s+(\S+)\s*")
         endline = re.compile(r"^FINISH")
+        atomic_calc_ptn = re.compile(r"This is an atomic calculation")
 
-        self.nuclei_id = 0
-        self.nb_atoms = 0
-        self.basis_type = None
+        basis_type = None
 
         with open(self.filename, 'r') as f:
             context = f.readlines()
 
+        if atomic_calc_ptn.search(''.join(context), re.MULTILINE | re.DOTALL):
+            is_atom = True
+        else:
+            is_atom = False
+
+        mol_str = []
         for i, line in enumerate(context):
             if start_line.match(line):
-                context = context[i + 1:]
-
+                #context = context[i + 1:]
+                context = context[i + 3:]
+                break
         for i, line in enumerate(context):
             if endline.match(line):
                 break
-            elif dash_line.match(line) or empty_line.match(line):
-                continue
-            elif nuclei_nb_line.match(line):
-                m = nuclei_nb_line.match(line)
-                self.nuclei_id = int(round(float(m.group('nuclei'))))
-                self.nb_atoms = int(m.group('nb_atoms'))
-                # print(self.nuclei_id, self.nb_atoms)
-            elif basis_line.match(line):
-                m = basis_line.match(line)
-                if m:
-                    self.basis_type = m.group(1)
             else:
-                # we do not interest with these lines
-                continue
+                mol_str.append(line)
 
-        if self.basis_type is None:
-            self.basis_type = context[4].strip()
-
-        self.mol_settings = Settings({'nuclei_id': self.nuclei_id,
-                                      'nb_atoms': self.nb_atoms,
-                                      'basis_type': self.basis_type})
-
-    def parse_orbit(self, e_min=-20.0, e_max=25.0):
-        """Parse orbits from output file
-
-        Args:
-            e_min (float): energy minimum
-            e_max (float): energy maximum
-
-        Returns:
-            None
-        """
-
-        # at present, this info is useless
-        #self.molecule_info = Molecule.from_file(self.filename)
-        self.molecule_info = Settings()
-
-        # TODO: get atom information and restore to a Settings object
+        self.mol = Mol.from_string(mol_str)
+        self.mol.molecule.is_atom = is_atom
 
 
     def parse_results(self):
@@ -335,37 +165,150 @@ class Output(MSONable):
             None
         """
 
-        if not self.inp_settings:
+        if not self.inp:
             self.parse_input()
 
-        if not self.mol_settings:
+        if not self.mol:
             self.parse_mol()
 
         # check if calculation is finished
-        if self.calc_method in ['CI', 'CC']:
-            if self.calc_method == 'CC':
+        if self.inp.calc_method in ['CI', 'CC']:
+            if self.inp.calc_method == 'CC':
                 self._parse_coupled_cluster()
             else:
                 self._parse_configuration_interaction()
         else:
-            self.energy_settings = Settings()
+            self.energy_settings = {}
 
-        self.calc_type = self.calc_type or 'null'
-        self.hamiltonian = self.hamiltonian or 'null'
-        self.calc_method = self.calc_method or 'null'
-        self.basis_type = self.basis_type or 'null'
-        self.electric_field = self.electric_field or 'null'
+        calc_type = self.inp.calc_type or 'null'
+        hamiltonian = self.inp.hamiltonian or 'null'
+        calc_method = self.inp.calc_method or 'null'
+        basis_type = self.mol.basis_type or 'null'
 
         # for a set of calculations, this task_type can be regarded as an id
-        self.task_type = '-'.join([self.calc_type, self.calc_method,
-                                   self.hamiltonian]) + '@' + self.basis_type.strip()
+        self._task_type = '-'.join([calc_type, calc_method,
+                                   hamiltonian]) + '@' + basis_type.strip()
 
-    def get_task_type(self):
+    def parse_orbit(self):
+        """
+
+        Args:
+            filename:
+
+            For SO
+            * Fermion symmetry E1
+                * Closed shell, f = 1.0000
+                  -2.47797334037  ( 2)
+                * Open shell #1, f = 0.5000
+                  -0.13783115994  ( 2)
+                * Virtual eigenvalues, f = 0.0000
+                   0.00374548932  ( 6)        0.00499273090  ( 2)        0.01402796501  ( 6)        0.02179466435  (10)        0.03009547324  ( 2)
+                   0.03716487091  ( 6)        0.06363549163  (14)        0.07606125973  (10)        0.09203286658  ( 6)        0.12208961664  ( 2)
+                   0.19147871966  (14)        0.21707019780  (10)        0.22905557723  ( 2)        0.22905883825  ( 4)        0.26586221717  (18)
+                   0.39444173531  ( 2)        0.49420939940  (14)        0.55623366579  ( 2)        0.55624525507  ( 4)        0.60447384566  ( 4)
+                   0.60447617309  ( 6)        0.77688901369  (18)        1.25239748512  ( 2)        1.25997676379  ( 6)        1.25998182039  ( 8)
+                   1.36133214856  ( 2)        1.36137529052  ( 4)        1.75072060544  ( 4)        1.75074035505  ( 6)        3.49702377155  ( 2)
+                   3.49722182837  ( 4)        3.76715748401  ( 2)        9.76930432334  ( 2)        9.77034247125  ( 4)       10.47049017426  ( 2)
+                  28.40952020368  ( 2)       36.12853032246  ( 2)       36.14097956915  ( 4)       79.15864898987  ( 2)      236.13953875683  ( 2)
+                 783.60786051767  ( 2)     3002.96623263569  ( 2)    13731.73008778683  ( 2)
+
+            For SR
+            * Boson symmetry A1
+              * Closed shell, f = 1.0000
+                -2.47787107822  ( 2)
+              * Open shell #1, f = 0.5000
+                -0.13782962396  ( 2)
+              * Virtual eigenvalues, f = 0.0000
+                 0.01000493192  ( 2)        0.01881578996  ( 2)        0.03354206140  ( 2)        0.06105795349  ( 4)        0.08825402911  ( 2)
+                 0.11027718518  ( 2)        0.15768768851  ( 4)        0.20553440208  ( 4)        0.22554311803  ( 2)        0.38377353600  ( 2)
+                 0.46966416528  ( 4)        0.55315302017  ( 2)        0.59582793164  ( 4)        0.67809753506  ( 6)        1.24252600686  ( 2)
+                 1.24308361482  ( 4)        1.35864972273  ( 2)        1.74463236465  ( 4)        3.49480571226  ( 2)        3.75812114959  ( 2)
+                 9.76801822932  ( 2)       10.46222624083  ( 2)       28.40185035569  ( 2)       36.13522290609  ( 2)       79.15135049148  ( 2)
+               236.13236364858  ( 2)      783.60069042839  ( 2)     3002.95967127327  ( 2)    13731.72642240539  ( 2)
+
+            * Boson symmetry B1
+              * Virtual eigenvalues, f = 0.0000
+                 0.01000493192  ( 2)        0.03354206140  ( 2)        0.06105795349  ( 2)        0.08825402911  ( 2)        0.15768768851  ( 4)
+                 0.20553440208  ( 2)        0.22554311803  ( 2)        0.46966416528  ( 4)        0.55315302017  ( 2)        0.59582793164  ( 2)
+                 0.67809753506  ( 4)        1.24308361482  ( 4)        1.35864972273  ( 2)        1.74463236465  ( 2)        3.49480571226  ( 2)
+                 9.76801822932  ( 2)       36.13522290609  ( 2)
+
+        Returns:
+
+        """
+        start_ptn = re.compile(r"\s+Eigenvalues\s+")
+        sym_ptn = re.compile(r"^\* \b(?:Boson|Fermion)\b symmetry (.*)")
+        open_ptn = re.compile(r"^\s+\*\s+Open shell #\d+, f = (\d+(\.\d*)?)")
+        closed_ptn = re.compile(r"^\s+\*\s+Closed shell, f = (\d+(\.\d*)?)")
+        virtual_ptn = re.compile(
+            r"\s+\*\s+Virtual eigenvalues, f = (\d+(\.\d*)?)")
+        number = re.compile(
+            r"(?P<num>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+\(\s*(?P<degen>\d+)\)")
+        number_line_ptn = re.compile(r"\s+[-+]?(\d+(\.\d+)?|\d*\.\d+) .*")
+        endline_ptn = re.compile(r"^\* HOMO - LUMO")
+
+        with open(self.filename, 'r') as f:
+            lines = f.readlines()
+
+
+        for i, l in enumerate(lines):
+            if start_ptn.match(l):
+                lines = lines[i + 1:]
+                break
+        else:
+            warnings.warn("No SCF calculation info founded, this is calculation"
+                          " without SCF, please check it carefully!")
+
+        cur_sym = None
+        ao_type = None
+        occ_frac = 0.00
+        aos = []
+        for l in lines:
+            symmetry_match = sym_ptn.match(l)
+            if symmetry_match:
+                # add new branch
+                cur_sym = symmetry_match.group(1)
+
+            openshell_match = open_ptn.match(l)
+            if openshell_match:
+                occ_frac = float(openshell_match.group(1))
+                ao_type = OrbitalType.OPEN_SHELL
+
+            closeshell_match = closed_ptn.match(l)
+            if closeshell_match:
+                occ_frac = float(closeshell_match.group(1))
+                # occ_frac = 1.0
+                ao_type = OrbitalType.CLOSED_SHELL
+
+            virtualshell_match = virtual_ptn.match(l)
+            if virtualshell_match:
+                occ_frac = float(virtualshell_match.group(1))
+                # occ_frac = 0.0
+                ao_type = OrbitalType.VIRTUAL_SHELL
+
+            if number_line_ptn.match(l):
+                ao_energy, ao_degen = [], []
+                for m in number.finditer(l):
+                    ao_energy.append(float(m.group("num")))
+                    ao_degen.append(int(m.group("degen")))
+                for e, d in zip(ao_energy, ao_degen):
+                    ao = AtomicOrbital(cur_sym, ao_type, e, int(d), occ_frac)
+                    aos.append(ao)
+
+            if endline_ptn.match(l):
+                break
+
+        self.mos = MoleculeOrbitals(aos)
+        return self.mos
+
+
+    @property
+    def task_type(self):
         """Get a task type from an output file
 
         Returns:
         """
-        return self.task_type
+        return self._task_type
 
     def check_valid(self):
         """
@@ -436,7 +379,7 @@ class Output(MSONable):
                     energies[k] = float(m.group('energy'))
                     break
 
-        self.energy_settings = Settings(energies)
+        self.energy_settings = energies
         self._parse_cc_orbit()
 
     def _parse_cc_orbit(self):
@@ -473,8 +416,7 @@ class Output(MSONable):
                 if m:
                     clc_orb[k] = sum([int(nb) for nb in m.group(1).split()])
                     break
-        self.calc_orbit = Settings(clc_orb)
-
+        self._cc_calc_orbit = clc_orb
 
     def _parse_configuration_interaction(self):
         """Deal with KRCI calculations
@@ -519,7 +461,7 @@ class Output(MSONable):
         if len(sym_l) != len(all_e):
             warnings.warn('The shape of energy and symmetry are not '
                                'the same! Check results!')
-            return Settings()
+            return {}
 
         for i, sym_rt in enumerate(sym_l):
             tag_sym = sym_rt[0]
@@ -527,7 +469,7 @@ class Output(MSONable):
             if nb_root != len(all_e[i]):
                 warnings.warn('The number of root energies and the number of '
                               'roots are not the same! Check results!')
-                return Settings()
+                return {}
 
             for r in range(1, nb_root+1):
                 key = '_'.join(['sym', str(tag_sym), 'root',str(r)])
@@ -548,27 +490,7 @@ class Output(MSONable):
                     raise RuntimeError('There is no converged info')
             convergeds.append(converged)
 
-        self.energy_settings = Settings({'ci_e': energies, 'ci_converged':convergeds})
-        self._parse_ci_orbit()
-
-
-    def _parse_ci_orbit(self):
-        """
-        *KRCICALC
-        .CI PROGRAM
-        LUCIAREL
-        .INACTIVE
-        50
-        .GAS SHELLS
-        3
-        10 12 / 6
-        14 16 / 3
-        16 16 / 124
-        Returns:
-
-        """
-        pass
-
+        self.energy_settings = {'ci_e': energies, 'ci_converged':convergeds}
 
     def _parse_hartree_fock(self):
         """Deal with HF calculations
@@ -588,24 +510,23 @@ class Output(MSONable):
 
         pass
 
+    @property
+    def calc_orbit(self):
+        if self.inp.calc_method == 'CC':
+            return self._cc_calc_orbit
+        elif self.inp.calc_method == 'CI':
+            return self.inp.ci_calc_orbit
+        else:
+            return {'occ':0, 'vir':0}
+
     def as_dict(self) -> dict:
         d = {"@module": self.__class__.__module__,
              "@class": self.__class__.__name__,
-             "basis_type": self.basis_type,
-             "calc_method": self.calc_method,
-             "electric_field": self.electric_field,
-             "energy_settings": self.energy_settings.as_dict(),
+             "energy_settings": self.energy_settings,
              "filename": self.filename,
-             'hamiltonian': self.hamiltonian,
-             'has_hamiltonian': self.has_hamiltonian,
-             #'inp_settings': self.input.as_dict(),
-             #'mol_settings': self.mol.as_dict(),
-             'inp_settings': self.inp_settings.as_dict(),
-             'mol_settings': self.mol_settings.as_dict(),
-             'nb_atoms': self.nb_atoms,
-             'nuclei_id': self.nuclei_id,
              'task_type': self.task_type,
-             'molecule_info': self.molecule_info.as_dict(),
+             'mol': self.mol.as_dict(),
+             'inp': self.inp,
              'is_ok': self.is_ok
              }
         return jsanitize(d, strict=True)

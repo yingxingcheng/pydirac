@@ -19,13 +19,16 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+import warnings
 from pydirac.core.molecule import Molecule
-from pydirac.io.sets import Inpobj
+#from pydirac.io.sets import Inpobj
+from pydirac.io.inputs import Inp
+from pydirac.io.outputs import Output
 
 
-__all__ = ['get_mrci_inp']
+__all__ = ['get_atomic_mrci_inp']
 
-def get_info_for_s_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
+def get_info_for_s_block(out, e_min, e_max, calc_type='quadrupole'):
     """
     atom_info: information about specified atom
     Return:
@@ -33,23 +36,16 @@ def get_info_for_s_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
          gas_list: (list) a list for GAS setup
          root_list: (list) root for different symmetry
     """
-    assert atom.info.block == 's'
+    atomic_info =  out.mol.molecule.atomic_info
+    mos = out.mos
+    assert atomic_info.block == 's'
 
-    # obtain the number of electrons
-    nb_closed_elec = atom.closed_elec()
-    nb_open_elec = atom.openshell_elec()
-    nb_total_elec = atom.total_nb_elec()
-
-    # obtain orbit info
-    ## res_orbits = [nb_closed_shells, nb_open_shells, nb_virtual_shells]
-    orbitals_dirac_info = atom.orbit_count(res_virtual=True, v_min_e=v_min_e, v_max_e=v_max_e)
-    nb_closed_shell = orbitals_dirac_info[0]
-    nb_open_shell = orbitals_dirac_info[1]
-    nb_vir_shell = orbitals_dirac_info[-1]
+    nb_closed_elec, nb_open_elec, nb_total_elec, nb_closed_shell, \
+    nb_open_shell, nb_vir_shell = mos.get_ao_and_elec(e_min, e_max)
 
     assert (nb_closed_elec == nb_closed_shell)
     assert (nb_open_elec <= nb_open_shell)
-    period = atom.info.period
+    period = atomic_info.period
 
     gas_list = []
     root_list = []
@@ -133,7 +129,7 @@ def get_info_for_s_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
     return nb_active_elec, gas_list, root_list
 
 
-def get_info_for_p_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
+def get_info_for_p_block(out, e_min, e_max, calc_type='quadrupole'):
     """
     atom_info: information about specified atom
     Return:
@@ -141,23 +137,16 @@ def get_info_for_p_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
          gas_list: (list) a list for GAS setup
          root_list: (list) root for different symmetry
     """
-    assert atom.info.block == 'p'
+    atomic_info =  out.mol.molecule.atomic_info
+    mos = out.mos
+    assert atomic_info.block == 'p'
 
-    # obtain the number of electrons
-    nb_closed_elec = atom.closed_elec()
-    nb_open_elec = atom.openshell_elec()
-    nb_total_elec = atom.total_nb_elec()
-
-    # obtain orbit info
-    ## res_orbits = [nb_closed_shells, nb_open_shells, nb_virtual_shells]
-    orbitals_dirac_info = atom.orbit_count(res_virtual=True, v_min_e=v_min_e, v_max_e=v_max_e)
-    nb_closed_shell = orbitals_dirac_info[0]
-    nb_open_shell = orbitals_dirac_info[1]
-    nb_vir_shell = orbitals_dirac_info[-1]
+    nb_closed_elec, nb_open_elec, nb_total_elec, nb_closed_shell, \
+    nb_open_shell, nb_vir_shell = mos.get_ao_and_elec(e_min, e_max)
 
     assert (nb_closed_elec == nb_closed_shell)
     assert (nb_open_elec <= nb_open_shell)
-    period = atom.info.period
+    period = atomic_info.period
 
     gas_list = []
     root_list = []
@@ -277,7 +266,7 @@ def get_info_for_p_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
     return nb_active_elec, gas_list, root_list
 
 
-def get_info_for_d_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
+def get_info_for_d_block(out, e_min, e_max, calc_type='quadrupole'):
     """
     atom_info: information about specified atom
     Return:
@@ -285,23 +274,16 @@ def get_info_for_d_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
          gas_list: (list) a list for GAS setup
          root_list: (list) root for different symmetry
     """
-    assert atom.info.block == 'd'
+    atomic_info =  out.mol.molecule.atomic_info
+    mos = out.mos
+    assert atomic_info.block == 'd'
 
-    # obtain the number of electrons
-    nb_closed_elec = atom.closed_elec()
-    nb_open_elec = atom.openshell_elec()
-    nb_total_elec = atom.total_nb_elec()
-
-    # obtain orbit info
-    ## res_orbits = [nb_closed_shells, nb_open_shells, nb_virtual_shells]
-    orbitals_dirac_info = atom.orbit_count(res_virtual=True, v_min_e=v_min_e, v_max_e=v_max_e)
-    nb_closed_shell = orbitals_dirac_info[0]
-    nb_open_shell = orbitals_dirac_info[1]
-    nb_vir_shell = orbitals_dirac_info[-1]
+    nb_closed_elec, nb_open_elec, nb_total_elec, nb_closed_shell, \
+    nb_open_shell, nb_vir_shell = mos.get_ao_and_elec(e_min, e_max)
 
     assert (nb_closed_elec == nb_closed_shell)
     assert (nb_open_elec <= nb_open_shell)
-    period = atom.info.period
+    period = atomic_info.period
 
     gas_list = []
     root_list = []
@@ -375,7 +357,7 @@ def get_info_for_d_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
     return nb_active_elec, gas_list, root_list
 
 
-def get_info_for_f_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
+def get_info_for_f_block(out, e_min, e_max, calc_type='quadrupole'):
     """
     atom_info: information about specified atom
     Return:
@@ -383,23 +365,16 @@ def get_info_for_f_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
          gas_list: (list) a list for GAS setup
          root_list: (list) root for different symmetry
     """
-    assert atom.info.block == 'f'
+    atomic_info =  out.mol.molecule.atomic_info
+    mos = out.mos
+    assert atomic_info.block == 'f'
 
-    # obtain the number of electrons
-    nb_closed_elec = atom.closed_elec()
-    nb_open_elec = atom.openshell_elec()
-    nb_total_elec = atom.total_nb_elec()
-
-    # obtain orbit info
-    ## res_orbits = [nb_closed_shells, nb_open_shells, nb_virtual_shells]
-    orbitals_dirac_info = atom.orbit_count(res_virtual=True, v_min_e=v_min_e, v_max_e=v_max_e)
-    nb_closed_shell = orbitals_dirac_info[0]
-    nb_open_shell = orbitals_dirac_info[1]
-    nb_vir_shell = orbitals_dirac_info[-1]
+    nb_closed_elec, nb_open_elec, nb_total_elec, nb_closed_shell, \
+    nb_open_shell, nb_vir_shell = mos.get_ao_and_elec(e_min, e_max)
 
     assert (nb_closed_elec == nb_closed_shell)
     assert (nb_open_elec <= nb_open_shell)
-    period = atom.info.period
+    period = atomic_info.period
 
     gas_list = []
     root_list = []
@@ -409,32 +384,38 @@ def get_info_for_f_block(atom, v_min_e, v_max_e, calc_type='quadrupole'):
 
 
 
-def get_mrci_inp(filename_input, filename_out='PYDIRAC.inp', v_min_e=-1, v_max_e=10.0):
+def get_atomic_mrci_inp(filename_input, filename_out='PYDIRAC.inp', e_min=-1, e_max=10.0):
     """
     Create MRCI input based on the previous SCF calculation.
     """
 
-    atom = Molecule.from_file(filename_input)
+    out = Output(filename_input)
+    out.parse_orbit()
+    atom = out.mol.molecule
+    print(atom.is_atom)
+
+    if not atom.is_atom:
+        warnings.warn('This is not an atomic calculation!')
+        return
 
     # this is for p block elements
-    if atom.info.block == 'p':
+    if atom.atomic_info.block == 'p':
         nb_active_elec, gas_list, root_list = \
-            get_info_for_p_block(atom, v_min_e=v_min_e, v_max_e=v_max_e, calc_type='quadrupole')
-    elif atom.info.block == 's':
+            get_info_for_p_block(out, e_min=e_min, e_max=e_max, calc_type='quadrupole')
+    elif atom.atomic_info.block == 's':
         nb_active_elec, gas_list, root_list = \
-            get_info_for_s_block(atom, v_min_e=v_min_e, v_max_e=v_max_e, calc_type='quadrupole')
-    elif atom.info.block == 'd':
+            get_info_for_s_block(out, e_min=e_min, e_max=e_max, calc_type='quadrupole')
+    elif atom.atomic_info.block == 'd':
         nb_active_elec, gas_list, root_list = \
-            get_info_for_d_block(atom, v_min_e=v_min_e, v_max_e=v_max_e, calc_type='quadrupole')
-    elif atom.info.block == 'f':
+            get_info_for_d_block(out, e_min=e_min, e_max=e_max, calc_type='quadrupole')
+    elif atom.atomic_info.block == 'f':
         nb_active_elec, gas_list, root_list = \
-            get_info_for_f_block(atom, v_min_e=v_min_e, v_max_e=v_max_e, calc_type='quadrupole')
+            get_info_for_f_block(out, e_min=e_min, e_max=e_max, calc_type='quadrupole')
     else:
         raise RuntimeError('Unknown block element!')
 
-    total_nb_elec = atom.total_nb_elec()
-    print('total number electrons is {0}'.format(total_nb_elec))
-    inactivate = (atom.total_nb_elec() - nb_active_elec) // 2
+    print('total number electrons is {0}'.format(atom.atomic_info.Z))
+    inactivate = (atom.atomic_info.Z - nb_active_elec) // 2
     nb_gas_shell = len(gas_list)
     nb_root_sym = len(root_list)
 
@@ -447,11 +428,9 @@ def get_mrci_inp(filename_input, filename_out='PYDIRAC.inp', v_min_e=-1, v_max_e
     krci_setup.extend(['.MAX CI', '120', '.MXCIVE', '60', '.ANALYZ',
                        '.RSTRCI', 'rstr', '.CHECKP', '.NOOCCN'])
 
-    krci = ('*KRCICALC', krci_setup)
-
-    inp = Inpobj.from_file(filename_input)
-    inp.add_keywords(krci)
-    inp.write_to_file(filename_out)
+    inp = out.inp
+    inp[inp.wf_tag]['KRCICALC'] = krci_setup
+    inp.write_file(filename_out)
 
 
 if __name__ == '__main__':
@@ -459,4 +438,4 @@ if __name__ == '__main__':
 
     argv = sys.argv[1:]
     for filename in argv:
-        get_mrci_inp(filename_input=filename)
+        get_atomic_mrci_inp(filename_input=filename)

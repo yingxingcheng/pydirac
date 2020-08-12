@@ -45,6 +45,8 @@ def test_get_polarizability():
     # get_polarizability(Br_q_mrci_dir, deepth=1)
     # get_polarizability(acv4z_new_dir, deepth=1)
     # get_polarizability(wrong_dir, deepth=1)
-    #get_polarizability(Rn_q_so_dir, deepth=1)
+    get_polarizability(Rn_q_so_dir, deepth=1)
     # get_polarizability(K_mrci_dir, deepth=1)
     get_polarizability(B_mrci_dir, deepth=0)
+
+test_get_polarizability()

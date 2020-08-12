@@ -21,7 +21,7 @@
 
 import os
 from pydirac.core.settings import Settings
-from pydirac.io.sets import DiracJob
+from pydirac.io.inputs import Inp
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
@@ -36,17 +36,33 @@ def test_write():
     sett.input.analyze.mulpop._en = True
     sett.input.analyze.mulpop.vecpop = '1..oo'
     sett.input.hamiltonian.dossss = True
-    sett.input.hamiltonian.operator._en = True
+    # sett.input.hamiltonian.operator._en = True
     sett.input.hamiltonian.operator = [' ZDIPLEN', ' COMFACTOR', ' 0.01']
     sett.input.integrals.readinp.uncontract = True
     sett.input.general.pcmout = True
-    sett.input['WAVE FUNCTIONS'].scf._en = True
-    sett.input['WAVE FUNCTIONS']['KR CI'] = True
-    sett.input['WAVE FUNCTIONS'].resolve = True
-    sett.input['WAVE FUNCTIONS'].scf['CLOSED SHELL'] = 4
-    sett.input['WAVE FUNCTIONS'].scf['OPEN SHELL'] = [1, '1/6']
-    sett.input['WAVE FUNCTIONS'].scf['EVCCNV'] = '1.0D-9 5.0D-8'
-    sett.input['WAVE FUNCTIONS'].scf['MAXITR'] = 90
+
+    wave_func = Settings()
+    wave_func['KR CI'] = True
+    wave_func.resolve = True
+
+    scf_setting = Settings()
+    scf_setting._en = True
+    scf_setting['CLOSED SHELL'] = 4
+    scf_setting['OPEN SHELL'] = [1, '1/6']
+    scf_setting.evccnv = '1.0D-9 5.0D-8'
+    scf_setting.maxitr = 90
+    wave_func.scf = scf_setting
+
+    sett.input['WAVE FUNCTIONS'] = wave_func
+
+
+    # sett.input['WAVE FUNCTIONS'].scf._en = True
+    # sett.input['WAVE FUNCTIONS']['KR CI'] = True
+    # sett.input['WAVE FUNCTIONS'].resolve = True
+    # sett.input['WAVE FUNCTIONS'].scf['CLOSED SHELL'] = 4
+    # sett.input['WAVE FUNCTIONS'].scf['OPEN SHELL'] = [1, '1/6']
+    # sett.input['WAVE FUNCTIONS'].scf['EVCCNV'] = '1.0D-9 5.0D-8'
+    # sett.input['WAVE FUNCTIONS'].scf['MAXITR'] = 90
     sett.input['WAVE FUNCTIONS'].krcicalc['CI PROGRAM'] = 'LUCIAREL'
     sett.input['WAVE FUNCTIONS'].krcicalc.inactive = 1
     sett.input['WAVE FUNCTIONS'].krcicalc['GAS SHELLS'] = \
@@ -56,11 +72,15 @@ def test_write():
     sett.input['WAVE FUNCTIONS'].krcicalc['DIPMOM'] = True
     sett.input['WAVE FUNCTIONS'].krcicalc['RSTRCI'] = 0
     sett.input['WAVE FUNCTIONS'].krcicalc['CIROOTS'] = '3  3'
+    sett.input['WAVE FUNCTIONS'].krcicalc['CIROOTS'] = '4  3'
 
     sett.runscript.pam.mol = '/Users/yxcheng/PhD/plams_tutorial/B.mol'
 
-    job = DiracJob(settings=sett)
+    # job = DiracJob(settings=sett)
+    job = Inp(sett.input)
 
     fout = os.path.join(data_dir, 'tmp.inp')
     with open(fout, 'w') as f:
-        f.write(job.get_input())
+        f.write(job.get_string())
+
+test_write()

@@ -84,7 +84,7 @@ def get_polarizability(dirname: str = './',
         for f in glob.glob('*.out'):
             obj = Output(filename=f)
             if obj.is_ok:
-                curr_dir_output_lis.append(Output(filename=f))
+                curr_dir_output_lis.append(obj)
 
         if is_valid(curr_dir_output_lis):
             do_curr_dir = True
@@ -139,7 +139,7 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
             return
 
         # check the calc_type from the first output file
-        calc_type = output_lis[0].calc_type
+        calc_type = output_lis[0].inp.calc_type
         calc_orbit = output_lis[0].calc_orbit
         precision = 'null'
         if len(calc_orbit):
@@ -159,7 +159,7 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
         fields = []
 
         for o in output_lis:
-            if o.calc_type != calc_type:
+            if o.inp.calc_type != calc_type:
                 warnings.warn('we found a error output whose calc_type {0} is '
                               'different with the first one {1}'.format(
                     o.calc_type, calc_type))
@@ -167,14 +167,14 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
 
             # TODO: different calc formula for CC and CI
             # check CC or CI
-            if o.calc_method not in ['CC', 'CI']:
+            if o.inp.calc_method not in ['CC', 'CI']:
                 warnings.warn('This calculation {0} does not belong any '
                               'method "CC" or "CI".'.format(o.calc_method))
                 continue
 
             # CC or CI
-            fields.append(float(o.electric_field))
-            if o.calc_method == 'CC':
+            fields.append(float(o.inp.electric_field))
+            if o.inp.calc_method == 'CC':
                 for k, v in  o.energy_settings.items():
                     if k not in energies.keys():
                         energies[k] = []
@@ -262,7 +262,7 @@ def is_valid(output_lis, verbos=False):
     # check all there file if they are all 'CC' or 'CI' calculations
     task_record = {}
     for o in output_lis:
-        if not o.calc_method in ['CC', 'CI']:
+        if not o.inp.calc_method in ['CC', 'CI']:
             continue
         else:
             if not o.task_type in task_record:

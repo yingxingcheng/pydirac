@@ -24,7 +24,8 @@
 import os
 
 from pydirac.core.molecule import Molecule
-from pydirac.io.krci import get_mrci_inp
+from pydirac.io.outputs import Output
+from pydirac.io.krci import get_atomic_mrci_inp
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
@@ -35,12 +36,13 @@ def test_write_file():
     test write_file
     """
     fname = os.path.join(data_dir, 'Cu_DHF.out')
-    atom = Molecule.from_file(fname)
-    print(atom.closed_elec(), atom.openshell_elec())
-    print(atom.info.symbol)
-    if atom.info.group:
-        print(atom.info.group_symbol)
-    print(atom.info.block)
+    out = Output(fname)
+    atom = out.parse_orbit()
+    print(atom.as_dict())
+    print(atom.nb_closed_elec(), atom.nb_open_elec())
+    print(atom.as_dict())
 
     fout = os.path.join(data_dir, 'PYDIRAC.inp')
-    get_mrci_inp(fname, fout)
+    get_atomic_mrci_inp(fname, fout)
+
+test_write_file()

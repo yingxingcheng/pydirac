@@ -195,3 +195,14 @@ class Element(MSONable):
     @property
     def period(self):
         return self.row
+
+    def as_dict(self) -> dict:
+        d = {
+            'Z':self.Z,
+            'block': self.block,
+            'row':self.row,
+            'group': self.group,
+            'group_symbol': self.group_symbol,
+            'period': self.period
+        }
+        return jsanitize(d)

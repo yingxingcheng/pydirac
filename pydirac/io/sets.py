@@ -29,6 +29,15 @@ intervention. This ensures comparability across runs.
 
 
 import abc
+from pathlib import Path
+from copy import deepcopy
+import shutil
+
+from monty.json import MSONable, jsanitize
+from monty.serialization import loadfn
+
+from pydirac.io.inputs import DiracInput, Mol, Inp
+from pydirac.core.molecule import Molecule
 from collections import OrderedDict
 import re
 from monty.json import MSONable
@@ -37,402 +46,197 @@ from os.path import join as opj
 from pydirac.core.periodic_table import Element
 from pydirac.core.settings import Settings
 from pydirac.utility.config import *
-from pydirac.io.mole import get_mole_file
+from pydirac.io.inputs import Mol
 from pydirac.io.basic import input_from_calctype
 
-__all__ = ['DiracJob', 'Inpobj', 'Molobj', 'OldDiracJob', 'JobType']
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
 
+MODULE_DIR = Path(__file__).resolve().parent
+
+
 class DiracInputSet(MSONable, metaclass=abc.ABCMeta):
-    pass
-
-
-class Inpobj(object):
     """
-    Input object for DIRAC inp file
+    Base class representing a set of Dirac input parameters with a structure
+    supplied as init parameters. Typically, you should not inherit from this
+    class. Start from DictSet or MPRelaxSet or MITRelaxSet.
     """
-    first_level = {
-        '**DIRAC': {'.TITLE': None, '.WAVE' : True, '.4INDEX': True, '.ANALYZE': True},
-        '**ANALYZE': {'.MULPOP': True, },
-        '**MULPOP' : '1..oo',
-        '**HAMILTONIAN' : {'.X2C': True, '.NOSPIN': True, '.OPERATOR': {
-            'ZDIPLEN': True, 'COMFACTOR': 0.0000}},
-        '**INTEGRALS': {'*READINP': '.UNCONTRACT'},
-        '**WAVE FUNCTIONS': {'.SCF': True, '.RELCCSD': True, '.RESOLVE': True}
-        }
 
-    second_level = {
-    }
-
-
-    def __init__(self, keyword_dict):
-        self.origin_keyword_dict = keyword_dict
-        self.keywords_list = list(self.origin_keyword_dict.items())
-
-    def write_to_file(self, filename):
-        """
-        write context to file named by filename
-        """
-        # inp_str = []
-        # for k1st, v1st in self.keyword_dict.items():
-        #     inp_str.append(k1st)
-        #     if len(v1st):
-        #         inp_str.extend(v1st)
-
-        inp_str = []
-        for k, v in self.keywords_list:
-            inp_str.append(k)
-            if len(v):
-                inp_str.extend(v)
-        
-        with open(filename, 'w') as f:
-            f.write('\n'.join(inp_str))
-        #print('\n'.join(inp_str))
-
-    def add_keywords(self, keywords):
-        """
-        Add keywords which will be wrote to file
-        """
-        if not isinstance(keywords, tuple):
-            raise TypeError('Wrong type for keywords, it should be tuple')
-        
-        # for k, v in self.keywords_list:
-        #     for i in range(len(v)):
-        #         v[i] = v[i].strip()
-
-        if keywords[0] in ['**RELCC', '*KRCICALC', '*SCF']:
-            for k,v in self.keywords_list:
-                if k.startswith('**WAVE'):
-                    # if keywords[0] in [_keywords.strip() for _keywords in v]:
-                    #     break
-
-                    str_added  = '#'
-                    if keywords[0] == '*KRCICALC':
-                        str_added = '.KR CI'
-                    elif keywords[0] == '**RELCC':
-                        str_added = '.RELCCSD'
-                    else:
-                        pass
-
-                    for idx, kw in enumerate(v):
-                        if kw.startswith('*'):
-                            v.insert(idx, str_added)
-                            break
-                    break
-                else:
-                    # add '**WAVE'
-                    pass
-
-        for k, v in self.keywords_list:
-            if k.startswith('**HAMI'):
-                # change COMFACTOR
-                for idx, value in enumerate(v):
-                    if value.strip() in ['COMFACTOR', 'ZDIPLEN']:
-                        v[idx] = ' '+value.strip()
-
-                for idx, value in enumerate(v):
-                    if value.strip() == 'COMFACTOR':
-                        v[idx+1] = ' zff'
-                        break
-                break
-
-        print('check resolved')
-        for k, v in self.keywords_list:
-            if k.startswith('**WAVE'):
-                # check resolved
-                if '.RESOLVE' in [_keywords.strip() for _keywords in v]:
-                    break
-
-                for idx, value in enumerate(v):
-                    if value.startswith('*'):
-                        v.insert(idx,'.RESOLVE')
-                        break
-                break
-        
-        print('check VECPOP')
-        for k, v in self.keywords_list:
-            if k.startswith('**ANAL'):
-                # check .VECPOP
-                for idx, value in enumerate(v):
-                    if value.strip() == '.VECPOP':
-                        v[idx+1] = '1..oo'
-                        break
-                break
-
-        self.keywords_list.insert(-1, keywords)
-
-    @classmethod
-    def from_file(cls, filename):
-        """
-        create Inpobj from filename which can be inp file or output file of DIRAC
-        """
-        with open(filename, 'r') as f:
-            lines = f.readlines()
-
-        #start_line = re.compile(r"^Contents of the input file\s+$")
-        #end_line = re.compile(r"^Contents of the molecule file\s+$")
-
-        start_line = re.compile(r"^\*\*DIRAC\s*$")
-        end_line = re.compile(r"^\*+END .*$")
-
-        for i, l in enumerate(lines):
-            if start_line.match(l):
-                # print(l)
-                break
-        #print(i)
-        lines = lines[i:]
-        inp_lines = []
-        for l in lines:
-            if end_line.match(l):
-                inp_lines.append(l)
-                break
-
-            if len(l.strip()):
-                inp_lines.append(l)
-
-        keyword_dict = OrderedDict()
-        cur_1st_level = ''
-        #cur_2nd_level = ''
-        for l in inp_lines:
-            #l = l.strip() # yxcheng 02/15/2020
-            l = l.strip('\n')
-            if l.startswith('**'):
-                cur_1st_level = l
-                if l not in keyword_dict.keys():
-                    keyword_dict[l] = []
-            # elif l.startswith('*'):
-            #     cur_2nd_level = l
-            #     if l not in keyword_dict[cur_1st_level].keys():
-            #         keyword_dict[cur_1st_level][l] = []
-            elif l.startswith('*END'):
-                if l not in keyword_dict.keys():
-                    keyword_dict[l] = []
-            else:
-               #keyword_dict[cur_1st_level][cur_2nd_level].append(l)
-               keyword_dict[cur_1st_level].append(l)
-        return Inpobj(keyword_dict)
-
-
-class Molobj(object):
-
-    def __init__(self):
+    @property
+    @abc.abstractmethod
+    def inp(self):
+        """Inp object"""
         pass
 
-    def write_to_file(self, filename):
-        """write Molobj to a file named filename
+    @property
+    @abc.abstractmethod
+    def mol(self):
+        """Mol object
+        Returns:
         """
         pass
 
-    @classmethod
-    def from_file(cls, filename):
-        pass
+    def get_dirac_input(self):
+        return DiracInput(inp=self.inp, mol=self.mol)
 
-
-class JobType:
-    d_DOSSSS_SCF = 0
-    q_DOSSSS_SCF = 1
-    d_DOSSSS_RELCCSD = 2
-    q_DOSSSS_RELCCSD = 3
-    d_X2C_SCF =  4
-    q_X2C_SCF = 5
-    d_X2C_NOSPIN_SCF = 6
-    q_X2C_NOSPIN_SCF = 7
-    d_X2C_NOSPIN_RELCCSD = 8
-    q_X2C_NOSPIN_RELCCSD = 9
-
-
-
-class OldDiracJob:
-
-    @staticmethod
-    def get_all_input(atom_type='He', basis_type='dyall.v2z',
-                      basis_choice='BASIS',
-                      field_value=None, create_script=True, scratch_dir=None,
-                      suffix=None, calc_type=None):
-        """Create input file according atom type and basis specified by users.
+    def write_input(self, output_dir, make_dir_if_not_present=True):
         """
-        if scratch_dir is None:
-            if suffix:
-                scratch_dir = atom_type + suffix
-            else:
-                scratch_dir = atom_type
-        elif suffix:
-                basename = os.path.basename(scratch_dir)
-                dirname = os.path.dirname(scratch_dir)
-                scratch_dir = os.path.join(dirname, basename + "_"+ suffix)
-        else:
-            pass
+        Writes a set of DIRAC input to a directory.
+        Returns:
 
-        if not os.path.exists(scratch_dir):
-            os.makedirs(scratch_dir)
-
-        atom_info = Element(atom_type)
-        atom_type = atom_info.symbol
-
-        fname = atom_type + '_' + basis_type + '.mol'
-        fname = os.path.join(scratch_dir, fname)
-        get_mole_file(atom_info=atom_info, filename_out=fname,
-                      basis_type=basis_type, basis_choice=basis_choice)
-
-        # create input file of DIRAC
-        calc_type = calc_type or 0
-        calc_funcs = ['d_DOSSSS_SCF', 'q_DOSSSS_SCF',
-                      'd_DOSSSS_RELCCSD', 'q_DOSSSS_RELCCSD',
-                      'd_X2C_SCF', 'q_X2C_SCF',
-                      'd_X2C_NOSPIN_SCF', 'q_X2C_NOSPIN_SCF',
-                      'd_X2C_NOSPIN_RELCCSD', 'd_X2C_NOSPIN_RELCCSD',
-                      ]
-
-        inp_fname = atom_type + '_' + basis_type + '.inp'
-        inp_fname = os.path.join(scratch_dir, inp_fname)
-        input_from_calctype(atom_info, calc_funcs[calc_type], inp_fname)
-
-        # # create script to execute with different field values.
-        # if create_script:
-        #     field_str = []
-        #     if field_value is None:
-        #         field_str.append('+0.0000')
-        #     else:
-        #         for f in field_value:
-        #             if f > 0:
-        #                 field_str.append('+{0:.4f}'.format(f))
-        #             else:
-        #                 field_str.append('{0:.4f}'.format(f))
-
-        #     field_str = ' '.join(field_str)
-        #     # TODO: support multiple methods (post-HF)
-        #     reference_str = '' if 0.00 in field_value else '+0.0000'
-
-        #     calc_method = 'CCSD(T)'
-        #     res_fname = '_'.join(['res', atom_type,
-        #                           calc_method.replace('(', '\(').
-        #                          replace(')', '\)'),
-        #                           basis_type]) + '.dat'
-        #     script_tp = get_script(atom_type, field_str, res_fname, calc_method,
-        #                            field_value, dir_path, reference_str,
-        #                            basis_type)
-
-        #     spt_fname = 'run_{0}_{1}.sh'.format(atom_type, basis_type)
-        #     spt_fname = os.path.join(scratch_dir, spt_fname)
-        #     with open(spt_fname, 'w') as f:
-        #         f.write(script_tp)
-
-        #     # os.chmod(scratch_dir, 777)
-        #     os.chmod(spt_fname, 0o777)
-
-
-class DiracJob:
-    """A class representing a single computational job with DIRAC."""
-
-    _top = ['dirac']
-
-    def __init__(self, settings):
-        self.settings = settings
-
-
-    def get_input(self):
-        """Transform all contents of ``input`` branch of ``settings``
-        into string with blocks, subblocks, keys and values.
-
-        On the highest level alphabetic order of iteration is modified:
-        keys occuring in class attribute ``_top`` are printed first.
-        See :ref:`dirac-input` for details.
         """
-        is_empty = lambda x: isinstance(x, Settings) and len(x) == 0
+        dinput = self.get_dirac_input()
+        dinput.write_input(output_dir, make_dir_if_not_present=make_dir_if_not_present)
 
-        def parse_key(key, value):
-            ret = '.' + key.upper() + '\n'
-            if not (value is True or is_empty(value)):
-                if isinstance(value, list):
-                    for i in value:
-                        ret += str(i) + '\n'
-                else:
-                    ret += str(value) + '\n'
-            return ret
 
-        def parse_block(block):
-            enabler = '_en'
-            ret = '**' + block.upper() + '\n'
-            s = self.settings.input[block]
-            for k,v in s.items():
-                if not isinstance(v, Settings) or is_empty(v):
-                    ret += parse_key(k, v)
-            for k,v in s.items():
-                if isinstance(v, Settings) and enabler in v:
-                    ret += parse_key(k, v[enabler])
-            for k,v in s.items():
-                if isinstance(v, Settings) and len(v) > 0:
-                    ret += '*' + k.upper() + '\n'
-                    for kk,vv in v.items():
-                        if kk != enabler:
-                            ret += parse_key(kk, vv)
-            return ret
+def _load_yaml_config(fname):
+    config = loadfn(str(MODULE_DIR / ("%s.yaml" % fname)))
+    if "PARENT" in config:
+        parent_config = _load_yaml_config(config["PARENT"])
+        for k, v in parent_config.items():
+            if k not in config:
+                config[k] = v
+            elif isinstance(v, dict):
+                v_new = config.get(k, {})
+                v_new.update(v)
+                config[k] = v_new
+    return config
 
-        inp = ''
-        for block in self._top:
-            if block in self.settings.input:
-                inp += parse_block(block)
-        for block in self.settings.input:
-            if block not in self._top:
-                inp += parse_block(block)
-        inp += '*END OF INPUT\n'
+
+class DictSet(DiracInputSet):
+
+    def __init__(
+            self,
+            molecule,
+            config_dict,
+            files_to_transfer=None,
+            user_inp_settings=None,
+            user_mol_settings=None,
+            use_structure_charge=False
+    ):
+        self._molecule = molecule
+        self._config_dict = deepcopy(config_dict)
+        self.files_to_transfer = files_to_transfer or {}
+        self.user_inp_settings = user_inp_settings or {}
+        self.user_mol_settings = user_mol_settings or {}
+        self.use_molecule_charge = use_structure_charge
+
+    @property
+    def inp(self) -> Inp:
+        """
+        Returns: Inp object
+        """
+        settings = dict(self._config_dict["inp"])
+        inp = Inp(settings)
         return inp
 
+    @property
+    def molecule(self) -> Molecule:
+        return self._molecule
 
-    def get_runscript(self):
-        """Generate a runscript. Returned string is a ``pam`` call followed
-        by option flags generated based on ``self.settings.runscript.pam``
-        contents. See :ref:`dirac-runscript` for details."""
-        r = self.settings.runscript.pam
-        ret = 'pam'
-        for k,v in r.items():
-            ret += ' --%s'%k
-            if v is not True:
-                if isinstance(v, list):
-                    ret += '="%s"' % ' '.join(v)
-                else:
-                    ret += '='+str(v)
-
-        if self.settings.runscript.stdout_redirect:
-            ret += ' >'+self._filename('out')
-        ret += '\n\n'
-        return ret
-
-    def _get_ready(self):
-        """Before generating runscript and input with parent method
-        :meth:`SingleJob._get_ready<scm.plams.core.basejob.SingleJob._get_ready>`
-        add proper ``mol`` and ``inp`` entries to ``self.settings.runscript.pam``.
-        If already present there, ``mol`` will not be added.
+    @property
+    def mol(self) -> Mol:
         """
-        s = self.settings.runscript.pam
-        if 'mol' not in s:
-            s.mol = self.name+'.xyz'
-            with open(opj(self.path, self.name+'.xyz'), 'w') as f:
-                f.write(str(len(self.molecule)) + '\n\n')
-                for atom in self.molecule:
-                    suffix = 'b={block}' if hasattr(atom,'block') else ''
-                    f.write(atom.str(suffix=suffix)+'\n')
-        s.inp = self._filename('inp')
+        Returns: Mol object
+        """
+        mol = Mol(self.molecule)
+        mol_settings = dict(self._config_dict["mol"])
+        basis_type = mol_settings.get('basis_type', 'dyall.v2z')
+        mol.basis_type = basis_type
+
+        if 'basis_type' in self.user_mol_settings:
+            mol.basis_type = self.user_mol_settings['basis_type']
+        return mol
+
+    def __str__(self):
+        return self.__class__.__name__
+
+    def write_input(self, output_dir, make_dir_if_not_present=True):
+        super().write_input(
+            output_dir=output_dir,
+            make_dir_if_not_present=make_dir_if_not_present
+        )
+        for k,v in self.files_to_transfer.items():
+            shutil.copy2(v, str(Path(output_dir) / k))
+
+
+class AtomicDHFSet(DictSet):
+    CONFIG = _load_yaml_config("AtomicDHFSet")
+
+    def __init__(self, molecule, **kwargs):
+        super().__init__(molecule, AtomicDHFSet.CONFIG, **kwargs)
+        self.kwargs = kwargs
+
+
+class AtomicCCSet(AtomicDHFSet):
+    CONIFG = _load_yaml_config("AtomicCCSet")
+
+    def __init__(
+            self,
+            molecule,
+            prev_inp=None,
+            prev_mol=None,
+            **kwargs
+    ):
+        super(AtomicCCSet, self).__init__(molecule, **kwargs)
+        # self._config_dict['inp'].update()
+        if isinstance(prev_inp, str):
+            prev_inp = Inp.from_file(prev_inp)
+        if isinstance(prev_mol, str):
+            prev_mol = Mol.from_file(prev_mol)
+
+        self.prev_inp = prev_inp
+        self.prev_mol = prev_mol
+        self.kwargs = kwargs
+
+    def inp(self):
+        parent_inp = super().inp
+        inp = (
+            Inp(self.prev_inp)
+            if self.prev_inp is not None
+            else Inp(parent_inp)
+        )
+
+        inp.update(
+            {
+
+            }
+        )
+
+    def mol(self):
+        pass
 
 
 if __name__ == '__main__':
-    import sys
+    pass
+    # import sys
 
-    argv = sys.argv[1:]
+    # argv = sys.argv[1:]
 
-    relcc = ('**RELCC', ['.NEL_F1', '3 0 0 0 2 0 0 0', '.ENERGY',
-                         '.PRINT', '1', '*CCENER',
-                       '.MAXIT', '60', '.NTOL', '10'])
-    # inactivate = (closed_elec - elec_in_gas)//2
-    # gas1 = '10 12 / 6' # for elements from third row
-    # gas2 = '{0} {1} / 3'.format(open_elec+10, open_elec+12) # for p open-shell orbit
-    # gas3 = '{0} {1} / {2}'.format(open_elec+12, open_elec+12, nb_virtual)
-    # krci = ('*KRCICALC',['.CI PROGRAM', 'LUCIAREL','.INACTIVE',inactivate,
-    #                      '.GAS SHELLS',3, gas1,gas2,gas3,'.CIROOTS',ciroot1,'.CIROOTS',ciroot2,'.MAX CI','120', '.MXCIVE','60','.ANALYZ','.RSTRCI','rstr','.CHECKP'])
-    for f in argv:
-        inp = Inpobj.from_file(f)
-        inp.add_keywords(relcc)
-        # inp.add_keywords(krci)
-        inp.write_to_file('tmp_B.inp')
+    # relcc = ('**RELCC', ['.NEL_F1', '3 0 0 0 2 0 0 0', '.ENERGY',
+    #                      '.PRINT', '1', '*CCENER',
+    #                    '.MAXIT', '60', '.NTOL', '10'])
+    # # inactivate = (closed_elec - elec_in_gas)//2
+    # # gas1 = '10 12 / 6' # for elements from third row
+    # # gas2 = '{0} {1} / 3'.format(open_elec+10, open_elec+12) # for p open-shell orbit
+    # # gas3 = '{0} {1} / {2}'.format(open_elec+12, open_elec+12, nb_virtual)
+    # # krci = ('*KRCICALC',['.CI PROGRAM', 'LUCIAREL','.INACTIVE',inactivate,
+    # #                      '.GAS SHELLS',3, gas1,gas2,gas3,'.CIROOTS',ciroot1,'.CIROOTS',ciroot2,'.MAX CI','120', '.MXCIVE','60','.ANALYZ','.RSTRCI','rstr','.CHECKP'])
+    # for f in argv:
+    #     inp = Inpobj.from_file(f)
+    #     inp.add_keywords(relcc)
+    #     # inp.add_keywords(krci)
+    #     inp.write_to_file('tmp_B.inp')
+
+    def main():
+        import os
+        molecule = Molecule(['H'], [[0.0,0., 0.]])
+        dhf = AtomicDHFSet(molecule=molecule, user_mol_settings={"basis_type":'dyall.acv4z'})
+        print(dhf.inp)
+
+        module_dir = os.path.dirname(os.path.abspath(__file__))
+        data_dir = os.path.abspath(os.path.join(module_dir,'../unit_tests/', 'data'))
+        dhf.write_input(output_dir=os.path.join(data_dir, 'dirac_input'), make_dir_if_not_present=True)
+
+    main()
