@@ -29,8 +29,6 @@ from monty.os import cd
 from pydirac import SETTINGS, __version__
 from pydirac.core.settings import Settings
 from pydirac.core.molecule import Molecule
-from pydirac.utility.config import get_mol_by_custom_basis, \
-    get_mol_by_default_basis
 from pydirac.core.periodic_table import Element
 
 
@@ -398,6 +396,8 @@ class Inp(dict, MSONable):
                 key = m.group(1)
                 if key.upper() not in self._allowed_duplicated_list:
                     raise RuntimeError('Duplicated key does not support!')
+            if value is False:
+                return ''
             ret = '.' + key.upper() + '\n'
             if not (value is True or is_empty(value)):
                 if isinstance(value, list):
@@ -581,10 +581,11 @@ class Inp(dict, MSONable):
                 warnings.warn('this is not finite-field calculations')
                 self._calc_type = 'non_finite_field'
         else:
-            if self._has_hamiltonian:
-                warnings.warn('Hamiltonian is invalid, dir')
-            else:
-                warnings.warn('".OPERATOR" is not in Hamiltonian')
+            if not self._has_hamiltonian:
+                warnings.warn('Hamiltonian is invalid')
+            elif not 'OPERATOR' in inp_settings.hamiltonian:
+                warnings.warn('".OPERATOR" is not in Hamiltonian, this is not finit-field calculation!')
+                pass
             self._calc_type = 'non_finite_field'
 
         # check electric field
@@ -593,8 +594,7 @@ class Inp(dict, MSONable):
             pos = inp_settings.hamiltonian.operator.index(' COMFACTOR')
             self._electric_field = inp_settings.hamiltonian.operator[pos+1]
         else:
-            warnings.warn('Did not find electric field, '
-                          'dir:')
+            # warnings.warn('Did not find electric field')
             self._electric_field = 'null'
 
     def find_case(self, key):
@@ -644,6 +644,7 @@ class Mol(MSONable):
     """Class to represent DIRAC Mol file
 
     """
+    _basis_info_line = 2
 
     def __init__(
             self,
@@ -793,7 +794,7 @@ class Mol(MSONable):
                 continue
 
         if basis_type is None:
-            basis_type = context[4].strip()
+            basis_type = context[Mol._basis_info_line].strip()
         basis_type = basis_type
         # TODO: we are doing atomic calculation
         assert nb_atoms == 1
@@ -802,7 +803,8 @@ class Mol(MSONable):
 
     @staticmethod
     def get_string(atom_info: Element, basis_type: str,
-                      basis_lib: str = 'BASIS', ) -> None:
+                      basis_lib: str = 'BASIS', ) -> str:
+
         atom_index = atom_info.Z
         atom_type = atom_info.symbol
 
@@ -813,18 +815,49 @@ class Mol(MSONable):
         if basis_lib == 'EXPLICIT':
             with open('basis/{0}.dat'.format(atom_type), 'r') as f:
                 basis_info = f.read()
-            template = get_mol_by_custom_basis(atom_type, atom_index,
+            template = Mol.get_mol_by_custom_basis(atom_type, atom_index,
                                                basis_lib, basis_info)
         elif basis_lib == 'BASIS':
-            template = get_mol_by_default_basis(atom_type, atom_index,
+            template = Mol.get_mol_by_default_basis(atom_type, atom_index,
                                                 basis_type)
         else:
             raise TypeError('Basis type should be "BASIS" or "EXPLICIT" '
                             'for builtin basis or custom basis.')
         return template
 
+    @staticmethod
+    def get_mol_by_custom_basis(atom_type, atom_index, basis_choice,
+                                basis_info):
+        template = """INTGRL
+{atom} atom
+{basis}
+C   1    2  X  Y
+    {elec}.    1
+{atom}    0.0000000000        0.0000000000        0.0000000000
+{basis_info}
+""".format(**{'atom': atom_type, 'elec': atom_index, 'basis': basis_choice,
+                  'basis_info': basis_info})
+        return template
+
+    @staticmethod
+    def get_mol_by_default_basis(atom_type, atom_index, basis_type):
+        template = """INTGRL
+{atom} atom
+{basis}
+C   1    2  X  Y
+    {elec}.    1
+{atom}    0.0000000000        0.0000000000        0.0000000000
+LARGE BASIS {basis}
+FINISH
+
+""".format(**{'atom': atom_type, 'elec': atom_index, 'basis': basis_type})
+        return template
+
     def __str__(self):
         basis_type = self.basis_type or 'null'
+        if self.basis_lib == 'EXPLICIT':
+            warnings.warn('No implement {0} yet'.format(self.basis_lib))
+            pass
         return Mol.get_string(self.molecule.atomic_info, basis_type)
 
     def write_file(self, filename=None):
@@ -833,11 +866,14 @@ class Mol(MSONable):
                     self.basis_type + '.mol'
             with open(fname, 'w') as f:
                 basis_type = self.basis_type or 'null'
-                f.write(Mol.get_string(self.molecule.atomic_info.Z, basis_type))
+                f.write(Mol.get_string(self.molecule.atomic_info, basis_type))
         else:
             raise NotImplementedError('For many-atoms molecule, '
                                       'it has not been implemented yet! ')
 
+    def update(self, new_dict):
+        for k,v in new_dict.items():
+            setattr(self, k, v)
 
 if __name__ == '__main__':
     # setting = parse_dirac_input()

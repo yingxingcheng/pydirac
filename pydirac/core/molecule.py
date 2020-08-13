@@ -19,9 +19,7 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-import re
-import warnings
-from monty.json import MSONable, jsanitize
+from monty.json import MSONable
 from pydirac.core.periodic_table import Element
 
 

@@ -38,7 +38,7 @@ from pydirac.analysis.polarizability import PolarizabilityCalculator
 
 def get_polarizability(dirname: str = './',
                        calc_dir_patters=None,
-                       deepth: int =0, verbos=True) -> None:
+                       deepth: int =0, verbos=True) -> dict:
     """Get polarizability from a directory
 
     A calculation directory may contain some information as followings:
@@ -76,6 +76,7 @@ def get_polarizability(dirname: str = './',
     if verbos:
         print('cd {0}'.format(dirname))
 
+    all_res = {}
     curr_dir_output_lis = []
     calc_dir_output_lis = []
     with cd(dirname):
@@ -117,18 +118,28 @@ def get_polarizability(dirname: str = './',
         if is_valid(calc_dir_output_lis):
             do_clc_dir = True
 
+        all_res['curr_dir'] = {}
         if do_curr_dir:
-            get_polarizability_from_output_list(dirname, curr_dir_output_lis, tag='curr_dir')
+            e_dict = get_polarizability_from_output_list(dirname, curr_dir_output_lis, tag='curr_dir')
+            all_res['curr_dir'] = e_dict
+
+        all_res['calc_dir'] = {}
         if do_clc_dir:
-            get_polarizability_from_output_list(dirname, calc_dir_output_lis, tag='clc_dir')
+            e_dict = get_polarizability_from_output_list(dirname, calc_dir_output_lis, tag='clc_dir')
+            all_res['calc_dir'] = e_dict
 
         # Step 3. deal with all sub_dir
+        all_res['sub_dir'] = {}
         if do_sub_dir:
             sub_dirs = [d for d in glob.glob('*') if os.path.isdir(d)
                         and d not in clc_dirs]
 
             for sd in sub_dirs:
-                get_polarizability(os.path.join(dirname, sd), calc_dir_patters, deepth-1)
+                res = get_polarizability(os.path.join(dirname, sd), calc_dir_patters, deepth-1)
+                if sd not in all_res['sub_dir'] and len(res) > 0:
+                    all_res['sub_dir'][os.path.basename(sd)] = res
+    return all_res
+
 
 
 def get_polarizability_from_output_list(dirname, output_lis, tag=None):
@@ -162,14 +173,14 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
             if o.inp.calc_type != calc_type:
                 warnings.warn('we found a error output whose calc_type {0} is '
                               'different with the first one {1}'.format(
-                    o.calc_type, calc_type))
+                    o.inp.calc_type, calc_type))
                 continue
 
             # TODO: different calc formula for CC and CI
             # check CC or CI
             if o.inp.calc_method not in ['CC', 'CI']:
                 warnings.warn('This calculation {0} does not belong any '
-                              'method "CC" or "CI".'.format(o.calc_method))
+                              'method "CC" or "CI".'.format(o.inp.calc_method))
                 continue
 
             # CC or CI
@@ -242,6 +253,7 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
             print('  {0:<20s} {1:<20.3f} {2:<20.3f}'.format(i_k.strip('_e'), i_v[0], i_v[1]))
         print('='*80)
         print()
+    return e_res
 
 
 def is_valid(output_lis, verbos=False):

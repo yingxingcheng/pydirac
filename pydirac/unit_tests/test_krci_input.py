@@ -25,7 +25,7 @@ import os
 
 from pydirac.core.molecule import Molecule
 from pydirac.io.outputs import Output
-from pydirac.io.krci import get_atomic_mrci_inp
+from pydirac.io.sets import AtomicCISet
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
@@ -42,7 +42,9 @@ def test_write_file():
     print(atom.nb_closed_elec(), atom.nb_open_elec())
     print(atom.as_dict())
 
-    fout = os.path.join(data_dir, 'PYDIRAC.inp')
-    get_atomic_mrci_inp(fname, fout)
+    #fout = os.path.join(data_dir, 'PYDIRAC.inp')
+    ci_set = AtomicCISet.from_prev_dhf_calc(fname)
+    print(ci_set.inp)
+    print(ci_set.mol)
 
 test_write_file()
