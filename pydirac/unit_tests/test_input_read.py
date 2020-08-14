@@ -22,7 +22,6 @@
 from pydirac.io.inputs import Inp
 # from pydirac.io.sets import DiracJob
 import os
-from pydirac.core.settings import Settings
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(module_dir, 'data'))
@@ -31,17 +30,7 @@ dirac_inp = os.path.join(data_dir, 'tmp.inp')
 
 def test_read_func():
     input = Inp.from_file(dirac_inp)
-    # input['ANALYZE']['MULPOP']['VECPOP'] = 22
-    # input['ANALYZE']['MULPOP']['vecpop_id_01'] = 22
     print(input['WAVE FUNCTIONS']['KRCICALC']['CIROOTS'])
     print(input)
-    # print(Settings(input))
-    #print(DiracJob(input).get_input())
-    #print(Settings(input))
-    #input.write_file('tmp2.inp')
-    # print(Settings(input))
-    # print(setting.as_dict())
-    # job = DiracJob(settings=setting)
-    # print(job)
 
 test_read_func()

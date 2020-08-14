@@ -42,6 +42,7 @@ from monty.json import MSONable
 from pydirac.io.inputs import DiracInput, Mol, Inp
 from pydirac.io.outputs import Output
 from pydirac.core.molecule import Molecule
+from pydirac.core.settings import Settings
 
 
 dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -282,45 +283,35 @@ class AtomicCCSet(AtomicDHFSet):
         parent_inp = super().inp
         inp = self.prev_inp if self.prev_inp is not None else parent_inp
 
-        if 'RELCC' in inp and 'NOSDT' in inp['RELCC']:
-            pre_nosdt = True
-        else:
-            pre_nosdt = False
-        if self.no_T is None:
-            nosdt = pre_nosdt
-        else:
-            nosdt = self.no_T
+        s = Settings(inp)
+        # no matter whether previous inp has 4index
+        s.dirac['4INDEX'] = True
+        s[inp.wf_tag].relccsd = True
+        s.integrals.readinp.uncontract = True
+        if 'active' not in s.moltra:
+            s.moltra.active = '{0} {1} {2}'.format(
+                self.e_min, self.e_max, self.e_error)
 
-        inp['DIRAC']['4INDEX'] = True
-        inp[inp.wf_tag].update({'RELCCSD': True})
-        inp.update(
-            {
-                'MOLTRA': {
-                    'ACTIVE': '{0} {1} {2}'.format(
-                    self.e_min, self.e_max, self.e_error)
-                },
-                'RELCC': {
-                    'ENERGY': True,
-                    'PRINT': self.print_level,
-                    'CCENER': True,
-                    'MAXIT': self.maxit,
-                    'NTOL': self.ntol,
-                    'NOSDT': nosdt
-                }
-            }
-        )
+        # RELCC setup
+        relcc = Settings()
+        relcc.energy = True
+        relcc.print = self.print_level
+        relcc.ccener = True
+        relcc.maxit = self.maxit
+        relcc.ntol = self.ntol
+        if 'nosdt' not in s.relcc and self.no_T is True:
+            relcc.nosdt = self.no_T
+
         nelec = self.nelec_open or self.nelec
         if nelec and len(nelec):
-            inp['RELCC'].update({'NELEC':' '.join([str(i) for i in nelec])})
-
+            relcc.nelec = ' '.join([str(i) for i in nelec])
         if self.nel_f1 and len(self.nel_f1):
-            inp['RELCC'].pop('NELEC', None)
-            inp['RELCC'].update({'NEL_F1':' '.join([str(i) for i in self.nel_f1])})
-
+            relcc.nel_f1 = ' '.join([str(i) for i in self.nel_f1])
         if self.nel_f2 and len(self.nel_f2):
-            inp['RELCC'].pop('NELEC', None)
-            inp['RELCC'].update({'NEL_F2':' '.join([str(i) for i in self.nel_f2])})
-
+            relcc.nel_f2 = ' '.join([str(i) for i in self.nel_f1])
+        s.relcc = relcc
+        # update RELCC setup
+        inp.update(s.as_dict())
         inp.update(self.user_inp_settings)
         return inp
 
@@ -377,11 +368,48 @@ class AtomicCISet(AtomicDHFSet):
 
     @property
     def inp(self):
-        parent_inp = super().inp
-        inp = self.prev_inp if self.prev_inp is not None else parent_inp
+        inp = super().inp
 
-        # TODO: basic CI setup
+        # Step 1: the default KRCI setup
+        s = Settings(inp)
+        # s.dirac.analyze = True
+        # wf_tag = inp.wf_tag or 'WAVE FUNCTIONS'
+        # s.dirac[wf_tag] = True
+        # s.analyze.mulpop._en = True
+        # s.analyze.mulpop.vecpop = '1..oo'
+        # s.integrals.readinp = 'uncontract'
 
+        # wave_func = Settings()
+        # wave_func['KR CI'] = True
+        # wave_func.resolve = True
+        # s[wf_tag] = wave_func
+
+        # krci = Settings()
+        # krci['CI PROGRAM'] = 'LUCIAREL'
+        # # TODO: for different elements, the krci setup is different
+        # # krci.inactive = 1
+        # # krci['GAS SHELLS'] = [3, '0 2 / 1', '1 3 / 3', '3 3 / 10']
+        # krci['MAX CI'] = 60
+        # krci['NOOCCN'] = True
+        # krci.nooccn = True
+        # krci.rstrci = 0
+        # # TODO: for different element, the number of roots is also different
+        # krci['CIROOTS_id_0'] = '3  3'
+        # krci['CIROOTS_id_1'] = '4  3'
+        # s[wf_tag].krcicalc = krci
+        inp.update(s.as_dict())
+
+        # Step 2: if the previous inp exist, we use the previous one
+        if self.prev_inp:
+            #pre_s = Settings(self.prev_inp)
+            # print(pre_s)
+            #inp.update(pre_s.as_dict())
+            inp = self.prev_inp
+        else:
+            warnings.warn('For KRCI module, more detail need to be considered')
+            return None
+
+        # Step 3: user setting
         inp.update(self.user_inp_settings)
         return inp
 
@@ -770,7 +798,7 @@ class AtomicCISet(AtomicDHFSet):
         out = Output(filename_input)
         out.parse_orbit()
         atom = out.mol.molecule
-        print(atom.is_atom)
+        # print(atom.is_atom)
 
         if not atom.is_atom:
             warnings.warn('This is not an atomic calculation!')
@@ -792,7 +820,7 @@ class AtomicCISet(AtomicDHFSet):
         else:
             raise RuntimeError('Unknown block element!')
 
-        print('total number electrons is {0}'.format(atom.atomic_info.Z))
+        # print('total number electrons is {0}'.format(atom.atomic_info.Z))
         inactivate = (atom.atomic_info.Z - nb_active_elec) // 2
         nb_gas_shell = len(gas_list)
         nb_root_sym = len(root_list)

@@ -19,6 +19,9 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+# NOTE: this file is from ACM palm package, please reference it if you use this
+#       class in you project.
+
 import textwrap
 import contextlib
 from functools import wraps
@@ -38,9 +41,12 @@ class Settings(dict):
 
     Iteration follows lexicographical order (via :func:`sorted` function)
 
-    Methods for displaying content (:meth:`~object.__str__` and :meth:`~object.__repr__`) are overridden to recursively show nested instances in easy-readable format.
+    Methods for displaying content (:meth:`~object.__str__` and
+    :meth:`~object.__repr__`) are overridden to recursively show nested
+    instances in easy-readable format.
 
-    Regular dictionaries (also multi-level ones) used as values (or passed to the constructor) are automatically transformed to |Settings| instances::
+    Regular dictionaries (also multi-level ones) used as values (or passed to
+    the constructor) are automatically transformed to |Settings| instances::
 
         >>> s = Settings({'a': {1: 'a1', 2: 'a2'}, 'b': {1: 'b1', 2: 'b2'}})
         >>> s.a[3] = {'x': {12: 'q', 34: 'w'}, 'y': 7}
@@ -64,13 +70,21 @@ class Settings(dict):
             if isinstance(v, dict) and not isinstance(v, Settings):
                 self[k] = Settings(v)
             if isinstance(v, list):
-                self[k] = [Settings(i) if (isinstance(i, dict) and not isinstance(i, Settings)) else i for i in v]
+                self[k] = [Settings(i) if (isinstance(i, dict) and not
+                isinstance(i, Settings)) else i for i in v]
 
 
     def copy(self):
-        """Return a new instance that is a copy of this one. Nested |Settings| instances are copied recursively, not linked.
+        """Return a new instance that is a copy of this one. Nested |Settings|
+        instances are copied recursively, not linked.
 
-        In practice this method works as a shallow copy: all "proper values" (leaf nodes) in the returned copy point to the same objects as the original instance (unless they are immutable, like ``int`` or ``tuple``). However, nested |Settings| instances (internal nodes) are copied in a deep-copy fashion. In other words, copying a |Settings| instance creates a brand new "tree skeleton" and populates its leaf nodes with values taken directly from the original instance.
+        In practice this method works as a shallow copy: all "proper values"
+        (leaf nodes) in the returned copy point to the same objects as the
+        original instance (unless they are immutable, like ``int`` or ``tuple``).
+        However, nested |Settings| instances (internal nodes) are copied in a
+        deep-copy fashion. In other words, copying a |Settings| instance creates
+        a brand new "tree skeleton" and populates its leaf nodes with values
+        taken directly from the original instance.
 
         This behavior is illustrated by the following example::
 
@@ -112,9 +126,11 @@ class Settings(dict):
 
 
     def soft_update(self, other):
-        """Update this instance with data from *other*, but do not overwrite existing keys. Nested |Settings| instances are soft-updated recursively.
+        """Update this instance with data from *other*, but do not overwrite
+        existing keys. Nested |Settings| instances are soft-updated recursively.
 
-        In the following example ``s`` and ``o`` are previously prepared |Settings| instances::
+        In the following example ``s`` and ``o`` are previously prepared
+        |Settings| instances::
 
             >>> print(s)
             a:  AA
@@ -138,7 +154,8 @@ class Settings(dict):
               y2:   XY2
               y3:   O_XY3
 
-        *Other* can also be a regular dictionary. Of course in that case only top level keys are updated.
+        *Other* can also be a regular dictionary. Of course in that case only
+        top level keys are updated.
 
         Shortcut ``A += B`` can be used instead of ``A.soft_update(B)``.
         """
@@ -155,7 +172,8 @@ class Settings(dict):
 
 
     def update(self, other):
-        """Update this instance with data from *other*, overwriting existing keys. Nested |Settings| instances are updated recursively.
+        """Update this instance with data from *other*, overwriting existing keys.
+        Nested |Settings| instances are updated recursively.
 
         In the following example ``s`` and ``o`` are previously prepared |Settings| instances::
 
@@ -181,7 +199,8 @@ class Settings(dict):
               y2:   XY2
               y3:   O_XY3
 
-        *Other* can also be a regular dictionary. Of course in that case only top level keys are updated.
+        *Other* can also be a regular dictionary.
+        Of course in that case only top level keys are updated.
         """
         for name in other:
             if isinstance(other[name], Settings):
@@ -195,7 +214,8 @@ class Settings(dict):
 
 
     def merge(self, other):
-        """Return new instance of |Settings| that is a copy of this instance soft-updated with *other*.
+        """Return new instance of |Settings| that is a copy of this
+        instance soft-updated with *other*.
 
         Shortcut ``A + B`` can be used instead of ``A.merge(B)``.
         """
@@ -206,7 +226,9 @@ class Settings(dict):
 
 
     def find_case(self, key):
-        """Check if this instance contains a key consisting of the same letters as *key*, but possibly with different case. If found, return such a key. If not, return *key*.
+        """Check if this instance contains a key consisting of the same letters
+        as *key*, but possibly with different case. If found, return such a key.
+        If not, return *key*.
         """
         if not isinstance(key, str):
             return key
@@ -219,7 +241,8 @@ class Settings(dict):
 
 
     def as_dict(self):
-        """Return a copy of this instance with all |Settings| replaced by regular Python dictionaries.
+        """Return a copy of this instance with all |Settings| replaced by
+        regular Python dictionaries.
         """
         d = {}
         for k, v in self.items():
@@ -235,12 +258,16 @@ class Settings(dict):
 
     @classmethod
     def suppress_missing(cls):
-        """A context manager for temporary disabling the :meth:`.Settings.__missing__` magic method: all calls now raising a :exc:`KeyError`.
+        """A context manager for temporary disabling the :meth:`.Settings.__missing__`
+        magic method: all calls now raising a :exc:`KeyError`.
 
-        As a results, attempting to access keys absent from an arbitrary |Settings| instance will raise a :exc:`KeyError`, thus reverting to the default dictionary behaviour.
+        As a results, attempting to access keys absent from an arbitrary |Settings|
+        instance will raise a :exc:`KeyError`, thus reverting to the default
+        dictionary behaviour.
 
         .. note::
-            The :meth:`.Settings.__missing__` method is (temporary) suppressed at the class level to ensure consistent invocation by the Python interpreter.
+            The :meth:`.Settings.__missing__` method is (temporary) suppressed
+            at the class level to ensure consistent invocation by the Python interpreter.
             See also `special method lookup`_.
 
         Example:
@@ -264,11 +291,15 @@ class Settings(dict):
 
 
     def get_nested(self, key_tuple, suppress_missing=False):
-        """Retrieve a nested value by, recursively, iterating through this instance using the keys in *key_tuple*.
+        """Retrieve a nested value by, recursively, iterating through this
+        instance using the keys in *key_tuple*.
 
-        The :meth:`.Settings.__getitem__` method is called recursively on this instance until all keys in key_tuple are exhausted.
+        The :meth:`.Settings.__getitem__` method is called recursively on this
+        instance until all keys in key_tuple are exhausted.
 
-        Setting *suppress_missing* to ``True`` will internally open the :meth:`.Settings.suppress_missing` context manager, thus raising a :exc:`KeyError` if a key in *key_tuple* is absent from this instance.
+        Setting *suppress_missing* to ``True`` will internally open the :meth:`.
+        Settings.suppress_missing` context manager, thus raising a :exc:`KeyError`
+        if a key in *key_tuple* is absent from this instance.
 
         .. code:: python
 
@@ -287,12 +318,17 @@ class Settings(dict):
 
 
     def set_nested(self, key_tuple, value, suppress_missing=False):
-        """Set a nested value by, recursively, iterating through this instance using the keys in *key_tuple*.
+        """Set a nested value by, recursively, iterating through this instance
+        using the keys in *key_tuple*.
 
-        The :meth:`.Settings.__getitem__` method is called recursively on this instance, followed by :meth:`.Settings.__setitem__`, until all keys in key_tuple are exhausted.
+        The :meth:`.Settings.__getitem__` method is called recursively on this
+        instance, followed by :meth:`.Settings.__setitem__`, until all keys in
+        key_tuple are exhausted.
 
 
-        Setting *suppress_missing* to ``True`` will internally open the :meth:`.Settings.suppress_missing` context manager, thus raising a :exc:`KeyError` if a key in *key_tuple* is absent from this instance.
+        Setting *suppress_missing* to ``True`` will internally open the :meth:`.
+        Settings.suppress_missing` context manager, thus raising a :exc:`KeyError`
+        if a key in *key_tuple* is absent from this instance.
 
         .. code:: python
 
@@ -314,11 +350,13 @@ class Settings(dict):
     def flatten(self, flatten_list=True):
         """Return a flattened copy of this instance.
 
-        New keys are constructed by concatenating the (nested) keys of this instance into tuples.
+        New keys are constructed by concatenating the (nested) keys of this
+        instance into tuples.
 
         Opposite of the :meth:`.Settings.unflatten` method.
 
-        If *flatten_list* is ``True``, all nested lists will be flattened as well. Dictionary keys are replaced with list indices in such case.
+        If *flatten_list* is ``True``, all nested lists will be flattened as well.
+        Dictionary keys are replaced with list indices in such case.
 
         .. code-block:: python
 
@@ -344,7 +382,8 @@ class Settings(dict):
             # Switch from Settings.items() to enumerate() if a list is encountered
             for k, v in iter_type(sequence):
                 k = key_ret + (k, )
-                if isinstance(v, nested_type) and v:  # Empty lists or Settings instances will return ``False``
+                if isinstance(v, nested_type) and v:
+                    # Empty lists or Settings instances will return ``False``
                     _concatenate(k, v)
                 else:
                     ret[k] = v
@@ -359,9 +398,11 @@ class Settings(dict):
     def unflatten(self, unflatten_list=True):
         """Return a nested copy of this instance.
 
-        New keys are constructed by expanding the keys of this instance (*e.g.* tuples) into new nested |Settings| instances.
+        New keys are constructed by expanding the keys of this instance
+        (*e.g.* tuples) into new nested |Settings| instances.
 
-        If *unflatten_list* is ``True``, integers will be interpretted as list indices and are used for creating nested lists.
+        If *unflatten_list* is ``True``, integers will be interpreted as list
+        indices and are used for creating nested lists.
 
         Opposite of the :meth:`.Settings.flatten` method.
 
@@ -400,21 +441,25 @@ class Settings(dict):
 
 
     def __iter__(self):
-        """Iteration through keys follows lexicographical order. All keys are sorted as if they were strings."""
+        """Iteration through keys follows lexicographical order. All keys are
+        sorted as if they were strings."""
         return iter(sorted(self.keys(), key=str))
 
 
     def __missing__(self, name):
-        """When requested key is not present, add it with an empty |Settings| instance as a value.
+        """When requested key is not present, add it with an empty |Settings|
+        instance as a value.
 
-        This method is essential for automatic insertions in deeper levels. Without it things like::
+        This method is essential for automatic insertions in deeper levels.
+        Without it things like::
 
             >>> s = Settings()
             >>> s.a.b.c = 12
 
         will not work.
 
-        The behaviour of this method can be suppressed by initializing the :class:`.Settings.suppress_missing` context manager.
+        The behaviour of this method can be suppressed by initializing the
+        :class:`.Settings.suppress_missing` context manager.
         """
         self[name] = Settings()
         return self[name]
@@ -431,7 +476,8 @@ class Settings(dict):
 
 
     def __setitem__(self, name, value):
-        """Like regular ``__setitem__``, but ignore the case and if the value is a dict, convert it to |Settings|."""
+        """Like regular ``__setitem__``, but ignore the case and if the value
+        is a dict, convert it to |Settings|."""
         if isinstance(value, dict) and not isinstance(value, Settings):
             value = Settings(value)
         dict.__setitem__(self, self.find_case(name), value)
@@ -466,7 +512,8 @@ class Settings(dict):
 
 
     def _str(self, indent):
-        """Print contents with *indent* spaces of indentation. Recursively used for printing nested |Settings| instances with proper indentation."""
+        """Print contents with *indent* spaces of indentation. Recursively used
+        for printing nested |Settings| instances with proper indentation."""
         ret = ''
         for key, value in self.items():
             ret += ' '*indent + str(key) + ': \t'
@@ -491,7 +538,8 @@ class Settings(dict):
 
 
 class SuppressMissing(contextlib.AbstractContextManager):
-    """A context manager for temporary disabling the :meth:`.Settings.__missing__` magic method. See :meth:`Settings.suppress_missing` for more details."""
+    """A context manager for temporary disabling the :meth:`.Settings.__missing__`
+    magic method. See :meth:`Settings.suppress_missing` for more details."""
     def __init__(self, obj: type):
         """Initialize the :class:`SuppressMissing` context manager."""
         # Ensure that obj is a class, not a class instance
@@ -499,7 +547,8 @@ class SuppressMissing(contextlib.AbstractContextManager):
         self.missing = obj.__missing__
 
     def __enter__(self):
-        """Enter the :class:`SuppressMissing` context manager: delete :meth:`.Settings.__missing__` at the class level."""
+        """Enter the :class:`SuppressMissing` context manager: delete
+        :meth:`.Settings.__missing__` at the class level."""
         @wraps(self.missing)
         def __missing__(self, name): raise KeyError(name)
 
@@ -507,5 +556,6 @@ class SuppressMissing(contextlib.AbstractContextManager):
         setattr(self.obj, '__missing__', __missing__)
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """Exit the :class:`SuppressMissing` context manager: reenable :meth:`.Settings.__missing__` at the class level."""
+        """Exit the :class:`SuppressMissing` context manager: reenable
+        :meth:`.Settings.__missing__` at the class level."""
         setattr(self.obj, '__missing__', self.missing)

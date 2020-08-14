@@ -27,6 +27,16 @@ from setuptools import setup, find_packages
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
+def package_files(directory, extensions):
+    """Walk package directory to make sure we include all relevant files in package."""
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            if any([filename.endswith(ext) for ext in extensions]):
+                paths.append(os.path.join('..', path, filename))
+    return paths
+json_yaml_csv_files = package_files('pydirac', ['yaml', 'json', 'csv'])
+
 if __name__ == "__main__":
     print(module_dir)
     setup(
@@ -39,7 +49,7 @@ if __name__ == "__main__":
         author_email='Yingxing.Cheng@ugent.be',
         license='GNU',
         packages=find_packages(),
-        #package_data={'pygace': ['examples/*']},
+        package_data={'pydirac': json_yaml_csv_files},
         zip_safe=False,
         install_requires=[],
         extras_require={},

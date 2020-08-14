@@ -76,7 +76,7 @@ class TestAtomicCCSet(TestCase):
     def test_from_prev_calc(self):
         output = str(Path(
             MOUDLE_DIR) / '../../unit_tests/data/Rn_q_so/d-aug-dyall.acv3z_+0.00001')
-        print(output)
+        #print(output)
         new_cc = AtomicCCSet.from_prev_calc(output, no_scf=True,
                                             user_mol_settings={
                                                 'basis_type': 's-aug-ANO-RCC'})
@@ -104,12 +104,11 @@ class TestAtomicCISet(TestCase):
         fname = os.path.join(DATA_DIR, 'Cu_DHF.out')
         out = Output(fname)
         atom = out.parse_orbit()
-        print(atom.as_dict())
-        print(atom.nb_closed_elec(), atom.nb_open_elec())
-        print(atom.as_dict())
+        #print(atom.as_dict())
+        #print(atom.nb_closed_elec(), atom.nb_open_elec())
+        #print(atom.as_dict())
 
         # fout = os.path.join(DATA_DIR, 'PYDIRAC.inp')
         ci_set = AtomicCISet.from_prev_dhf_calc(fname)
         print(ci_set.inp)
         print(ci_set.mol)
-        ci_set.mol.write_file('hhhhh.mol')

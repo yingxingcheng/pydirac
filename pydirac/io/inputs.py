@@ -584,7 +584,7 @@ class Inp(dict, MSONable):
             if not self._has_hamiltonian:
                 warnings.warn('Hamiltonian is invalid')
             elif not 'OPERATOR' in inp_settings.hamiltonian:
-                warnings.warn('".OPERATOR" is not in Hamiltonian, this is not finit-field calculation!')
+                # warnings.warn('".OPERATOR" is not in Hamiltonian, this is not finit-field calculation!')
                 pass
             self._calc_type = 'non_finite_field'
 

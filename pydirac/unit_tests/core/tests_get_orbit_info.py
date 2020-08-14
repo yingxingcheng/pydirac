@@ -38,11 +38,11 @@
 #
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-from pydirac.core.molecule import Molecule
-from pydirac.core.molecular_orbitals import AtomicOrbital
 import os
 from pathlib import Path
 from monty.os import cd
+from pydirac.io.outputs import Output
+from pydirac.core.settings import Settings
 
 
 module_dir = Path(__file__).parent.parent.resolve()
@@ -56,11 +56,12 @@ def test_get_orbital_info():
     # fname = os.path.join(data_dir, 'Kr_DHF.out')
     with cd(os.path.join(data_dir,'Li')):
         for f in ['Li_D-CC-SR.out', 'Li_D-CC-SO.out']:
-            mol = Molecule.from_file(filename=f)
-            for ao in mol.aos:
-                print(ao)
-            print(mol.nao(-10, 10))
-            print(mol.nb_closed_ao(-10, 10))
-            print(mol.nb_open_ao(-10, 10))
-            print(mol.nb_virtual_ao(-10, 10))
+            out = Output(filename=f)
+            out.parse_orbit()
+            print(Settings(out.mos.as_dict()))
+            print(out.mos.nao(-10, 10))
+            print(out.mos.nb_closed_ao(-10, 10))
+            print(out.mos.nb_open_ao(-10, 10))
+            print(out.mos.nb_virtual_ao(-10, 10))
 
+test_get_orbital_info()
