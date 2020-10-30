@@ -120,12 +120,14 @@ def get_polarizability(dirname: str = './',
 
         all_res['curr_dir'] = {}
         if do_curr_dir:
-            e_dict = get_polarizability_from_output_list(dirname, curr_dir_output_lis, tag='curr_dir')
+            e_dict = get_polarizability_from_output_list(
+                dirname, curr_dir_output_lis, tag='curr_dir', verbos=verbos)
             all_res['curr_dir'] = e_dict
 
         all_res['calc_dir'] = {}
         if do_clc_dir:
-            e_dict = get_polarizability_from_output_list(dirname, calc_dir_output_lis, tag='clc_dir')
+            e_dict = get_polarizability_from_output_list(
+                dirname, calc_dir_output_lis, tag='clc_dir', verbos=verbos)
             all_res['calc_dir'] = e_dict
 
         # Step 3. deal with all sub_dir
@@ -135,14 +137,16 @@ def get_polarizability(dirname: str = './',
                         and d not in clc_dirs]
 
             for sd in sub_dirs:
-                res = get_polarizability(os.path.join(dirname, sd), calc_dir_patters, deepth-1)
+                res = get_polarizability(
+                    os.path.join(dirname, sd),
+                    calc_dir_patters, deepth-1, verbos=verbos)
                 if sd not in all_res['sub_dir'] and len(res) > 0:
                     all_res['sub_dir'][os.path.basename(sd)] = res
     return all_res
 
 
 
-def get_polarizability_from_output_list(dirname, output_lis, tag=None):
+def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=True):
     def _deal_with_single_basis(output_lis):
         # here, we are do the one basis_set
         if not len(output_lis):
@@ -152,9 +156,9 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
         # check the calc_type from the first output file
         calc_type = output_lis[0].inp.calc_type
         calc_orbit = output_lis[0].calc_orbit
-        precision = 'null'
-        if len(calc_orbit):
-            precision = '(core ' + str(calc_orbit['occ']) + ')[vir ' + str(calc_orbit['vir']) + ']'
+        # precision = 'null'
+        # if len(calc_orbit):
+        #     precision = '(core ' + str(calc_orbit['occ']) + ')[vir ' + str(calc_orbit['vir']) + ']'
         if calc_type not in 'QD':
             warnings.warn('Unknown type calculation!')
             return
@@ -213,46 +217,56 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None):
         res = {}
         for k, v in energies.items():
             res[k] = pc.get_svd_from_array(v, fields)
-        return res, precision
+        #return res, precision
+        return res
 
     # extract all basis_type info
     all_basis_res = {}
     for o in output_lis:
         k = o.task_type
+        calc_orbit = o.calc_orbit
+        precision = 'null'
+        if len(calc_orbit):
+            precision = '(core ' + str(calc_orbit['occ']) + ')[vir ' + str(calc_orbit['vir']) + ']'
+        k = o.mol.molecule.atomic_info.symbol + '@' + k + '@' + precision
         if not k in all_basis_res.keys():
             all_basis_res[k] = []
         all_basis_res[k].append(o)
 
     e_res = {}
     for k, v in all_basis_res.items():
-        single_res, precision = _deal_with_single_basis(v)
+        single_res  = _deal_with_single_basis(v)
         if single_res:
-            key = k+'@' + precision
-            e_res[key] = single_res
+            # key = k+'@' + precision
+            # e_res[key] = single_res
+            e_res[k] = single_res
 
-    for k, v in e_res.items():
-        if tag:
-            print('Table: results of {0} from \n "{1}" ({2})'.format(k, dirname, str(tag)))
-        else:
-            print('Table: results of {0} from \n "{1}"'.format(k, dirname))
-        print('='*80)
-        if k.startswith('D'):
-            print(
-                '  {0:<20s} {1:<20s} {2:<20s}'.format('method', 'polarizability',
-                                                      'hyper-polarizability'))
-        else:
-            print(
-                '  {0:<20s} {1:<20s} {2:<20s}'.format('method', 'momentum',
-                                                      'polarizability'))
-            # In DIRAC, the correct quadrupole polarizability should be divided 4
-            for _k in v.keys():
-                v[_k] = v[_k]/4.
+    if verbos:
+        for k, v in e_res.items():
+            if tag:
+                print('Table: results of {0} from \n "{1}" ({2})'.format(k, dirname, str(tag)))
+            else:
+                print('Table: results of {0} from \n "{1}"'.format(k, dirname))
+            print('='*80)
+            #if k.startswith('D'):
+            if '@D' in k:
+                    print(
+                    '  {0:<20s} {1:<20s} {2:<20s}'.format('method', 'polarizability',
+                                                          'hyper-polarizability'))
+            else:
+                print(
+                    '  {0:<20s} {1:<20s} {2:<20s}'.format('method', 'momentum',
+                                                          'polarizability'))
+                # In DIRAC, the correct quadrupole polarizability should be divided 4
+                for _k in v.keys():
+                    v[_k] = v[_k]/4.
 
-        print('-'*80)
-        for i_k, i_v in v.items():
-            print('  {0:<20s} {1:<20.3f} {2:<20.3f}'.format(i_k.strip('_e'), i_v[0], i_v[1]))
-        print('='*80)
-        print()
+            if verbos:
+                print('-'*80)
+                for i_k, i_v in v.items():
+                    print('  {0:<20s} {1:<20.3f} {2:<20.3f}'.format(i_k.strip('_e'), i_v[0], i_v[1]))
+                print('='*80)
+                print()
     return e_res
 
 

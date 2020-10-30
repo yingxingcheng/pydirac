@@ -23,6 +23,7 @@ import argparse
 import sys
 from pydirac.cli.pypam_input import get_inp
 from pydirac.cli.pypam_atom_db import get_atomDB
+from pydirac.core.basis_sets import get_explicit_basis_default_basis
 
 
 def main():
@@ -53,10 +54,24 @@ def main():
         '--deepth', type=int, default=0,
         help="how deep of directory with respect to current directory specified "
              "by '--dirname' to find the calculation information")
+    # parser_atomdb.add_argument(
+    #     '--verbos', nargs=1, type=int, help="print level", default=1)
 
     parser_atomdb.set_defaults(func=get_atomDB)
     parser_atomdb.set_defaults(patterns=['dyall'])
     parser_atomdb.set_defaults(dir_list=['./'])
+
+    # atomic basis set
+    parser_basis = subparsers.add_parser(
+        "basis", help="Tools for get explicit basis set based on mol file "
+                       "in which default basis is used")
+    parser_basis.add_argument('mol', type=str,
+                              help='An atomic mol file in which default Dyall basis set '
+                                   'is used. Currently, this script only supports '
+                                   'dyall.acv4z, dyall.acv3z, dyall.cv3z, and dyall.cv4z')
+    parser_basis.add_argument('-f', '--filename_out', nargs="+", type=str,
+                               help='A list of directories to compute polarizability')
+    parser_basis.set_defaults(func=get_explicit_bs)
 
     try:
         import argcomplete
@@ -77,6 +92,11 @@ def main():
         pypam_parser.print_help()
         sys.exit(-1)
     return args.func(args)
+
+
+def get_explicit_bs(args):
+    fout = args.filename_out
+    get_explicit_basis_default_basis(args.mol, fout)
 
 
 if __name__ == '__main__':

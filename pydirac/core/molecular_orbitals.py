@@ -146,7 +146,7 @@ class MoleculeOrbitals(MSONable):
         nb_elec = sum([ao.degen * ao.frac for ao in self.aos
                        if self.type_found(ao.type, ao_type) and
                        e_min <= ao.energy <= e_max])
-        return int(nb_elec)
+        return round(nb_elec)
 
     def nb_closed_elec(self, e_min=-inf, e_max=inf)->int:
         """The number of electrons in closed-shell AOs"""
@@ -175,7 +175,7 @@ class MoleculeOrbitals(MSONable):
         nb_ao = sum([ao.degen for ao in self.aos if
                      self.type_found(ao.type, ao_type) and
                      e_min <= ao.energy <= e_max])
-        return nb_ao
+        return round(nb_ao)
 
 
     def nb_open_ao(self, e_min=-inf, e_max=inf)->int:

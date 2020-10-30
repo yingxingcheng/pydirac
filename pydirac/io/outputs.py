@@ -474,6 +474,7 @@ class Output:
             for r in range(1, nb_root+1):
                 key = '_'.join(['sym', str(tag_sym), 'root',str(r)])
                 energies[key] = float(all_e[i][r-1])
+                #energies['_'.join(['sym',str(tag_sym),'ave.'])] = sum(all_e[i])/len(all_e[i])
 
         convergeds = []
         for line in conv_l:

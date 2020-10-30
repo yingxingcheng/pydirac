@@ -515,15 +515,21 @@ class Inp(dict, MSONable):
             elif 'X2Cmmf' in inp_settings.hamiltonian:
                 # need to do
                 self._hamiltonian = '2C'
+            elif 'NONREL' in inp_settings.hamiltonian:
+                self._hamiltonian = 'NR-2C'
             else:
                 warnings.warn('We do not know how many components, '
                               'please check inp file')
                 self._hamiltonian = '?C'
 
-            if 'NOSPIN' in inp_settings.hamiltonian:
-                self._hamiltonian += '-SR'
-            else:
-                self._hamiltonian += '-SO'
+            if not 'NONREL' in inp_settings.hamiltonian:
+                if 'NOSPIN' in inp_settings.hamiltonian:
+                    self._hamiltonian  = 'SR-' + self._hamiltonian
+                else:
+                    self._hamiltonian  = 'SO-' + self._hamiltonian
+
+            if 'Gaunt' in inp_settings.hamiltonian:
+                self._hamiltonian = self._hamiltonian + '-Gaunt'
         else:
             self._has_hamiltonian = False
 
@@ -760,7 +766,7 @@ class Mol(MSONable):
         empty_line = re.compile(r"^$")
         # inp_start_line = re.compile(r"^\*\*DIRAC\s*")
         nuclei_nb_line = re.compile(
-            r"\s*(?P<nuclei>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+(?P<nb_atoms>\d+)")
+            r"^\s*(?P<nuclei>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+(?P<nb_atoms>\d+)\s*$")
         basis_line = re.compile(r"^\b(?:LARGE|EXPLICIT)\b\s+BASIS\s+(\S+)\s*")
         endline = re.compile(r"^FINISH")
 
@@ -789,6 +795,7 @@ class Mol(MSONable):
                 m = basis_line.match(line)
                 if m:
                     basis_type = m.group(1)
+                    break
             else:
                 # we do not interest with these lines
                 continue

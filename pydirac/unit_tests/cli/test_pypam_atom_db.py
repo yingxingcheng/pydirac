@@ -87,4 +87,5 @@ def test_extract_info():
                     if ave is not None:
                         print('{0:15s} {1:50.3f}'.format('Final:',ave))
 
-test_extract_info()
+#test_extract_info()
+test_get_polarizability()

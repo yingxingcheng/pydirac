@@ -623,12 +623,15 @@ class AtomicCISet(AtomicDHFSet):
         elif nb_open_elec == 2:
             # IVA: C Si Ge Sn Pb Fl
             if calc_type == 'dipole':
-                ciroot1 = '1 1'
+                # DIRAC bugs, only one root does not get exact gs state
+                ciroot1 = '1 2'
                 # ciroot2 = '2 1'
                 root_list.extend([ciroot1])
             elif calc_type == 'quadrupole':
-                ciroot1 = '1 9'
-                ciroot2 = '2 6'
+                # ciroot1 = '1 9'
+                # ciroot2 = '2 6'
+                ciroot1 = '1 2'
+                ciroot2 = '2 2'
                 root_list.extend([ciroot1, ciroot2])
             else:
                 raise TypeError('Calc_type wrong! "dipole" or "quadrupole"')
@@ -639,8 +642,10 @@ class AtomicCISet(AtomicDHFSet):
                 ciroot2 = '4 2'
                 root_list.extend([ciroot1, ciroot2])
             elif calc_type == 'quadrupole':
-                ciroot1 = '3 10'
-                # ciroot2 = '4 10'
+                # ciroot1 = '3 10'
+                # # ciroot2 = '4 10'
+                ciroot1 = '3 2'
+                # ciroot2 = '4 2'
                 root_list.extend([ciroot1])
             else:
                 raise TypeError('Calc_type wrong! "dipole" or "quadrupole"')
@@ -651,8 +656,10 @@ class AtomicCISet(AtomicDHFSet):
                 ciroot2 = '2 2'
                 root_list.extend([ciroot1, ciroot2])
             elif calc_type == 'quadrupole':
-                ciroot1 = '1 9'
-                ciroot2 = '2 6'
+                # ciroot1 = '1 9'
+                # ciroot2 = '2 6'
+                ciroot1 = '1 3'
+                ciroot2 = '2 2'
                 root_list.extend([ciroot1, ciroot2])
             else:
                 raise TypeError('Calc_type wrong! "dipole" or "quadrupole"')
