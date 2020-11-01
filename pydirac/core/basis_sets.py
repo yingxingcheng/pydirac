@@ -20,7 +20,10 @@
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 import os
+import re
+
 from pydirac.core.periodic_table import Element
+from pydirac.io.inputs import Mol
 
 MODULE_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -78,7 +81,7 @@ def basis_helper(filename = 'ANO-RCC'):
             f.write('FINISH\n')
 
 
-def get_explicit_basis_default_basis(fname_in, fname_out = None):
+def get_explicit_basis_default_basis(input_strings, fname_out = None):
     """
     Get explicit basis set from DIRAC default basis library, which means that we
     copy basis info from library to a new file which use 'EXPLICIT' keyword to
@@ -102,10 +105,10 @@ def get_explicit_basis_default_basis(fname_in, fname_out = None):
     """
     bs_helper = DyallBasisHelper()
 
-    with open(fname_in, 'r') as f:
-        lines = f.read()
+    # with open(fname_in, 'r') as f:
+    #     lines = f.read()
 
-    lines = lines.strip().split('\n')
+    lines = input_strings.strip().split('\n')
     Z = int(float(lines[4].split()[0]))
     e_symbol = Element(Z).symbol
     basis_type = lines[6].split()[-1].split('.')[-1]
@@ -113,6 +116,8 @@ def get_explicit_basis_default_basis(fname_in, fname_out = None):
     bs = bs_helper.get_basis_set(basis_type, e_symbol)
 
     new_strings = []
+    # lines[2] = 'c-' + lines[2]
+    lines[2] = 'c-dyall.' + basis_type
     new_strings += lines[:6]
     nb_sym = len(bs.sym_dict)
     new_strings.append('LARGE EXPLICIT {} {}'.format(nb_sym, ' '.join(['1']*nb_sym)))
@@ -124,6 +129,13 @@ def get_explicit_basis_default_basis(fname_in, fname_out = None):
 
     with open(fname_out, 'w') as f:
         f.write('\n'.join(new_strings))
+
+
+def get_custom_basis_from_ele(ele_type, basis_type, fname_out=None):
+    e = Element(ele_type)
+    input_strings = Mol.get_mol_by_default_basis(e.symbol, e.Z, basis_type)
+    get_explicit_basis_default_basis(input_strings, fname_out=fname_out)
+
 
 
 class DyallBasisHelper(object):
@@ -143,7 +155,8 @@ class DyallBasisHelper(object):
         comment = []
         i_start = 0
         for i, line in enumerate(lines):
-            if line.startswith('$'):
+            match = re.match(r'^\$', line)
+            if match:
                 comment.append(line.rstrip())
                 continue
             else:
@@ -156,18 +169,23 @@ class DyallBasisHelper(object):
         i_start -= 1
         e = Element(ele_type)
 
-        i_start = 0
-        for i, line in enumerate(lines[i_start:]):
-            if line.startswith('$ {}'.format(e.symbol)):
-                i_start = i
+        lines = lines[i_start:]
+        for j, line in enumerate(lines):
+            match = re.match(r'^\$ {}\s*\n?$'.format(e.symbol), line)
+            # if line.startswith('$ {}'.format(e.symbol)):
+            if match:
+                j_start = j
                 break
         else:
             raise RuntimeError("This basis set does not support element "
                                "type {}".format(e.symbol))
 
+        lines = lines[j_start:]
         tmp_strings = []
-        for line in lines[i_start:]:
-            if len(line.strip()) == 0:
+        for line in lines:
+            match = re.match(r'^\s*\n?$', line)
+            # if len(line.strip()) == 0:
+            if match:
                 break
             else:
                 tmp_strings.append(line.rstrip())

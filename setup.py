@@ -35,7 +35,7 @@ def package_files(directory, extensions):
             if any([filename.endswith(ext) for ext in extensions]):
                 paths.append(os.path.join('..', path, filename))
     return paths
-json_yaml_csv_files = package_files('pydirac', ['yaml', 'json', 'csv'])
+json_yaml_csv_files = package_files('pydirac', ['yaml', 'json', 'csv', 'acv3z', 'acv4z', 'cv3z', 'cv4z'])
 
 if __name__ == "__main__":
     print(module_dir)

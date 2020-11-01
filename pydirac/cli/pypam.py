@@ -23,7 +23,7 @@ import argparse
 import sys
 from pydirac.cli.pypam_input import get_inp
 from pydirac.cli.pypam_atom_db import get_atomDB
-from pydirac.core.basis_sets import get_explicit_basis_default_basis
+from pydirac.core.basis_sets import get_custom_basis_from_ele
 
 
 def main():
@@ -65,9 +65,10 @@ def main():
     parser_basis = subparsers.add_parser(
         "basis", help="Tools for get explicit basis set based on mol file "
                        "in which default basis is used")
-    parser_basis.add_argument('mol', type=str,
-                              help='An atomic mol file in which default Dyall basis set '
-                                   'is used. Currently, this script only supports '
+    parser_basis.add_argument('element_type', type=str,
+                              help='Element type')
+    parser_basis.add_argument('basis_type', type=str,
+                              help='Basis type. At present, this script only supports '
                                    'dyall.acv4z, dyall.acv3z, dyall.cv3z, and dyall.cv4z')
     parser_basis.add_argument('-f', '--filename_out', nargs="+", type=str,
                                help='A list of directories to compute polarizability')
@@ -96,7 +97,8 @@ def main():
 
 def get_explicit_bs(args):
     fout = args.filename_out
-    get_explicit_basis_default_basis(args.mol, fout)
+    get_custom_basis_from_ele(args.element_type, args.basis_type, fout)
+
 
 
 if __name__ == '__main__':
