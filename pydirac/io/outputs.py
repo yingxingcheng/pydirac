@@ -364,7 +364,7 @@ class Output:
         energies = {}
         if has_T:
             patterns = [scf_pattern, mp2_pattern, ccsd_pattern, ccsd_p_T_pattern]
-            keys = ["scf_e", "mp2_e", "ccsd_e", "ccsd_p_T_e"]
+            keys = ["scf_e", "mp2_e", "ccsd_e", "ccsd(t)_e"]
         else:
             patterns = [scf_pattern, mp2_pattern, ccsd_pattern]
             keys = ["scf_e", "mp2_e", "ccsd_e"]

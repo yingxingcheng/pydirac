@@ -34,6 +34,15 @@ import warnings
 from monty.os import cd
 from pydirac.io.outputs import Output
 from pydirac.analysis.polarizability import PolarizabilityCalculator
+from pydirac.analysis.constant import *
+
+__all__ = [
+    "get_polarizability",
+    "get_polarizability_from_output_list",
+    "do_one_basis",
+    "is_valid",
+    "get_atomDB",
+]
 
 
 def get_polarizability(
@@ -67,10 +76,7 @@ def get_polarizability(
     else:
         raise TypeError("calc_dir_patters can only be <str> or <list>")
 
-    if deepth < 0:
-        deepth = 0
-    do_curr_dir = False
-    do_clc_dir = False
+    deepth = 0 if deepth < 0 else deepth
     do_sub_dir = deepth > 0
 
     # for debug
@@ -88,9 +94,6 @@ def get_polarizability(
             if obj.is_ok:
                 curr_dir_output_lis.append(obj)
 
-        if is_valid(curr_dir_output_lis):
-            do_curr_dir = True
-
         # Step 2. deal with all calc_dir
         # ------------------------------
         clc_dirs = []
@@ -102,8 +105,7 @@ def get_polarizability(
                 outs = glob.glob("*.out")
                 if len(outs) > 1:
                     warnings.warn(
-                        "there are more than two output file "
-                        "in this directory {0}, and we take "
+                        "there are more than two output file in this directory {0}, and we take "
                         "the first one {1}".format(clc_d, outs[0])
                     )
                 elif len(outs) == 1:
@@ -111,28 +113,24 @@ def get_polarizability(
                     if obj.is_ok:
                         calc_dir_output_lis.append(obj)
                 else:
-                    warnings.warn("there is no output file in this" " directory {0}".format(clc_d))
-
-        # check if all output obj in calc_dir_output_lis is valid and
-        # do we need to go on
-        if is_valid(calc_dir_output_lis):
-            do_clc_dir = True
+                    warnings.warn("there is no output file in this directory {0}".format(clc_d))
 
         all_res["curr_dir"] = {}
-        if do_curr_dir:
+        if is_valid(curr_dir_output_lis):
             e_dict = get_polarizability_from_output_list(
                 dirname, curr_dir_output_lis, tag="curr_dir", verbos=verbos
             )
             all_res["curr_dir"] = e_dict
 
         all_res["calc_dir"] = {}
-        if do_clc_dir:
+        if is_valid(calc_dir_output_lis):
             e_dict = get_polarizability_from_output_list(
                 dirname, calc_dir_output_lis, tag="clc_dir", verbos=verbos
             )
             all_res["calc_dir"] = e_dict
 
         # Step 3. deal with all sub_dir
+        # ------------------------------
         all_res["sub_dir"] = {}
         if do_sub_dir:
             sub_dirs = [d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs]
@@ -152,18 +150,14 @@ def do_one_basis(output_lis):
         return
 
     # check the calc_type from the first output file
-    ct = output_lis[0].inp.calc_type.upper()
+    ct = output_lis[0].inp.calc_type
     calc_orbit = output_lis[0].calc_orbit
-    if ct == "Q":
-        pc = PolarizabilityCalculator(calc_type="quadrupole")
-    elif ct == "D":
-        pc = PolarizabilityCalculator(calc_type="dipole")
-    else:
-        raise NotImplementedError
+    pc = PolarizabilityCalculator(calc_type=ct)
 
     # maybe we just use a dict to restore all information
     energies = {}
     # cause for different type calculations, the electric fields are the same
+    # TODO: use dict to restore fields as well?
     fields = []
 
     for o in output_lis:
@@ -195,6 +189,7 @@ def do_one_basis(output_lis):
         else:
             raise NotImplementedError
 
+    # remove items where the length of energy is not equal to the one of field
     del_k_lis = []
     for k, v in energies.items():
         if len(v) != len(fields):
@@ -206,36 +201,31 @@ def do_one_basis(output_lis):
     for k in del_k_lis:
         energies.pop(k)
 
+    # {'scf': alpha_scf, 'mp2':alpha_scf, 'ccsd':alpha_ccsd}
     res = {}
-    for k, v in energies.items():
-        res[k] = pc.get_svd_from_array(v, fields)
-    # return res, precision
+    for k, energy in energies.items():
+        res[k.strip("_e")] = pc.get_svd_from_array(energy, fields)
     # TODO: we should just return energies and calculate polar in another function.
     return res
 
 
 def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=True):
-    # extract all basis_type info
     all_basis_res = {}
     for o in output_lis:
         # TODO: the old task_type: NR-CC-2C, SO-CC-4C
-        k = o.task_type
-        calc_orbit = o.calc_orbit
-        precision = "null"
-        if len(calc_orbit):
-            precision = "(core " + str(calc_orbit["occ"]) + ")[vir " + str(calc_orbit["vir"]) + "]"
-        k = o.mol.molecule.atomic_info.symbol + "@" + k + "@" + precision
-        if not k in all_basis_res.keys():
+        task_type, orbit = o.task_type, o.calc_orbit
+        obt_info = get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
+        k = get_keyword(o.mol.molecule.atomic_info.symbol, task_type, obt_info)
+        if k not in all_basis_res:
             all_basis_res[k] = []
         all_basis_res[k].append(o)
 
     e_res = {}
     for k, v in all_basis_res.items():
-        single_res = do_one_basis(v)
-        if single_res:
-            # key = k+'@' + precision
-            # e_res[key] = single_res
-            e_res[k] = single_res
+        one_res = do_one_basis(v)
+        if one_res:
+            print(k, one_res)
+            e_res[k] = one_res
 
     if verbos:
         for k, v in e_res.items():
