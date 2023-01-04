@@ -33,11 +33,9 @@ class OrbitalType(Enum):
 
 
 class AtomicOrbital(MSONable):
-    """Orbit object to restore basis information about given orbit.
-    """
+    """Orbit object to restore basis information about given orbit."""
 
-    def __init__(self, sym:str, type:OrbitalType,
-                 energy:float, degen:int, frac:float):
+    def __init__(self, sym: str, type: OrbitalType, energy: float, degen: int, frac: float):
         """Create a AtomicOrbital object
 
         Args:
@@ -62,10 +60,8 @@ class AtomicOrbital(MSONable):
             return True
 
     def __str__(self):
-        info_list = [self.sym, self.type, self.energy,
-                     self.degen, self.frac]
-        return ' '.join([str(info) for info in info_list])
-
+        info_list = [self.sym, self.type, self.energy, self.degen, self.frac]
+        return " ".join([str(info) for info in info_list])
 
     def __repr__(self):
         return self.__str__()
@@ -86,17 +82,19 @@ class AtomicOrbital(MSONable):
         return is_equal
 
     def as_dict(self) -> dict:
-        ao_type = 'closed_shell'
+        ao_type = "closed_shell"
         if self.type is OrbitalType.OPEN_SHELL:
-            ao_type = 'open_shell'
+            ao_type = "open_shell"
         elif self.type is OrbitalType.VIRTUAL_SHELL:
-            ao_type = 'virtual_shell'
+            ao_type = "virtual_shell"
 
-        d = {'degen': self.degen,
-             'energy': self.energy,
-             'frac': self.frac,
-             'sym': self.sym,
-             'type': ao_type}
+        d = {
+            "degen": self.degen,
+            "energy": self.energy,
+            "frac": self.frac,
+            "sym": self.sym,
+            "type": ao_type,
+        }
         return jsanitize(d, strict=True)
 
     def from_dict(cls, d):
@@ -104,7 +102,7 @@ class AtomicOrbital(MSONable):
 
 
 class MoleculeOrbitals(MSONable):
-    def __init__(self, aos = None):
+    def __init__(self, aos=None):
         self.aos = aos
         self.closed_shells = []
         self.open_shells = []
@@ -125,7 +123,7 @@ class MoleculeOrbitals(MSONable):
             elif ao.type is OrbitalType.VIRTUAL_SHELL:
                 self.virtual_shells.append(ao)
             else:
-                raise RuntimeError('Unknown orbital type !')
+                raise RuntimeError("Unknown orbital type !")
 
     def type_found(self, test_type, ao_type=OrbitalType.ALL_SHELL):
         if ao_type is OrbitalType.ALL_SHELL:
@@ -133,7 +131,7 @@ class MoleculeOrbitals(MSONable):
         else:
             return test_type is ao_type
 
-    def nelec(self, e_min=-inf, e_max=inf, ao_type=OrbitalType.ALL_SHELL)->int:
+    def nelec(self, e_min=-inf, e_max=inf, ao_type=OrbitalType.ALL_SHELL) -> int:
         """Count the number of orbital within the energy range [e_min, e_max]
 
         Args:
@@ -143,25 +141,28 @@ class MoleculeOrbitals(MSONable):
         Returns:
             The number of electrons located in the energy range
         """
-        nb_elec = sum([ao.degen * ao.frac for ao in self.aos
-                       if self.type_found(ao.type, ao_type) and
-                       e_min <= ao.energy <= e_max])
+        nb_elec = sum(
+            [
+                ao.degen * ao.frac
+                for ao in self.aos
+                if self.type_found(ao.type, ao_type) and e_min <= ao.energy <= e_max
+            ]
+        )
         return round(nb_elec)
 
-    def nb_closed_elec(self, e_min=-inf, e_max=inf)->int:
+    def nb_closed_elec(self, e_min=-inf, e_max=inf) -> int:
         """The number of electrons in closed-shell AOs"""
         return self.nelec(e_min, e_max, ao_type=OrbitalType.CLOSED_SHELL)
 
-    def nb_open_elec(self, e_min=-inf, e_max=inf)->int:
+    def nb_open_elec(self, e_min=-inf, e_max=inf) -> int:
         """The number of electrons in open-shell AOs"""
         return self.nelec(e_min, e_max, ao_type=OrbitalType.OPEN_SHELL)
 
-    def nb_virtual_elec(self)->int:
+    def nb_virtual_elec(self) -> int:
         """The number of electrons in virtual AOs"""
         return 0
 
-    def nao(self, e_min=-inf, e_max=inf,
-            ao_type=OrbitalType.ALL_SHELL)->int:
+    def nao(self, e_min=-inf, e_max=inf, ao_type=OrbitalType.ALL_SHELL) -> int:
         """The number of AOs by specified AO type and energy range.
 
         Args:
@@ -172,16 +173,19 @@ class MoleculeOrbitals(MSONable):
         Returns:
             The number of AOs
         """
-        nb_ao = sum([ao.degen for ao in self.aos if
-                     self.type_found(ao.type, ao_type) and
-                     e_min <= ao.energy <= e_max])
+        nb_ao = sum(
+            [
+                ao.degen
+                for ao in self.aos
+                if self.type_found(ao.type, ao_type) and e_min <= ao.energy <= e_max
+            ]
+        )
         return round(nb_ao)
 
-
-    def nb_open_ao(self, e_min=-inf, e_max=inf)->int:
+    def nb_open_ao(self, e_min=-inf, e_max=inf) -> int:
         return self.nao(e_min, e_max, ao_type=OrbitalType.OPEN_SHELL)
 
-    def nb_virtual_ao(self, e_min=-inf, e_max=inf)->int:
+    def nb_virtual_ao(self, e_min=-inf, e_max=inf) -> int:
         """Count the number of virtual orbital within the energy
         range [e_min, e_max]
 
@@ -194,7 +198,7 @@ class MoleculeOrbitals(MSONable):
         """
         return self.nao(e_min, e_max, ao_type=OrbitalType.VIRTUAL_SHELL)
 
-    def nb_closed_ao(self, e_min=-inf, e_max=inf)->int:
+    def nb_closed_ao(self, e_min=-inf, e_max=inf) -> int:
         """Count the number of closed orbitals within the energy
         range [e_min, e_max]
 
@@ -218,8 +222,14 @@ class MoleculeOrbitals(MSONable):
         nb_closed_shell = self.nb_closed_ao(e_min, e_max)
         nb_open_shell = self.nb_open_ao(e_min, e_max)
         nb_vir_shell = self.nb_virtual_ao(e_min, e_max)
-        return (nb_closed_elec, nb_open_elec, nb_total_elec, nb_closed_shell,
-                nb_open_shell, nb_vir_shell)
+        return (
+            nb_closed_elec,
+            nb_open_elec,
+            nb_total_elec,
+            nb_closed_shell,
+            nb_open_shell,
+            nb_vir_shell,
+        )
 
     # @classmethod
     # def from_file(cls, filename):
@@ -231,10 +241,11 @@ class MoleculeOrbitals(MSONable):
     #     else:
     #         raise NotImplementedError('Not support other format but "*.out"')
 
-
     def as_dict(self) -> dict:
-        d = {'closed_shells': self.closed_shells,
-             'occ_open_shell': self.occ_open_shell,
-             'open_shells': self.open_shells,
-             'virtual_shells': self.virtual_shells}
+        d = {
+            "closed_shells": self.closed_shells,
+            "occ_open_shell": self.occ_open_shell,
+            "open_shells": self.open_shells,
+            "virtual_shells": self.virtual_shells,
+        }
         return jsanitize(d, strict=True)

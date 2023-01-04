@@ -23,69 +23,89 @@ import argparse
 import sys
 from pydirac.cli.pypam_input import get_inp
 from pydirac.cli.pypam_atom_db import get_atomDB
-from pydirac.core.basis_sets import get_custom_basis_from_ele
+from pydirac.core.basis import get_custom_basis_from_ele
 
 
 def main():
-    pypam_parser = argparse.ArgumentParser(description="pypam is a script tool to create, "
-                                                 "run, analyse a DIRAC calculation "
-                                                 "or a buntch of calculations")
+    pypam_parser = argparse.ArgumentParser(
+        description="pypam is a script tool to create, "
+        "run, analyse a DIRAC calculation "
+        "or a buntch of calculations"
+    )
 
     # input generation script
     subparsers = pypam_parser.add_subparsers()
     parser_input = subparsers.add_parser(
-        "input", help="Tools for creating inputs for a DIRAC calculation")
-    parser_input.add_argument('-c', '--calc_method', help="calculation method")
+        "input", help="Tools for creating inputs for a DIRAC calculation"
+    )
+    parser_input.add_argument("-c", "--calc_method", help="calculation method")
     parser_input.add_argument(
-        '-d', '--dirname',
-        help="where to generate all input files for a DIRAC calculation")
+        "-d", "--dirname", help="where to generate all input files for a DIRAC calculation"
+    )
     parser_input.set_defaults(func=get_inp)
 
     # atomic database script
     parser_atomdb = subparsers.add_parser(
-        "atomdb", help="Tools for compute polarizability "
-                       "from a calculation directory")
-    parser_atomdb.add_argument('dir_list', nargs="+", type=str,
-                               help='A list of directories to compute polarizability')
+        "atomdb", help="Tools for compute polarizability " "from a calculation directory"
+    )
     parser_atomdb.add_argument(
-        '-p', '--patterns', nargs="+", type=str,
-        help="to specify which kind of directory should be considered")
+        "dir_list", nargs="+", type=str, help="A list of directories to compute polarizability"
+    )
     parser_atomdb.add_argument(
-        '--deepth', type=int, default=0,
+        "-p",
+        "--patterns",
+        nargs="+",
+        type=str,
+        help="to specify which kind of directory should be considered",
+    )
+    parser_atomdb.add_argument(
+        "--deepth",
+        type=int,
+        default=0,
         help="how deep of directory with respect to current directory specified "
-             "by '--dirname' to find the calculation information")
+        "by '--dirname' to find the calculation information",
+    )
     # parser_atomdb.add_argument(
     #     '--verbos', nargs=1, type=int, help="print level", default=1)
 
     parser_atomdb.set_defaults(func=get_atomDB)
-    parser_atomdb.set_defaults(patterns=['dyall'])
-    parser_atomdb.set_defaults(dir_list=['./'])
+    parser_atomdb.set_defaults(patterns=["dyall"])
+    parser_atomdb.set_defaults(dir_list=["./"])
 
     # atomic basis set
     parser_basis = subparsers.add_parser(
-        "basis", help="Tools for get explicit basis set based on mol file "
-                       "in which default basis is used")
-    parser_basis.add_argument('element_type', type=str,
-                              help='Element type')
-    parser_basis.add_argument('basis_type', type=str,
-                              help='Basis type. At present, this script only supports '
-                                   'dyall.acv4z, dyall.acv3z, dyall.cv3z, and dyall.cv4z')
-    parser_basis.add_argument('-f', '--filename_out', nargs="+", type=str,
-                               help='A list of directories to compute polarizability')
+        "basis",
+        help="Tools for get explicit basis set based on mol file " "in which default basis is used",
+    )
+    parser_basis.add_argument("element_type", type=str, help="Element type")
+    parser_basis.add_argument(
+        "basis_type",
+        type=str,
+        help="Basis type. At present, this script only supports "
+        "dyall.acv4z, dyall.acv3z, dyall.cv3z, and dyall.cv4z",
+    )
+    parser_basis.add_argument(
+        "-f",
+        "--filename_out",
+        nargs="+",
+        type=str,
+        help="A list of directories to compute polarizability",
+    )
     parser_basis.set_defaults(func=get_explicit_bs)
 
     try:
         import argcomplete
+
         argcomplete.autocomplete(pypam_parser)
     except ImportError:
         # argcompolete not present
         pass
 
     args = pypam_parser.parse_args()
-    #args = pypam_parser.parse_args(['input', '-d', './'])
-    #args = pypam_parser.parse_args(['atomdb', './', '-p', 'faegri', 'dyall'])
-    #args = pypam_parser.parse_args(['atomdb', './'])
-    #print(args)
+    # args = pypam_parser.parse_args(['input', '-d', './'])
+    # args = pypam_parser.parse_args(['atomdb', './', '-p', 'faegri', 'dyall'])
+    # args = pypam_parser.parse_args(['atomdb', './'])
+    # print(args)
 
     try:
         getattr(args, "func")
@@ -100,6 +120,5 @@ def get_explicit_bs(args):
     get_custom_basis_from_ele(args.element_type, args.basis_type, fout)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

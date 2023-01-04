@@ -23,7 +23,7 @@ import re
 import warnings
 from monty.json import MSONable, jsanitize
 from pydirac.io.inputs import Inp, Mol
-from pydirac.core.molecular_orbitals import OrbitalType, AtomicOrbital, MoleculeOrbitals
+from pydirac.core.orbitals import OrbitalType, AtomicOrbital, MoleculeOrbitals
 
 
 class Output:
@@ -92,12 +92,12 @@ class Output:
         inp_start_line = re.compile(r"^\*\*DIRAC\s*")
         endline = re.compile(r"^\s*\*END OF")
 
-        with open(self.filename, 'r') as f:
+        with open(self.filename, "r") as f:
             context = f.readlines()
 
         for i, line in enumerate(context):
             if start_line.match(line):
-                context = context[i + 1:]
+                context = context[i + 1 :]
 
         inp_str = []
         is_start = False
@@ -107,8 +107,7 @@ class Output:
             elif inp_start_line.match(line):
                 is_start = True
                 inp_str.append(line)
-            elif dash_line.match(line) or empty_line.match(line) or \
-                    comment_line.match(line):
+            elif dash_line.match(line) or empty_line.match(line) or comment_line.match(line):
                 continue
             else:
                 inp_str.append(line)
@@ -127,17 +126,18 @@ class Output:
         empty_line = re.compile(r"^$")
         # inp_start_line = re.compile(r"^\*\*DIRAC\s*")
         nuclei_nb_line = re.compile(
-            r"\s*(?P<nuclei>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+(?P<nb_atoms>\d+)")
+            r"\s*(?P<nuclei>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+(?P<nb_atoms>\d+)"
+        )
         basis_line = re.compile(r"^\b(?:LARGE|EXPLICIT)\b\s+BASIS\s+(\S+)\s*")
         endline = re.compile(r"^FINISH")
         atomic_calc_ptn = re.compile(r"This is an atomic calculation")
 
         basis_type = None
 
-        with open(self.filename, 'r') as f:
+        with open(self.filename, "r") as f:
             context = f.readlines()
 
-        if atomic_calc_ptn.search(''.join(context), re.MULTILINE | re.DOTALL):
+        if atomic_calc_ptn.search("".join(context), re.MULTILINE | re.DOTALL):
             is_atom = True
         else:
             is_atom = False
@@ -145,8 +145,8 @@ class Output:
         mol_str = []
         for i, line in enumerate(context):
             if start_line.match(line):
-                #context = context[i + 1:]
-                context = context[i + 3:]
+                # context = context[i + 1:]
+                context = context[i + 3 :]
                 break
         for i, line in enumerate(context):
             if endline.match(line):
@@ -156,7 +156,6 @@ class Output:
 
         self.mol = Mol.from_string(mol_str)
         self.mol.molecule.is_atom = is_atom
-
 
     def parse_results(self):
         """Parse calculation results from output file
@@ -172,22 +171,21 @@ class Output:
             self.parse_mol()
 
         # check if calculation is finished
-        if self.inp.calc_method in ['CI', 'CC']:
-            if self.inp.calc_method == 'CC':
+        if self.inp.calc_method in ["CI", "CC"]:
+            if self.inp.calc_method == "CC":
                 self._parse_coupled_cluster()
             else:
                 self._parse_configuration_interaction()
         else:
             self.energy_settings = {}
 
-        calc_type = self.inp.calc_type or 'null'
-        hamiltonian = self.inp.hamiltonian or 'null'
-        calc_method = self.inp.calc_method or 'null'
-        basis_type = self.mol.basis_type or 'null'
+        calc_type = self.inp.calc_type or "null"
+        hamiltonian = self.inp.hamiltonian or "null"
+        calc_method = self.inp.calc_method or "null"
+        basis_type = self.mol.basis_type or "null"
 
         # for a set of calculations, this task_type can be regarded as an id
-        self._task_type = '-'.join([calc_type, calc_method,
-                                   hamiltonian]) + '@' + basis_type.strip()
+        self._task_type = "-".join([calc_type, calc_method, hamiltonian]) + "@" + basis_type.strip()
 
     def parse_orbit(self):
         """
@@ -240,24 +238,23 @@ class Output:
         sym_ptn = re.compile(r"^\* \b(?:Boson|Fermion)\b symmetry (.*)")
         open_ptn = re.compile(r"^\s+\*\s+Open shell #\d+, f = (\d+(\.\d*)?)")
         closed_ptn = re.compile(r"^\s+\*\s+Closed shell, f = (\d+(\.\d*)?)")
-        virtual_ptn = re.compile(
-            r"\s+\*\s+Virtual eigenvalues, f = (\d+(\.\d*)?)")
-        number = re.compile(
-            r"(?P<num>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+\(\s*(?P<degen>\d+)\)")
+        virtual_ptn = re.compile(r"\s+\*\s+Virtual eigenvalues, f = (\d+(\.\d*)?)")
+        number = re.compile(r"(?P<num>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+\(\s*(?P<degen>\d+)\)")
         number_line_ptn = re.compile(r"\s+[-+]?(\d+(\.\d+)?|\d*\.\d+) .*")
         endline_ptn = re.compile(r"^\* HOMO - LUMO")
 
-        with open(self.filename, 'r') as f:
+        with open(self.filename, "r") as f:
             lines = f.readlines()
-
 
         for i, l in enumerate(lines):
             if start_ptn.match(l):
-                lines = lines[i + 1:]
+                lines = lines[i + 1 :]
                 break
         else:
-            warnings.warn("No SCF calculation info founded, this is calculation"
-                          " without SCF, please check it carefully!")
+            warnings.warn(
+                "No SCF calculation info founded, this is calculation"
+                " without SCF, please check it carefully!"
+            )
 
         cur_sym = None
         ao_type = None
@@ -301,7 +298,6 @@ class Output:
         self.mos = MoleculeOrbitals(aos)
         return self.mos
 
-
     @property
     def task_type(self):
         """Get a task type from an output file
@@ -316,8 +312,8 @@ class Output:
         Returns:
 
         """
-        end_pattern = re.compile(r'\s*\*+\s+E N D\s+of\s+D I R A C\s+output\s+\*+')
-        with open(self.filename, 'r') as f:
+        end_pattern = re.compile(r"\s*\*+\s+E N D\s+of\s+D I R A C\s+output\s+\*+")
+        with open(self.filename, "r") as f:
             context = f.read()
         if end_pattern.search(context):
             self.is_ok = True
@@ -347,14 +343,18 @@ class Output:
         Returns:
             None
         """
-        start_pattern = re.compile(r'^\s*Overview of calculated energies')
-        scf_pattern = re.compile(r'^@ SCF energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))')
-        mp2_pattern = re.compile(r'^@ Total MP2 energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))')
-        ccsd_pattern = re.compile(r'^@ Total CCSD energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))')
-        ccsd_p_T_pattern = re.compile(r'^@ Total CCSD\(T\) energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))')
+        start_pattern = re.compile(r"^\s*Overview of calculated energies")
+        scf_pattern = re.compile(r"^@ SCF energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))")
+        mp2_pattern = re.compile(r"^@ Total MP2 energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))")
+        ccsd_pattern = re.compile(
+            r"^@ Total CCSD energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))"
+        )
+        ccsd_p_T_pattern = re.compile(
+            r"^@ Total CCSD\(T\) energy :\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))"
+        )
         end_line = re.compile(r"^$")
 
-        with open(self.filename, 'r') as f:
+        with open(self.filename, "r") as f:
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if start_pattern.match(line):
@@ -364,10 +364,10 @@ class Output:
         energies = {}
         if has_T:
             patterns = [scf_pattern, mp2_pattern, ccsd_pattern, ccsd_p_T_pattern]
-            keys = ['scf_e', 'mp2_e', 'ccsd_e', 'ccsd_p_T_e']
+            keys = ["scf_e", "mp2_e", "ccsd_e", "ccsd_p_T_e"]
         else:
             patterns = [scf_pattern, mp2_pattern, ccsd_pattern]
-            keys = ['scf_e', 'mp2_e', 'ccsd_e']
+            keys = ["scf_e", "mp2_e", "ccsd_e"]
 
         for i, line in enumerate(lines):
             if end_line.match(line):
@@ -376,7 +376,7 @@ class Output:
             for pattern, k in zip(patterns, keys):
                 m = pattern.match(line)
                 if m:
-                    energies[k] = float(m.group('energy'))
+                    energies[k] = float(m.group("energy"))
                     break
 
         self.energy_settings = energies
@@ -391,12 +391,12 @@ class Output:
         #  Spinor class : virtual                  220  222
         #
         #  Configuration in abelian subgroup
-        orb_start_pattern = re.compile(r'^\s*Configuration in highest pointgroup')
-        occ_pattern = re.compile(r'^\s*Spinor class : occupied\s+((?:\d+\s+)+)')
-        vir_pattern = re.compile(r'^\s*Spinor class : virtual\s+((?:\d+\s+)+)')
-        orb_end_pattern = re.compile(r'^\s*Configuration in abelian subgroup')
+        orb_start_pattern = re.compile(r"^\s*Configuration in highest pointgroup")
+        occ_pattern = re.compile(r"^\s*Spinor class : occupied\s+((?:\d+\s+)+)")
+        vir_pattern = re.compile(r"^\s*Spinor class : virtual\s+((?:\d+\s+)+)")
+        orb_end_pattern = re.compile(r"^\s*Configuration in abelian subgroup")
 
-        with open(self.filename, 'r') as f:
+        with open(self.filename, "r") as f:
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if orb_start_pattern.match(line):
@@ -404,7 +404,7 @@ class Output:
                     break
 
         clc_orb = {}
-        keys = ['occ', 'vir']
+        keys = ["occ", "vir"]
         patterns = [occ_pattern, vir_pattern]
 
         for i, line in enumerate(lines):
@@ -439,17 +439,21 @@ class Output:
         Returns:
             None
         """
-        #start_line = re.compile(r'Final CI energies\s+=\s+(?P<energy>([-+]?(\d+(\.\d*)?|\d*\.\d+)\s+)+)\s+')
-        energy_line = re.compile(r'Final CI energies\s+=\s+(?P<energy>(?:[-+]?(?:\d+(?:\.\d*)?|\d*\.\d+)\s+)+)\s+')
-        conv_line = re.compile(r'(?:\s*root\s+\d+\s+\.+\s+(?:converged|unconverged)!\s*)+')
-        sym_line = re.compile(r'\s*&+\s+KRCI calculation for symmetry no\.\s+(\d+)\s+&+\s+Number of CI roots for this symmetry\s+(\d+)\s+')
+        # start_line = re.compile(r'Final CI energies\s+=\s+(?P<energy>([-+]?(\d+(\.\d*)?|\d*\.\d+)\s+)+)\s+')
+        energy_line = re.compile(
+            r"Final CI energies\s+=\s+(?P<energy>(?:[-+]?(?:\d+(?:\.\d*)?|\d*\.\d+)\s+)+)\s+"
+        )
+        conv_line = re.compile(r"(?:\s*root\s+\d+\s+\.+\s+(?:converged|unconverged)!\s*)+")
+        sym_line = re.compile(
+            r"\s*&+\s+KRCI calculation for symmetry no\.\s+(\d+)\s+&+\s+Number of CI roots for this symmetry\s+(\d+)\s+"
+        )
 
-        with open(self.filename, 'r') as fin:
+        with open(self.filename, "r") as fin:
             context = fin.read()
 
-        energy_l = energy_line.findall(context, re.MULTILINE|re.DOTALL)
-        conv_l = conv_line.findall(context, re.MULTILINE|re.DOTALL)
-        sym_l = sym_line.findall(context, re.MULTILINE|re.DOTALL)
+        energy_l = energy_line.findall(context, re.MULTILINE | re.DOTALL)
+        conv_l = conv_line.findall(context, re.MULTILINE | re.DOTALL)
+        sym_l = sym_line.findall(context, re.MULTILINE | re.DOTALL)
 
         energies = {}
 
@@ -459,39 +463,40 @@ class Output:
             all_e.append(e_roots)
 
         if len(sym_l) != len(all_e):
-            warnings.warn('The shape of energy and symmetry are not '
-                               'the same! Check results!')
+            warnings.warn("The shape of energy and symmetry are not " "the same! Check results!")
             return {}
 
         for i, sym_rt in enumerate(sym_l):
             tag_sym = sym_rt[0]
             nb_root = int(sym_rt[1])
             if nb_root != len(all_e[i]):
-                warnings.warn('The number of root energies and the number of '
-                              'roots are not the same! Check results!')
+                warnings.warn(
+                    "The number of root energies and the number of "
+                    "roots are not the same! Check results!"
+                )
                 return {}
 
-            for r in range(1, nb_root+1):
-                key = '_'.join(['sym', str(tag_sym), 'root',str(r)])
-                energies[key] = float(all_e[i][r-1])
-                #energies['_'.join(['sym',str(tag_sym),'ave.'])] = sum(all_e[i])/len(all_e[i])
+            for r in range(1, nb_root + 1):
+                key = "_".join(["sym", str(tag_sym), "root", str(r)])
+                energies[key] = float(all_e[i][r - 1])
+                # energies['_'.join(['sym',str(tag_sym),'ave.'])] = sum(all_e[i])/len(all_e[i])
 
         convergeds = []
         for line in conv_l:
             converged = []
-            for wrd in line.split('\n'):
+            for wrd in line.split("\n"):
                 if not len(wrd.strip()):
                     continue
-                if 'unconverged' in wrd:
+                if "unconverged" in wrd:
                     converged.append(False)
-                elif 'converged' in wrd:
+                elif "converged" in wrd:
                     converged.append(True)
                 else:
                     print(wrd)
-                    raise RuntimeError('There is no converged info')
+                    raise RuntimeError("There is no converged info")
             convergeds.append(converged)
 
-        self.energy_settings = {'ci_e': energies, 'ci_converged':convergeds}
+        self.energy_settings = {"ci_e": energies, "ci_converged": convergeds}
 
     def _parse_hartree_fock(self):
         """Deal with HF calculations
@@ -513,22 +518,22 @@ class Output:
 
     @property
     def calc_orbit(self):
-        if self.inp.calc_method == 'CC':
+        if self.inp.calc_method == "CC":
             return self._cc_calc_orbit
-        elif self.inp.calc_method == 'CI':
+        elif self.inp.calc_method == "CI":
             return self.inp.ci_calc_orbit
         else:
-            return {'occ':0, 'vir':0}
+            return {"occ": 0, "vir": 0}
 
     def as_dict(self) -> dict:
-        d = {"@module": self.__class__.__module__,
-             "@class": self.__class__.__name__,
-             "energy_settings": self.energy_settings,
-             "filename": self.filename,
-             'task_type': self.task_type,
-             'mol': self.mol.as_dict(),
-             'inp': self.inp,
-             'is_ok': self.is_ok
-             }
+        d = {
+            "@module": self.__class__.__module__,
+            "@class": self.__class__.__name__,
+            "energy_settings": self.energy_settings,
+            "filename": self.filename,
+            "task_type": self.task_type,
+            "mol": self.mol.as_dict(),
+            "inp": self.inp,
+            "is_ok": self.is_ok,
+        }
         return jsanitize(d, strict=True)
-
