@@ -507,16 +507,17 @@ class Inp(dict, MSONable):
                 # need to do
                 self._hamiltonian = "2C"
             elif "NONREL" in inp_settings.hamiltonian:
-                self._hamiltonian = "NR-2C"
+                # self._hamiltonian = "NR-2C"
+                self._hamiltonian = "2C-NR"
             else:
                 warnings.warn("We do not know how many components, " "please check inp file")
                 self._hamiltonian = "?C"
 
             if not "NONREL" in inp_settings.hamiltonian:
                 if "NOSPIN" in inp_settings.hamiltonian:
-                    self._hamiltonian = "SR-" + self._hamiltonian
+                    self._hamiltonian += "-SR"
                 else:
-                    self._hamiltonian = "SO-" + self._hamiltonian
+                    self._hamiltonian += "-DC"
 
             if "Gaunt" in inp_settings.hamiltonian:
                 self._hamiltonian = self._hamiltonian + "-Gaunt"

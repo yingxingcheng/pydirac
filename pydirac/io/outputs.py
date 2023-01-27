@@ -22,6 +22,7 @@
 import re
 import warnings
 from monty.json import MSONable, jsanitize
+import numpy as np
 from pydirac.io.inputs import Inp, Mol
 from pydirac.core.orbitals import OrbitalType, AtomicOrbital, MoleculeOrbitals
 
@@ -185,7 +186,8 @@ class Output:
         basis_type = self.mol.basis_type or "null"
 
         # for a set of calculations, this task_type can be regarded as an id
-        self._task_type = "-".join([calc_type, calc_method, hamiltonian]) + "@" + basis_type.strip()
+        self._task_type = "-".join([calc_type, hamiltonian, calc_method]) + "@" + basis_type.strip()
+        # print(self._task_type)
 
     def parse_orbit(self):
         """
@@ -447,6 +449,12 @@ class Output:
         sym_line = re.compile(
             r"\s*&+\s+KRCI calculation for symmetry no\.\s+(\d+)\s+&+\s+Number of CI roots for this symmetry\s+(\d+)\s+"
         )
+        scf_line = re.compile(
+            r"\* REACMO: Coefficients read from file DFCOEF - Total energy:\s+(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))"
+        )
+        scf_line2 = re.compile(
+            r"\s*Electronic energy\s*:\s*(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))"
+        )
 
         with open(self.filename, "r") as fin:
             context = fin.read()
@@ -496,7 +504,15 @@ class Output:
                     raise RuntimeError("There is no converged info")
             convergeds.append(converged)
 
-        self.energy_settings = {"ci_e": energies, "ci_converged": convergeds}
+        scf_energy = np.nan
+        scf_l = scf_line.search(context)
+        if scf_l:
+            scf_energy = float(scf_l.group("energy"))
+        else:
+            scf_l2 = scf_line2.search(context)
+            if scf_l2:
+                scf_energy = float(scf_l2.group("energy"))
+        self.energy_settings = {"scf_e": scf_energy, "ci_e": energies, "ci_converged": convergeds}
 
     def _parse_hartree_fock(self):
         """Deal with HF calculations

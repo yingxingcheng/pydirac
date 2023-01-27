@@ -35,6 +35,7 @@ from monty.os import cd
 from pydirac.io.outputs import Output
 from pydirac.analysis.polarizability import PolarizabilityCalculator
 from pydirac.analysis.constant import *
+from pydirac.core.settings import Settings
 
 __all__ = [
     "get_polarizability",
@@ -157,7 +158,6 @@ def do_one_basis(output_lis):
     # maybe we just use a dict to restore all information
     energies = {}
     # cause for different type calculations, the electric fields are the same
-    # TODO: use dict to restore fields as well?
     fields = []
 
     for o in output_lis:
@@ -178,16 +178,21 @@ def do_one_basis(output_lis):
 
         elif o.inp.calc_method == "CI":
             # check all roots converged
-            if not np.alltrue(np.asarray(o.energy_settings["ci_converged"])):
-                raise RuntimeError("Not all roots are converged!")
-                # warnings.warn("not all roots are converged, please use data carfully")
+            for i in o.energy_settings["ci_converged"]:
+                if not np.alltrue(np.asarray(i)):
+                    raise RuntimeError("Not all roots are converged!")
 
             for k, v in o.energy_settings["ci_e"].items():
                 if k not in energies.keys():
                     energies[k] = []
                 energies[k].append(v)
+
+            if "scf_e" not in energies:
+                energies["scf_e"] = []
+            energies["scf_e"].append(o.energy_settings["scf_e"])
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
+            continue
 
     # remove items where the length of energy is not equal to the one of field
     del_k_lis = []
@@ -204,15 +209,15 @@ def do_one_basis(output_lis):
     # {'scf': alpha_scf, 'mp2':alpha_scf, 'ccsd':alpha_ccsd}
     res = {}
     for k, energy in energies.items():
-        res[k.strip("_e")] = pc.get_svd_from_array(energy, fields)
-    # TODO: we should just return energies and calculate polar in another function.
-    return res
+        polar_key = k.strip("_e")
+        res[polar_key] = pc.get_svd_from_array(energy, fields)
+    res_all = {"energy": {"energies": energies, "fields": fields}, "polar": res}
+    return res_all
 
 
 def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=True):
     all_basis_res = {}
     for o in output_lis:
-        # TODO: the old task_type: NR-CC-2C, SO-CC-4C
         task_type, orbit = o.task_type, o.calc_orbit
         obt_info = get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
         k = get_keyword(o.mol.molecule.atomic_info.symbol, task_type, obt_info)
@@ -221,10 +226,11 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=Tr
         all_basis_res[k].append(o)
 
     e_res = {}
+    # print("[Debug] get_polarizability_from_output_list():")
     for k, v in all_basis_res.items():
         one_res = do_one_basis(v)
         if one_res:
-            print(k, one_res)
+            # print(k, "==>", one_res)
             e_res[k] = one_res
 
     if verbos:

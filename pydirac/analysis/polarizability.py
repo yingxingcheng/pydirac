@@ -92,18 +92,21 @@ class PolarizabilityCalculator:
 
         # define a matrix
         A = self.get_A(np.asarray(field))
-        # SVD
-        U, sigma, VT = svd(A)
-        # Make a matrix Sigma of the correct size:
-        Sigma = np.zeros(A.shape)
-        Sigma[: A.shape[1], : A.shape[1]] = np.diag(sigma)
-
-        Sigma_prinv = np.zeros(A.shape).T
-        Sigma_prinv[: self.nb_coeffs, : self.nb_coeffs] = np.diag(1 / sigma[: self.nb_coeffs])
-
-        # Now compute the SVD-based solution for the least-squares problem
         b = np.asarray(energy) - e_ref
-        x_svd = VT.T.dot(Sigma_prinv).dot(U.T).dot(b)
+        x_svd = np.linalg.lstsq(A, b, rcond=1e-8)[0]
+
+        # # SVD
+        # U, sigma, VT = svd(A)
+        # # Make a matrix Sigma of the correct size:
+        # Sigma = np.zeros(A.shape)
+        # Sigma[: A.shape[1], : A.shape[1]] = np.diag(sigma)
+
+        # Sigma_prinv = np.zeros(A.shape).T
+        # Sigma_prinv[: self.nb_coeffs, : self.nb_coeffs] = np.diag(1 / sigma[: self.nb_coeffs])
+
+        # # Now compute the SVD-based solution for the least-squares problem
+        # b = np.asarray(energy) - e_ref
+        # x_svd = VT.T.dot(Sigma_prinv).dot(U.T).dot(b)
         return x_svd
 
     def get_res_svd(self, filename):
@@ -125,18 +128,20 @@ class PolarizabilityCalculator:
 
         # define a matrix
         A = self.get_A(np.asarray(field))
-        # SVD
-        U, sigma, VT = svd(A)
-        # Make a matrix Sigma of the correct size:
-        Sigma = np.zeros(A.shape)
-        Sigma[: A.shape[1], : A.shape[1]] = np.diag(sigma)
-
-        Sigma_prinv = np.zeros(A.shape).T
-        Sigma_prinv[: self.nb_coeffs, : self.nb_coeffs] = np.diag(1 / sigma[: self.nb_coeffs])
-
-        # Now compute the SVD-based solution for the least-squares problem
         b = np.asarray(energy) - e_ref
-        x_svd = VT.T.dot(Sigma_prinv).dot(U.T).dot(b)
+        x_svd = np.linalg.lstsq(A, b, rcond=1e-8)[0]
+        # # SVD
+        # U, sigma, VT = svd(A)
+        # # Make a matrix Sigma of the correct size:
+        # Sigma = np.zeros(A.shape)
+        # Sigma[: A.shape[1], : A.shape[1]] = np.diag(sigma)
+
+        # Sigma_prinv = np.zeros(A.shape).T
+        # Sigma_prinv[: self.nb_coeffs, : self.nb_coeffs] = np.diag(1 / sigma[: self.nb_coeffs])
+
+        # # Now compute the SVD-based solution for the least-squares problem
+        # b = np.asarray(energy) - e_ref
+        # x_svd = VT.T.dot(Sigma_prinv).dot(U.T).dot(b)
         return x_svd
 
 
