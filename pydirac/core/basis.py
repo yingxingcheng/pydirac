@@ -1,31 +1,9 @@
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#  Pydirac: PYthon tool for DIRAC software.
-#  Copyright (C) 2020-2020 The Pydirac Development Team
-#
-#  This file is part of Pydirac.
-#
-#  Pydirac is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 3
-#  of the License, or (at your option) any later version.
-#
-#  Pydirac is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, see <http://www.gnu.org/licenses/>
-#
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 import os
 import re
+import importlib_resources
 
 from pydirac.core.periodic import Element
 from pydirac.io.inputs import Mol
-
-MODULE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 
 def basis_helper(filename="ANO-RCC"):
@@ -142,11 +120,12 @@ class DyallBasisHelper(object):
         pass
 
     def get_basis_set(self, basis_type, ele_type):
+        basis_type = basis_type.lower()
         if basis_type not in ["acv3z", "acv4z", "cv3z", "cv4z"]:
             raise RuntimeError('basis_type must be one of "acv3z", "acv4z", ' '"cv3z", and "cv4z"')
 
-        fname = os.path.join(MODULE_PATH, "dyall.{}".format(basis_type))
-        with open(fname, "r") as f:
+        fname = str(importlib_resources.files("pydirac.data.basisset") / f"dyall.{basis_type}")
+        with open(fname) as f:
             lines = f.readlines()
 
         comment = []
