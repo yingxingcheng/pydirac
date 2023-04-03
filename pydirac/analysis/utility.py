@@ -1,82 +1,82 @@
-#!/usr/bin/env python
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#  Pydirac: PYthon tool for DIRAC software.
-#  Copyright (C) 2020-2020 The Pydirac Development Team
-#
-#  This file is part of Pydirac.
-#
-#  Pydirac is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 3
-#  of the License, or (at your option) any later version.
-#
-#  Pydirac is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, see <http://www.gnu.org/licenses/>
-#
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 import re
 
 
-def get_symbol_and_charge(filename = 'atom.mol'):
-    """Get Info from `mol` file
+def get_symbol_and_charge(filename="atom.mol"):
+    """
+    Get atom symbols and charges from a `.mol` file.
 
-    Args:
-        filename (str): filename of `mol` file
+    Parameters:
+    -----------
+    filename : str, optional
+        The name of the `.mol` file to read.
 
     Returns:
-        A list of atoms
+    --------
+    atoms : list of tuple of str and float
+        A list of tuples containing the symbol and charge of each atom in the file.
+
+    Example:
+    --------
+    >>> get_symbol_and_charge('atom.mol')
+    [('C', 6.0), ('H', 1.0), ('H', 1.0), ('H', 1.0)]
     """
 
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         context = f.read()
 
-    pattern = r'^\s+(\d+)\.\s+(\d+\.?\d?)\s+'
+    # Regular expression to match the symbol and charge of each atom in the file
+    pattern = r"^\s+(\d+)\.\s+(\d+\.?\d?)\s+"
     re_obj = re.compile(pattern)
     atoms = re.findall(pattern, context, re.MULTILINE)
-    print(atoms)
+
+    # Convert charge from string to float and return a list of (symbol, charge) tuples
+    atoms = [(re.sub(r"[0-9]+", "", symbol), float(charge)) for symbol, charge in atoms]
+
     return atoms
 
 
-def get_energy(filename, method='CCSD(T)'):
-    """Get energy from a CC calculation.
+def get_energy(filename, method="CCSD(T)"):
+    """
+    Get the energy from a quantum chemical calculation output file.
 
-    Give a CC calculation output file specified by `fname` and which type energy
-    do you need given by `method`, the options are 'CCSD(T)', 'CCSD', 'MP2' or
-    'SCF'
+    Given a quantum chemical calculation output file specified by `filename` and
+    the type of energy to retrieve given by `method`, the options are "CCSD(T)",
+    "CCSD", "MP2", or "SCF".
 
-    Args:
-        filename (str): the filename of RELCCSD calculation output
-        method (str): energy type
+    Parameters:
+    -----------
+    filename : str
+        The name of the quantum chemical calculation output file.
+    method : str, optional
+        The type of energy to retrieve. Default is "CCSD(T)".
 
     Returns:
-        A list of energies
+    --------
+    energy : float
+        The energy value.
+
+    Raises:
+    -------
+    RuntimeError :
+        If the energy for the specified method is not found in the file.
+
+    Example:
+    --------
+    >>> get_energy('calc.out', method='CCSD(T)')
+    -245.186792800
     """
 
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         context = f.read()
 
-    if '(' and ')' in method:
-        # add \ for (
-        method = method.replace('(', '\(').replace(')', '\)')
-    pattern = r'^@.*{method} energy[\s:]*(-?[\d\.]+)'.format(
-        **{'method': method})
-
-    # re_obj = re.compile(pattern)
+    # Regular expression to match the energy for the specified method
+    if "(" and ")" in method:
+        # Escape parentheses
+        method = method.replace("(", r"\(").replace(")", r"\)")
+    pattern = r"^@.*{method} energy[\s:]*(-?[\d\.]+)".format(**{"method": method})
     energy = re.findall(pattern, context, re.MULTILINE)
 
     if energy:
-        return energy[-1]
+        return float(energy[-1])
     else:
-        raise RuntimeError(
-            'Did not find energy for {0} in {1}'.format(method, filename))
-
-
-if __name__ == '__main__':
-    pass
+        raise RuntimeError("Did not find energy for {0} in {1}".format(method, filename))

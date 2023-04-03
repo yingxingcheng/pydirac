@@ -26,7 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 pydirac/tests/
-pydirac/unit_tests/data
+pydirac/tests/data
 dist/
 
 # PyInstaller

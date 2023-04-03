@@ -27,48 +27,48 @@ from setuptools import setup, find_packages
 
 module_dir = os.path.dirname(os.path.abspath(__file__))
 
+
 def package_files(directory, extensions):
     """Walk package directory to make sure we include all relevant files in package."""
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
             if any([filename.endswith(ext) for ext in extensions]):
-                paths.append(os.path.join('..', path, filename))
+                paths.append(os.path.join("..", path, filename))
     return paths
-json_yaml_csv_files = package_files('pydirac', ['yaml', 'json', 'csv', 'acv3z', 'acv4z', 'cv3z', 'cv4z'])
+
+
+json_yaml_csv_files = package_files(
+    "pydirac", ["yaml", "json", "csv", "acv3z", "acv4z", "cv3z", "cv4z"]
+)
 
 if __name__ == "__main__":
-    print(module_dir)
     setup(
-        name='pydirac',
-        version='1.0.0',
-        description='DIRAC interface',
-        long_description=open(os.path.join(module_dir, 'README.md')).read(),
-        url='https://github/yxcheng/pydirac',
-        author='Yingxing Cheng',
-        author_email='Yingxing.Cheng@ugent.be',
-        license='GNU',
+        name="pydirac",
+        version="1.0.0",
+        description="DIRAC interface",
+        long_description=open(os.path.join(module_dir, "README.md")).read(),
+        url="https://github/yxcheng/pydirac",
+        author="Yingxing Cheng",
+        author_email="Yingxing.Cheng@ugent.be",
+        license="GNU",
         packages=find_packages(),
-        package_data={'pydirac': json_yaml_csv_files},
+        package_data={"pydirac": json_yaml_csv_files},
         zip_safe=False,
         install_requires=[],
         extras_require={},
-        classifiers=['Programming Language :: Python :: 2.7',
-                     "Programming Language :: Python :: 3",
-                     "Programming Language :: Python :: 3.6",
-                     'Development Status :: 5 - Production/Stable',
-                     'Intended Audience :: Science/Research',
-                     'Intended Audience :: System Administrators',
-                     'Intended Audience :: Information Technology',
-                     'Operating System :: OS Independent',
-                     'Topic :: Other/Nonlisted Topic',
-                     'Topic :: Scientific/Engineering'],
-        #test_suite='nose.collector',
-        #tests_require=['nose'],
-        #scripts=[os.path.join('scripts', f) for f in os.listdir(os.path.join(module_dir, 'scripts'))]
-        entry_points={
-            'console_scripts': [
-                'pypam = pydirac.cli.pypam:main',
-            ]
-        }
+        classifiers=[
+            "Development Status :: 5 - Production/Stable",
+            "Intended Audience :: Science/Research",
+            "Intended Audience :: System Administrators",
+            "Intended Audience :: Information Technology",
+            "Operating System :: OS Independent",
+            "Topic :: Other/Nonlisted Topic",
+            "Topic :: Scientific/Engineering",
+        ],
+        python_requires=">3.6",
+        # test_suite='nose.collector',
+        # tests_require=['nose'],
+        # scripts=[os.path.join('scripts', f) for f in os.listdir(os.path.join(module_dir, 'scripts'))]
+        entry_points={"console_scripts": ["pypam = pydirac.cli.pypam:main"]},
     )
