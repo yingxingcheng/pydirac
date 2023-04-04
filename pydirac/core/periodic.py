@@ -1,6 +1,7 @@
 import six
 from monty.json import MSONable, jsanitize
 
+__all__ = ["Element"]
 # fmt: off
 _PERIODIC_TABLE = [
     'dummy', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P', 'S',
@@ -40,9 +41,28 @@ _SPECIAL_ELEMENTS = {
 
 
 class Element(MSONable):
+    """
+    Represents a chemical element in the periodic table.
+
+    Attributes
+    ----------
+    atomic_number : int
+        The atomic number of the element.
+    symbol : str
+        The symbol of the element.
+    """
+
     ROW_SIZES = (2, 8, 8, 18, 18, 32, 32)
 
     def __init__(self, id):
+        """
+        Initialize the Element object.
+
+        Parameters
+        ----------
+        id : str or int
+            The symbol or atomic number of the element.
+        """
         if isinstance(id, (six.string_types, int)):
             idx, symbol = self._get_element(id)
         else:
@@ -52,6 +72,20 @@ class Element(MSONable):
         self.symbol = symbol
 
     def _get_element(self, id):
+        """
+        Get the element by the given id (either symbol or atomic number).
+
+        Parameters
+        ----------
+        id : str or int
+            The symbol or atomic number of the element.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the atomic number and symbol of the element.
+        """
+
         def get_symbol(id):
             """
             Get element by given index.
@@ -80,7 +114,12 @@ class Element(MSONable):
     @property
     def block(self):
         """
-        Return the block character "s,p,d,f"
+        Get the block character (s, p, d, or f) of the element.
+
+        Returns
+        -------
+        str
+            The block character of the element.
         """
         if (self.is_actinoid or self.is_lanthanoid) and self.atomic_number not in [71, 103]:
             return "f"
@@ -97,21 +136,36 @@ class Element(MSONable):
     @property
     def is_lanthanoid(self):
         """
-        True if element is a lanthanoid.
+        Check if the element is a lanthanoid.
+
+        Returns
+        -------
+        bool
+            True if the element is a lanthanoid, False otherwise.
         """
         return 56 < self.atomic_number < 72
 
     @property
     def is_actinoid(self):
         """
-        True if element is a actinoid.
+        Check if the element is an actinoid.
+
+        Returns
+        -------
+        bool
+            True if the element is an actinoid, False otherwise.
         """
         return 88 < self.atomic_number < 104
 
     @property
     def row(self):
         """
-        Returns the periodic table row of the element.
+        Get the periodic table row of the element.
+
+        Returns
+        -------
+        int
+            The row of the element in the periodic table.
         """
         z = self.Z
         total = 0
@@ -128,7 +182,12 @@ class Element(MSONable):
     @property
     def group(self):
         """
-        Returns the periodic table group of the element.
+        Get the periodic table group of the element.
+
+        Returns
+        -------
+        int
+            The group of the element in the periodic table.
         """
         z = self.atomic_number
         if z == 1:
@@ -155,17 +214,49 @@ class Element(MSONable):
 
     @property
     def group_symbol(self):
+        """
+        Get the group symbol of the element.
+
+        Returns
+        -------
+        str
+            The group symbol of the element.
+        """
         return "group-{0}".format(self.group)
 
     @property
     def Z(self):
+        """
+        Get the atomic number of the element.
+
+        Returns
+        -------
+        int
+            The atomic number of the element.
+        """
         return self.atomic_number
 
     @property
     def period(self):
+        """
+        Get the period of the element in the periodic table.
+
+        Returns
+        -------
+        int
+            The period of the element in the periodic table.
+        """
         return self.row
 
     def as_dict(self) -> dict:
+        """
+        Get a dictionary representation of the Element object.
+
+        Returns
+        -------
+        dict
+            The dictionary representation of the Element object.
+        """
         d = {
             "Z": self.Z,
             "block": self.block,
@@ -177,7 +268,14 @@ class Element(MSONable):
         return jsanitize(d)
 
     def get_elec_config(self):
-        """Get electron configuration by specifying the number of electrons."""
+        """
+        Get the electron configuration of the element.
+
+        Returns
+        -------
+        str
+            The electron configuration of the element.
+        """
         n = self.Z
         if n in _SPECIAL_ELEMENTS.keys():
             return _SPECIAL_ELEMENTS[n]
@@ -198,25 +296,80 @@ class Element(MSONable):
         return orbital_info
 
     def get_dirac_shell_str(self, return_dict=False):
-        """Get electron configurations in DIRAC according to the number of electrons.
+        """
+        Returns the electron configurations in DIRAC according to the number of electrons.
 
+        Parameters
+        ----------
+        return_dict : bool, optional
+            Whether to return the results as a dictionary or string. Default is False.
+
+        Returns
+        -------
+        str or dict
+            The electron configurations in DIRAC.
+
+        Notes
+        -----
         For example:
-        for NSYM = 1
-        .CLOSED SHELL
-        2
-        .OPEN SHELL
-        1
-        1/2
 
-        or for NSYM != 1
-        .CLSED SHELL
-        2 0
-        .OPEN SHELL
-        1
-        1/2,0
+        - for NSYM = 1
+            ```text
+            .CLOSED SHELL
+            2
+            .OPEN SHELL
+            1
+            1/2
+            ```
+
+        - or for NSYM != 1
+            ```text
+            .CLSED SHELL
+            2 0
+            .OPEN SHELL
+            1
+            1/2,0
+            ```
         """
 
         def get_shell(elec_config, NSYM=1):
+            """
+            Determines the number of electrons in each shell and subshell for a given electronic configuration.
+
+            Parameters
+            ----------
+            elec_config : str
+                The electronic configuration of the atom. For example, "1s2 2s2 2p6" represents the configuration of Neon.
+            NSYM : int, optional
+                The number of symmetry operations, defaults to 1.
+
+            Returns
+            -------
+            cs_str : str or None
+                The string representation of the number of electrons in closed shells, or None if there are no closed shells.
+            os_str : str or None
+                The string representation of the number of electrons in open shells, or None if there are no open shells.
+
+            Notes
+            -----
+            This function uses the Aufbau principle to determine the electron configuration. The order of orbitals is as follows:
+            "1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p 7s 5f 6d 7p"
+            The maximum number of electrons that can be in each subshell is as follows:
+            s: 2
+            p: 6
+            d: 10
+            f: 14
+            Any subshell with less than the maximum number of electrons is considered open shell, otherwise it is considered closed shell.
+
+            Examples
+            --------
+            >>> get_shell("1s2 2s2 2p6")
+            ('10', None)
+
+            >>> get_shell("1s2 2s2 2p5")
+            (None, '1/2,0\\n1/2,0\\n2/6,0')
+
+            """
             rule = "1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p 7s 5f 6d 7p"
             nb_dict = {"s": 2, "p": 6, "d": 10, "f": 14}
             cs_even, cs_odd = 0, 0

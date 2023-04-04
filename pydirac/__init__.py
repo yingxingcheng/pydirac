@@ -1,33 +1,9 @@
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#  Pydirac: PYthon tool for DIRAC software.
-#  Copyright (C) 2020-2020 The Pydirac Development Team
-#
-#  This file is part of Pydirac.
-#
-#  Pydirac is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 3
-#  of the License, or (at your option) any later version.
-#
-#  Pydirac is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, see <http://www.gnu.org/licenses/>
-#
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 import os
-import warnings
-from fnmatch import fnmatch
 import yaml
 
-
-__author__ = "Yingxing Cheng"
+__author__ = "YingXing Cheng"
 __email__ = "yingxing.cheng@ugent.be"
-__maintainer__ = "Yingxing Cheng"
+__maintainer__ = "YingXing Cheng"
 __maintainer_email__ = "yingxing.cheng@ugent.be"
 __version__ = "1.0.0"
 
@@ -53,29 +29,7 @@ def _load_pmg_settings():
 
 SETTINGS = _load_pmg_settings()
 
-
-def loadfn(fname):
-    """
-    Convenience method to perform quick loading of data from a filename. The
-    type of object returned depends the file type.
-
-    Args:
-        fname (string): A filename.
-
-    Returns:
-        Note that fname is matched using unix-style, i.e., fnmatch.
-        (Structure) if *POSCAR*/*CONTCAR*/*.cif
-        (Vasprun) *vasprun*
-        (obj) if *json* (passthrough to monty.serialization.loadfn)
-    """
-    # if (fnmatch(fname, "*POSCAR*") or fnmatch(fname, "*CONTCAR*") or ".cif" in fname.lower()) or \
-    #         fnmatch(fname, "*.vasp"):
-    #     return Mol.from_file(fname)
-    # if fnmatch(fname, "*vasprun*"):
-    #     from pymatgen.io.vasp import Vasprun
-    #     return Vasprun(fname)
-    # if fnmatch(fname, "*.json*"):
-    #     from monty.serialization import loadfn
-    #     return loadfn(fname)
-    # raise ValueError("Unable to determine how to process %s." % fname)
-    pass
+from pydirac.core import *
+from pydirac.cli import *
+from pydirac.analysis import *
+from pydirac.io import *

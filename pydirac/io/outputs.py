@@ -5,6 +5,8 @@ import numpy as np
 from pydirac.io.inputs import Inp, Mol
 from pydirac.core.orbitals import OrbitalType, AtomicOrbital, MoleculeOrbitals
 
+__all__ = ["Output"]
+
 
 class Output:
     """Class to parse DIRAC output file
@@ -513,6 +515,16 @@ class Output:
 
     @property
     def calc_orbit(self):
+        """Calculate the orbit.
+
+        Returns
+        -------
+        dict or function
+            If the calculation method is "CC", returns the CC orbit calculation function.
+            If the calculation method is "CI", returns the CI orbit calculation function.
+            Otherwise, returns a dictionary with "occ" and "vir" keys and values set to 0.
+
+        """
         if self.inp.calc_method == "CC":
             return self._cc_calc_orbit
         elif self.inp.calc_method == "CI":
@@ -521,6 +533,14 @@ class Output:
             return {"occ": 0, "vir": 0}
 
     def as_dict(self) -> dict:
+        """Return the object as a dictionary.
+
+        Returns
+        -------
+        dict
+            A dictionary representation of the object.
+
+        """
         d = {
             "@module": self.__class__.__module__,
             "@class": self.__class__.__name__,

@@ -32,9 +32,12 @@ intervention. This ensures comparability across runs.
 
 class DiracInputSet(MSONable, metaclass=abc.ABCMeta):
     """
-    Base class representing a set of Dirac input parameters with a structure
-    supplied as init parameters. Typically, you should not inherit from this
-    class. Start from DictSet or MPRelaxSet or MITRelaxSet.
+    Abstract base class representing a set of Dirac input parameters with a
+    structure supplied as initialization parameters.
+
+    Attributes:
+        inp (property): Inp object.
+        mol (property): Mol object.
     """
 
     @property
@@ -52,20 +55,44 @@ class DiracInputSet(MSONable, metaclass=abc.ABCMeta):
         pass
 
     def get_dirac_input(self):
+        """Return a :class:`~pydirac.inputs.DiracInput` instance from the input and
+        molecule objects.
+
+        Returns:
+            DiracInput: DiracInput instance.
+        """
         return DiracInput(inp=self.inp, mol=self.mol)
 
     def write_input(self, output_dir, make_dir_if_not_present=True):
         """
-        Writes a set of DIRAC input to a directory.
-        Returns:
+        Write a set of DIRAC input to a directory.
 
+        Args:
+            output_dir (str): Path to the output directory.
+            make_dir_if_not_present (bool): If True, create the directory if not present.
+
+        Returns:
+            None
         """
         dinput = self.get_dirac_input()
         dinput.write_input(output_dir, make_dir_if_not_present=make_dir_if_not_present)
 
 
 def _load_yaml_config(fname):
-    # config = loadfn(str(MODULE_DIR / ("%s.yaml" % fname)))
+    """
+    Load a YAML configuration file and merge it with its parent configurations.
+
+    Parameters
+    ----------
+    fname : str
+        The name of the YAML configuration file to load.
+
+    Returns
+    -------
+    dict
+        The merged YAML configuration dictionary.
+
+    """
     config = loadfn(str(importlib_resources.files("pydirac.data.template") / f"{fname}.yaml"))
     if "PARENT" in config:
         parent_config = _load_yaml_config(config["PARENT"])
@@ -80,6 +107,41 @@ def _load_yaml_config(fname):
 
 
 class DictSet(DiracInputSet):
+    """
+    Concrete implementation of :class:`~pydirac.input_sets.DiracInputSet` that generates
+    DIRAC input sets from a dictionary of settings and a molecule.
+
+    Parameters
+    ----------
+    molecule : pymatgen.Molecule
+        The molecule object.
+    config_dict : dict
+        A dictionary of input and molecule settings.
+    files_to_transfer : dict, optional
+        A dictionary of files to transfer.
+    user_inp_settings : dict, optional
+        A dictionary of user-defined input settings.
+    user_mol_settings : dict, optional
+        A dictionary of user-defined molecule settings.
+    use_structure_charge : bool, optional
+        Whether to use the structure charge.
+
+    Attributes
+    ----------
+    inp : Inp
+        Inp object.
+    molecule : pymatgen.Molecule
+        The molecule object.
+    mol : Mol
+        Mol object.
+
+    Methods
+    -------
+    write_input(output_dir, make_dir_if_not_present=True)
+        Write a set of DIRAC input to a directory.
+
+    """
+
     def __init__(
         self,
         molecule,
@@ -89,6 +151,25 @@ class DictSet(DiracInputSet):
         user_mol_settings=None,
         use_structure_charge=False,
     ):
+        """
+        Constructor for :class:`~pydirac.input_sets.DictSet`.
+
+        Parameters
+        ----------
+        molecule : pymatgen.Molecule
+            The molecule object.
+        config_dict : dict
+            A dictionary of input and molecule settings.
+        files_to_transfer : dict, optional
+            A dictionary of files to transfer.
+        user_inp_settings : dict, optional
+            A dictionary of user-defined input settings.
+        user_mol_settings : dict, optional
+            A dictionary of user-defined molecule settings.
+        use_structure_charge : bool, optional
+            Whether to use the structure charge.
+
+        """
         self._molecule = molecule
         self._config_dict = deepcopy(config_dict)
         self.files_to_transfer = files_to_transfer or {}
@@ -99,7 +180,13 @@ class DictSet(DiracInputSet):
     @property
     def inp(self) -> Inp:
         """
-        Returns: Inp object
+        Inp object.
+
+        Returns
+        -------
+        Inp
+            Inp instance.
+
         """
         settings = dict(self._config_dict["inp"])
         inp = Inp(settings)
@@ -112,7 +199,13 @@ class DictSet(DiracInputSet):
     @property
     def mol(self) -> Mol:
         """
-        Returns: Mol object
+        Mol object.
+
+        Returns
+        -------
+        Mol
+            Mol instance.
+
         """
         mol = Mol(self.molecule)
         mol_settings = dict(self._config_dict["mol"])
@@ -129,15 +222,79 @@ class DictSet(DiracInputSet):
         return mol
 
     def __str__(self):
+        """
+        Return the class name.
+
+        Returns
+        -------
+        str
+            The class name.
+
+        """
         return self.__class__.__name__
 
     def write_input(self, output_dir, make_dir_if_not_present=True):
+        """
+        Write a set of DIRAC input to a directory.
+
+        Parameters
+        ----------
+        output_dir : str
+            The path of the directory to write the input files to.
+        make_dir_if_not_present : bool, optional
+            Whether to create the directory if it does not exist.
+
+        Returns
+        -------
+        None
+
+        """
         super().write_input(output_dir=output_dir, make_dir_if_not_present=make_dir_if_not_present)
         for k, v in self.files_to_transfer.items():
             shutil.copy2(v, str(Path(output_dir) / k))
 
 
 class AtomicDHFSet(DictSet):
+    """
+    A class representing a set of input parameters for an atomic Dirac-Hartree-Fock (DHF) calculation.
+
+    Parameters
+    ----------
+    molecule : Molecule
+        The molecule to compute the DHF calculation for.
+    hamiltonian_mode : str, optional
+        The type of Hamiltonian to use. Must be one of "2C" (two-component) or "4C" (four-component).
+        Defaults to "4C".
+    is_spinfree : bool, optional
+        Whether to use a spin-free Hamiltonian. Defaults to False.
+    is_ff : bool, optional
+        Whether to include a frozen-core approximation. Defaults to False.
+    ff_mode : str, optional
+        The type of frozen-core approximation to use. Must be one of "D" (dipole approximation) or "Q"
+        (quadrupole approximation). Defaults to "D".
+    zff : float, optional
+        The factor by which to scale the frozen-core potential. Only used if is_ff is True. Defaults to None.
+    **kwargs
+        Additional keyword arguments to be passed to the superclass constructor.
+
+    Attributes
+    ----------
+    SUPPORTED_FF_MODES : tuple of str
+        The supported frozen-core approximation modes.
+    SUPPORTED_HAMILTONIAN_MODES : tuple of str
+        The supported Hamiltonian modes.
+
+    Raises
+    ------
+    ValueError
+        If the ff_mode parameter is not one of the supported modes.
+
+    Notes
+    -----
+    This class inherits from DictSet and uses the configuration file "AtomicDHFSet" to populate its input dictionary.
+
+    """
+
     CONFIG = _load_yaml_config("AtomicDHFSet")
 
     SUPPORTED_FF_MODES = ("D", "Q")
@@ -170,6 +327,14 @@ class AtomicDHFSet(DictSet):
 
     @property
     def inp(self):
+        """
+        The input dictionary for the DHF calculation.
+
+        Returns
+        -------
+        dict
+            The input dictionary.
+        """
         parent_inp = super().inp
 
         # update open shell setup
@@ -218,9 +383,74 @@ class AtomicDHFSet(DictSet):
 
 class AtomicCCSet(AtomicDHFSet):
     """
-    Specification of reference determinant, type of calculation, and general settings
+    Specification of reference determinant, type of calculation, and general settings.
 
     Default is energy calculation.
+
+    Parameters
+    ----------
+    molecule : AtomicStruct or Molecule
+        The atomic or molecular structure.
+    e_min : float, optional
+        Minimum energy of the active space. Default is -20.0.
+    e_max : float, optional
+        Maximum energy of the active space. Default is 25.0.
+    e_error : float, optional
+        Convergence threshold for energy. Default is 0.01.
+    maxit : int, optional
+        Maximum number of iterations. Default is 60.
+    ntol : int, optional
+        Convergence threshold for the norm of the residual. Default is 10.
+    nelec : tuple of int, optional
+        Number of electrons for closed-shell systems. Default is None.
+    nelec_open : tuple of int, optional
+        Number of electrons for open-shell systems. Default is None.
+    nel_f1 : tuple of int, optional
+        Number of frozen core electrons in the first fragment. Default is None.
+    nel_f2 : tuple of int, optional
+        Number of frozen core electrons in the second fragment. Default is None.
+    no_T : bool, optional
+        If True, does not include the T amplitudes. Default is None.
+    print_level : int, optional
+        Level of detail printed. Default is 1.
+    prev_inp : str or Inp, optional
+        Path to previous input file or the previous input file object. Default is None.
+    prev_mol : str or Mol, optional
+        Path to previous molecular file or the previous molecular file object. Default is None.
+    **kwargs
+        Additional arguments to pass to AtomicDHFSet.
+
+    Attributes
+    ----------
+    e_min : float
+        Minimum energy of the active space.
+    e_max : float
+        Maximum energy of the active space.
+    e_error : float
+        Convergence threshold for energy.
+    maxit : int
+        Maximum number of iterations.
+    ntol : int
+        Convergence threshold for the norm of the residual.
+    nelec : tuple of int or None
+        Number of electrons for closed-shell systems.
+    nelec_open : tuple of int or None
+        Number of electrons for open-shell systems.
+    nel_f1 : tuple of int or None
+        Number of frozen core electrons in the first fragment.
+    nel_f2 : tuple of int or None
+        Number of frozen core electrons in the second fragment.
+    no_T : bool or None
+        If True, does not include the T amplitudes.
+    print_level : int
+        Level of detail printed.
+    prev_inp : Inp or None
+        Previous input file object or None.
+    prev_mol : Mol or None
+        Previous molecular file object or None.
+    kwargs : dict
+        Additional arguments passed to AtomicDHFSet.
+
     """
 
     def __init__(
@@ -265,6 +495,14 @@ class AtomicCCSet(AtomicDHFSet):
 
     @property
     def inp(self):
+        """
+        Generates an input file object with the settings required for a CC calculation.
+
+        Returns
+        -------
+        Inp
+            Input file object.
+        """
         parent_inp = super().inp
         inp = self.prev_inp if self.prev_inp is not None else parent_inp
 
@@ -302,20 +540,34 @@ class AtomicCCSet(AtomicDHFSet):
 
     @property
     def mol(self):
+        """
+        Returns the molecular file object.
+
+        Returns
+        -------
+        Mol
+            Molecular file object.
+        """
         parent_mol = super().mol
         this_mol = self.prev_mol if self.prev_mol is not None else parent_mol
         this_mol.update(self.user_mol_settings)
         return this_mol
 
     def override_from_prev_calc(self, prev_calc_dir=".", no_scf=False):
-        """Update the input set to include settings from a previous calculation.
+        """
+        Update the input set to include settings from a previous calculation.
 
-        Args:
-            prev_calc_dir: The path to the previous calculation directory.
+        Parameters
+        ----------
+        prev_calc_dir : str, optional
+            Path to the previous calculation directory. Default is ".".
+        no_scf : bool, optional
+            If True, does not perform SCF calculations. Default is False.
 
-        Returns:
-            The input set with the settings (inp, molecule, mol, etc)
-            updated using the previous DIRAC run.
+        Returns
+        -------
+        AtomicCCSet
+            Input set with updated settings.
         """
         output = get_diracrun_output(prev_calc_dir)
 
@@ -331,11 +583,62 @@ class AtomicCCSet(AtomicDHFSet):
 
     @classmethod
     def from_prev_calc(cls, prev_calc_dir, ff_mode="D", no_scf=False, **kwargs):
+        """
+        Create an AtomicCCSet object using settings from a previous calculation.
+
+        Parameters
+        ----------
+        prev_calc_dir : str
+            Path to the previous calculation directory.
+        ff_mode : str, optional
+            Fragmentation mode. Default is "D".
+        no_scf : bool, optional
+            If True, does not perform SCF calculations. Default is False.
+        **kwargs
+            Additional arguments to pass to AtomicDHFSet.
+
+        Returns
+        -------
+        AtomicCCSet
+            Input set with updated settings from previous calculation.
+        """
         input_set = cls(_dummy_structure, ff_mode=ff_mode, **kwargs)
         return input_set.override_from_prev_calc(prev_calc_dir, no_scf)
 
 
 class AtomicCISet(AtomicDHFSet):
+    """
+    Specifies the reference determinant and type of calculation for CI calculations.
+
+    Inherits from AtomicDHFSet.
+
+    Parameters
+    ----------
+    molecule : str or pymatgen.Molecule
+        A string or pymatgen.Molecule object representing the molecule to calculate.
+    prev_inp : str or Inp, optional
+        A string or Inp object representing the previous input file to be used as a template.
+        Default is None.
+    prev_mol : str or Mol, optional
+        A string or Mol object representing the previous molecular file to be used as a template.
+        Default is None.
+    **kwargs
+        Additional keyword arguments to pass to AtomicDHFSet.
+
+    Attributes
+    ----------
+    prev_inp : Inp
+        The previous input file to be used as a template.
+    prev_mol : Mol
+        The previous molecular file to be used as a template.
+    kwargs : dict
+        Additional keyword arguments passed to AtomicDHFSet.
+
+    Notes
+    -----
+    The default calculation is energy calculation.
+    """
+
     def __init__(self, molecule, prev_inp=None, prev_mol=None, **kwargs):
         super().__init__(molecule, **kwargs)
         if isinstance(prev_inp, str):
@@ -349,6 +652,14 @@ class AtomicCISet(AtomicDHFSet):
 
     @property
     def inp(self):
+        """
+        Generates an input file object with the settings required for a CI calculation.
+
+        Returns
+        -------
+        Inp
+            Input file object.
+        """
         inp = super().inp
 
         # Step 1: the default KRCI setup
@@ -396,12 +707,35 @@ class AtomicCISet(AtomicDHFSet):
 
     @property
     def mol(self):
+        """
+        Returns the molecular file object.
+
+        Returns
+        -------
+        Mol
+            Molecular file object.
+        """
         parent_mol = super().mol
         this_mol = self.prev_mol if self.prev_mol is not None else parent_mol
         this_mol.update(self.user_mol_settings)
         return this_mol
 
     def override_from_prev_calc(self, prev_calc_dir=".", no_scf=False):
+        """
+        Update the input set to include settings from a previous calculation.
+
+        Parameters
+        ----------
+        prev_calc_dir : str, optional
+            Path to the previous calculation directory. Default is ".".
+        no_scf : bool, optional
+            If True, does not perform SCF calculations. Default is False.
+
+        Returns
+        -------
+        AtomicCISet
+            Input set with updated settings.
+        """
         output = get_diracrun_output(prev_calc_dir)
 
         self.prev_inp = output.inp
@@ -412,17 +746,52 @@ class AtomicCISet(AtomicDHFSet):
 
     @classmethod
     def from_prev_calc(cls, prev_calc_dir, ff_mode="D", no_scf=False, **kwargs):
+        """
+        Create an AtomicCISet object using settings from a previous calculation.
+
+        Parameters
+        ----------
+        prev_calc_dir : str
+            Path to the previous calculation directory.
+        ff_mode : str, optional
+            Fragmentation mode. Default is "D".
+        no_scf : bool, optional
+            If True, does not perform SCF calculations. Default is False.
+        **kwargs
+            Additional arguments to pass to AtomicDHFSet.
+
+        Returns
+        -------
+        AtomicCISet
+            Input set with updated settings from previous calculation.
+        """
         input_set = cls(_dummy_structure, ff_mode=ff_mode, **kwargs)
         return input_set.override_from_prev_calc(prev_calc_dir, no_scf)
 
     @staticmethod
     def get_info_for_s_block(out: Output, e_min, e_max, calc_type="quadrupole"):
         """
-        atom_info: information about specified atom
-        Return:
-             nb_active_elec: (int) the number of electrons in GAS
-             gas_list: (list) a list for GAS setup
-             root_list: (list) root for different symmetry
+        Get information for the s block.
+
+        Parameters
+        ----------
+        out : Output
+            The output file to parse.
+        e_min : float
+            The minimum energy.
+        e_max : float
+            The maximum energy.
+        calc_type : str, optional
+            The type of calculation. Default is "quadrupole".
+
+        Returns
+        -------
+        nb_active_elec: int
+            The number of electrons in the GAS.
+        gas_list: list
+            A list for GAS setup.
+        root_list: list
+            Root for different symmetries.
         """
         atomic_info = out.mol.molecule.atomic_info
         mos = out.mos
@@ -525,11 +894,27 @@ class AtomicCISet(AtomicDHFSet):
     @staticmethod
     def get_info_for_p_block(out: Output, e_min, e_max, calc_type="quadrupole"):
         """
-        atom_info: information about specified atom
-        Return:
-             nb_active_elec: (int) the number of electrons in GAS
-             gas_list: (list) a list for GAS setup
-             root_list: (list) root for different symmetry
+        Get information for the p block.
+
+        Parameters
+        ----------
+        out : Output
+            The output file to parse.
+        e_min : float
+            The minimum energy.
+        e_max : float
+            The maximum energy.
+        calc_type : str, optional
+            The type of calculation. Default is "quadrupole".
+
+        Returns
+        -------
+        nb_active_elec: int
+            The number of electrons in the GAS.
+        gas_list: list
+            A list for GAS setup.
+        root_list: list
+            Root for different symmetries.
         """
         atomic_info = out.mol.molecule.atomic_info
         mos = out.mos
@@ -671,11 +1056,27 @@ class AtomicCISet(AtomicDHFSet):
     @staticmethod
     def get_info_for_d_block(out: Output, e_min, e_max, calc_type="quadrupole"):
         """
-        atom_info: information about specified atom
-        Return:
-             nb_active_elec: (int) the number of electrons in GAS
-             gas_list: (list) a list for GAS setup
-             root_list: (list) root for different symmetry
+        Get information for the d block.
+
+        Parameters
+        ----------
+        out : Output
+            The output file to parse.
+        e_min : float
+            The minimum energy.
+        e_max : float
+            The maximum energy.
+        calc_type : str, optional
+            The type of calculation. Default is "quadrupole".
+
+        Returns
+        -------
+        nb_active_elec: int
+            The number of electrons in the GAS.
+        gas_list: list
+            A list for GAS setup.
+        root_list: list
+            Root for different symmetries.
         """
         atomic_info = out.mol.molecule.atomic_info
         mos = out.mos
@@ -769,11 +1170,27 @@ class AtomicCISet(AtomicDHFSet):
     @staticmethod
     def get_info_for_f_block(out: Output, e_min, e_max, calc_type="quadrupole"):
         """
-        atom_info: information about specified atom
-        Return:
-             nb_active_elec: (int) the number of electrons in GAS
-             gas_list: (list) a list for GAS setup
-             root_list: (list) root for different symmetry
+        Get information for the f block.
+
+        Parameters
+        ----------
+        out : Output
+            The output file to parse.
+        e_min : float
+            The minimum energy.
+        e_max : float
+            The maximum energy.
+        calc_type : str, optional
+            The type of calculation. Default is "quadrupole".
+
+        Returns
+        -------
+        nb_active_elec: int
+            The number of electrons in the GAS.
+        gas_list: list
+            A list for GAS setup.
+        root_list: list
+            Root for different symmetries.
         """
         atomic_info = out.mol.molecule.atomic_info
         mos = out.mos
@@ -801,6 +1218,20 @@ class AtomicCISet(AtomicDHFSet):
     def from_prev_dhf_calc(cls, filename_input, e_min=-10, e_max=10.0):
         """
         Create MRCI input based on the previous SCF calculation.
+
+        Parameters
+        ----------
+        filename_input : str
+            The name of the input file.
+        e_min : float, optional
+            The minimum energy. Default is -10.
+        e_max : float, optional
+            The maximum energy. Default is 10.0.
+
+        Returns
+        -------
+        cls
+            The MRCI input object.
         """
 
         out = Output(filename_input)
@@ -862,19 +1293,23 @@ class AtomicCISet(AtomicDHFSet):
         return ci_obj
 
 
-_dummy_structure = Molecule(
-    [1],
-    [
-        [
-            0.0,
-            0.0,
-            0.0,
-        ]
-    ],
-)
+_dummy_structure = Molecule([1], [[0.0, 0.0, 0.0]])
 
 
 def get_diracrun_output(path) -> Output:
+    """
+    Get the output from a previous DIRAC calculation.
+
+    Parameters
+    ----------
+    path : str
+        The path to the previous calculation directory.
+
+    Returns
+    -------
+    Output
+        The output object from the previous calculation.
+    """
     path = Path(path)
     outputs = list(glob.glob(str(path / "*.out")))
     if len(outputs) == 0:
@@ -885,34 +1320,6 @@ def get_diracrun_output(path) -> Output:
 
 if __name__ == "__main__":
     import tempfile
-
-    def main():
-        molecule = Molecule(["Mc"], [[0.0, 0.0, 0.0]])
-        dhf = AtomicDHFSet(
-            molecule=molecule,
-            is_ff=True,
-            ff_mode="Q",
-            hamiltonian_mode="2C",
-            is_spinfree=True,
-            user_mol_settings={"basis_type": "dyall.cv3z"},
-        )
-        cc = AtomicCCSet(
-            molecule=molecule,
-            no_T=True,
-            e_min=-30,
-            e_max=30,
-            nelec=(2, 1),
-            nel_f1=(2, 1, 0, 0),
-            is_spinfree=True,
-            hamiltonian_mode="4C",
-            is_ff=True,
-            ff_mode="D",
-        )
-
-        # Use a temporary directory to store the output files
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            dhf.write_input(output_dir=tmp_dir)
-            cc.write_input(output_dir=tmp_dir)
 
     def main2():
         module_dir = os.path.dirname(os.path.abspath(__file__))

@@ -5,16 +5,22 @@ import importlib_resources
 from pydirac.core.periodic import Element
 from pydirac.io.inputs import Mol
 
+__all__ = [
+    "basis_helper",
+    "get_explicit_basis_default_basis",
+    "get_custom_basis_from_ele",
+    "DyallBasisHelper",
+    "DyallBasis",
+]
+
 
 def basis_helper(filename="ANO-RCC"):
-    """
-    Custom basis set generate script.
+    """Custom basis set generate script.
+
     Parameters
     ----------
-    filename: file name
-
-    Returns
-    -------
+    filename : str, optional
+        The name of the file containing the basis set information. Default value is "ANO-RCC".
 
     """
     with open(filename, "r") as f:
@@ -61,31 +67,33 @@ def basis_helper(filename="ANO-RCC"):
 
 def get_explicit_basis_default_basis(input_strings, fname_out=None):
     """
-    Get explicit basis set from DIRAC default basis library, which means that we
-    copy basis info from library to a new file which use 'EXPLICIT' keyword to
-    specify basis set.
+    Get explicit basis set from DIRAC default basis library. This involves copying
+    basis information from the library to a new file that specifies the basis set using
+    the 'EXPLICIT' keyword.
 
-    In this way, we can add more diffuse functions based on the default library
-    by using even-term methods.
+    This method allows for the addition of more diffuse functions to the default library
+    using even-tempered methods.
 
-    At present, this function supports basis sets as followings:
+    Currently, this function supports the following basis sets:
         1) dyall.acv3z
         2) dyall.acv4z
         3) dyall.cv3z
         4) dyall.cv4z
 
-    Args:
-        filename: normal file in which basis sets specified by default, e.g.,
-                  dyall.acv4z and dyall.acv3z
+    Parameters
+    ----------
+    input_strings : list of str
+        List of strings containing basis set information for one or more elements.
+    fname_out : str or None, optional
+        Name of output file to save the explicit basis set. If None, the basis set
+        will not be saved to a file.
 
-    Returns:
-
+    Returns
+    -------
+    str
+        String containing the explicit basis set information.
     """
     bs_helper = DyallBasisHelper()
-
-    # with open(fname_in, 'r') as f:
-    #     lines = f.read()
-
     lines = input_strings.strip().split("\n")
     Z = int(float(lines[4].split()[0]))
     e_symbol = Element(Z).symbol

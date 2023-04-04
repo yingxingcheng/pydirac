@@ -5,26 +5,51 @@ import subprocess
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.os import cd
 
-from pydirac import SETTINGS, __version__
+from pydirac import SETTINGS
 from pydirac.core.settings import Settings
 from pydirac.core.molecule import Molecule
 from pydirac.core.periodic import Element
 
+__all__ = ["DiracInput", "Inp", "Mol"]
+
 
 class DiracInput(dict, MSONable):
     """
-    Class to contain a set of dirac input objects corresponding to a run.
+    Class to contain a set of DIRAC input objects corresponding to a run.
+
+    Parameters
+    ----------
+    inp : Inp
+        Inp object.
+    mol : Mol
+        Mol object.
+    optional_files : dict, optional
+        Other input files supplied as a dictionary of {filename: object}. The object
+        should follow standard conventions in implementing an `as_dict()` and
+        `from_dict()` method. Defaults to None.
+
+    Attributes
+    ----------
+    keys : List[str]
+        List of keys in the DiracInput dictionary.
+
     """
 
     def __init__(self, inp, mol, optional_files=None, **kwargs):
         """
-        Args:
-            inp: Inp object
-            mol: Mol object
-            optional_files: Other input files supplied as a dict of {
-            filename: object}. The object should follow standard conventions in
-            implementing a as_dict() adn from_dict method.
-            **kwargs:
+        Parameters
+        ----------
+        inp : Inp
+            Inp object.
+        mol : Mol
+            Mol object.
+        optional_files : dict, optional
+            Other input files supplied as a dictionary of {filename: object}. The object
+            should follow standard conventions in implementing an `as_dict()` and
+            `from_dict()` method. Defaults to None.
+        **kwargs
+            Keyword arguments to be passed to the base class.
+
         """
         super().__init__(**kwargs)
         self.update({"inp": inp, "mol": mol})
@@ -32,6 +57,15 @@ class DiracInput(dict, MSONable):
             self.update(optional_files)
 
     def __str__(self):
+        """
+        Returns a string representation of the DiracInput object.
+
+        Returns
+        -------
+        str
+            String representation of the DiracInput object.
+
+        """
         output = []
         for k, v in self.items():
             output.append(k)
@@ -41,8 +75,13 @@ class DiracInput(dict, MSONable):
 
     def as_dict(self) -> dict:
         """
-        Returns:
-            MSONable dict
+        Returns a MSONable dict representation of the DiracInput object.
+
+        Returns
+        -------
+        dict
+            MSONable dict representation of the DiracInput object.
+
         """
         d = {k: v.as_dict() for k, v in self.items()}
         d["@module"] = self.__class__.__module__
@@ -52,11 +91,18 @@ class DiracInput(dict, MSONable):
     @classmethod
     def from_dict(cls, d):
         """
-        Args:
-            d: Dict representation.
+        Returns a DiracInput object from a dictionary.
 
-        Returns:
-            VaspInput
+        Parameters
+        ----------
+        d : dict
+            Dict representation.
+
+        Returns
+        -------
+        DiracInput
+            DiracInput object.
+
         """
         dec = MontyDecoder()
         sub_d = {"optional_files": {}}
@@ -71,12 +117,18 @@ class DiracInput(dict, MSONable):
     def write_input(self, output_dir=".", make_dir_if_not_present=True):
         """
         Write DIRAC input to a directory.
-        Args:
-            output_dir: Directory to write to. Defaults to current directory
-                (".").
-            make_dir_if_not_present: Create the directory if not present.
-                Defaults to True.
-        Returns:
+
+        Parameters
+        ----------
+        output_dir : str, optional
+            Directory to write to. Defaults to current directory (".").
+        make_dir_if_not_present : bool, optional
+            Create the directory if not present. Defaults to True.
+
+        Returns
+        -------
+        None
+
         """
         if make_dir_if_not_present and not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -89,14 +141,20 @@ class DiracInput(dict, MSONable):
     def from_directory(input_dir, optional_files=None):
         """
         Read in a set of DIRAC input from a directory. Note that only the standard
-        inp, mol files are read unless otional_filenames is specified.
+        inp, mol files are read unless optional_files is specified.
 
-        Args:
-            input_dir: Directory to read DIRAC input from.
-            opotional_files: Optional files to read in as well as a dict of {
-            filename: Object type}. Object type must have a static method from_file.
+        Parameters
+        ----------
+        input_dir : str
+            Directory to read DIRAC input from.
+        optional_files : dict, optional
+            Optional files to read in as well as a dictionary of {filename: Object type}.
+            Object type must have a static method from_file. Defaults to None.
 
-        Returns:
+        Returns
+        -------
+        DiracInput
+            DiracInput object.
 
         """
         sub_d = {}
@@ -118,13 +176,27 @@ class DiracInput(dict, MSONable):
     ):
         """
         Write input files and run DIRAC.
-        Args:
-            run_dir: Where to write input files and do the run.
-            dirac_cmd: Args to be supplied to run DIRAC.
-            output_file: File to write output
-            err_file: File to write err
 
-        Returns:
+        Parameters
+        ----------
+        run_dir : str, optional
+            Where to write input files and do the run.
+        dirac_cmd : list, optional
+            Args to be supplied to run DIRAC.
+        output_file : str, optional
+            File to write output. Defaults to "dirac.out".
+        err_file : str, optional
+            File to write error. Defaults to "dirac.err".
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        RuntimeError
+            If `dirac_cmd` is not supplied or `DIRAC_EXE` is not set in `.pydirac.yaml`.
+
         """
         self.write_input(output_dir=run_dir)
         dirac_cmd = dirac_cmd or SETTINGS.get("DIRAC_EXE")
@@ -139,12 +211,78 @@ class DiracInput(dict, MSONable):
 
 
 class Inp(dict, MSONable):
-    """Class to represent DIRAC input file"""
+    """Class to represent DIRAC input file.
+
+    Parameters
+    ----------
+    params : dict, optional
+        Dictionary containing the input file data.
+
+    Attributes
+    ----------
+    _allowed_duplicated_list : list
+        A list of keywords that are allowed to be duplicated.
+    _top : list
+        A list of top-level keywords in the input file.
+
+    Methods
+    -------
+    as_dict() -> dict
+        Convert the instance to a dictionary.
+    from_dict(d: dict) -> Inp
+        Initialize the instance from a dictionary.
+    add_sub_node(settinging_obj, dir_node, subdir_node, keyword_node, value_list) -> bool
+        Add sub node to parent node.
+    from_string(lines: list) -> Inp
+        Initialize the instance from a list of strings.
+    get_string() -> str
+        Transform all contents of ``input`` branch of ``settings`` into string with blocks,
+        subblocks, keys and values.
+    __str__() -> str
+        Return the string representation of the instance.
+
+    Properties
+    ----------
+    use_wavefunc : bool
+        True if wavefunction is to be used in the calculation, False otherwise.
+    has_hamiltonian : bool
+        True if Hamiltonian is present in the input file, False otherwise.
+    hamiltonian : dict
+        Dictionary representing the Hamiltonian data in the input file.
+    calc_type : str
+        The calculation type (e.g., 'energy', 'gradient', 'hessian', etc.) in the input file.
+    calc_method : str
+        The calculation method (e.g., 'HF', 'DFT', 'MP2', etc.) in the input file.
+    electric_field : list
+        List of electric field strengths and orientations in the input file.
+    ci_calc_orbit : dict
+        Dictionary representing the CI calculation orbit in the input file.
+    wf_tag : str
+        The wavefunction tag in the input file.
+
+    Raises
+    ------
+    AssertionError
+        If the directory node is None or if the value list is not a list.
+        RuntimeError: If a duplicated key is encountered.
+
+    Examples
+    --------
+    >>> inp = Inp({'dirac': {}})
+    >>> inp
+    {'dirac': {}}
+
+    Notes
+    -----
+    The Inp class is used to represent DIRAC input files.
+
+    """
 
     _allowed_duplicated_list = ["CIROOTS"]
     _top = ["dirac", "analyze", "hamiltonian", "integrals", "general"]
 
     def __init__(self, params=None):
+        """Initialize the Inp class instance."""
         super(Inp, self).__init__()
         if params:
             pass
@@ -152,6 +290,7 @@ class Inp(dict, MSONable):
         self._parse_input()
 
     def as_dict(self) -> dict:
+        """Convert the instance to a dictionary."""
         d = dict(self)
         d["@module"] = self.__class__.__module__
         d["@class"] = self.__class__.__name__
@@ -159,11 +298,12 @@ class Inp(dict, MSONable):
 
     @classmethod
     def from_dict(cls, d):
+        """Initialize the instance from a dictionary."""
         return Inp({k: v for k, v in d.items() if k not in ("@module", "@class")})
 
     @staticmethod
     def add_sub_node(settinging_obj, dir_node, subdir_node, keyword_node, value_list):
-        """Add sub node to parent node"""
+        """Add sub node to parent node."""
         assert type(dir_node) is not None
         assert type(value_list) == list
 
@@ -222,6 +362,19 @@ class Inp(dict, MSONable):
 
     @classmethod
     def from_string(cls, lines):
+        """
+        Initialize the instance from a list of strings.
+
+        Parameters
+        ----------
+        lines : list
+            List of strings representing the input file.
+
+        Returns
+        -------
+        Inp
+            Inp instance initialized from the input file.
+        """
         setting = {}
 
         old_dir = None
@@ -406,39 +559,118 @@ class Inp(dict, MSONable):
         return inp
 
     def __str__(self):
+        """
+        Return a string representation of the object.
+
+        Returns
+        -------
+        str
+            The string representation of the object.
+        """
         return self.get_string()
 
     @property
     def use_wavefunc(self):
+        """
+        Return whether or not to use a wave function.
+
+        Returns
+        -------
+        bool
+            Whether or not to use a wave function.
+        """
         return self._use_wavefunc
 
     @property
     def has_hamiltonian(self):
+        """
+        Return whether or not a Hamiltonian is present.
+
+        Returns
+        -------
+        bool
+            Whether or not a Hamiltonian is present.
+        """
         return self._has_hamiltonian
 
     @property
     def hamiltonian(self):
+        """
+        Return the Hamiltonian.
+
+        Returns
+        -------
+        str
+            The Hamiltonian.
+        """
         return self._hamiltonian
 
     @property
     def calc_type(self):
+        """
+        Return the calculation type.
+
+        Returns
+        -------
+        str
+            The calculation type.
+        """
         return self._calc_type
 
     @property
     def calc_method(self):
+        """
+        Return the calculation method.
+
+        Returns
+        -------
+        str
+            The calculation method.
+        """
         return self._calc_method
 
     @property
     def electric_field(self):
+        """
+        Return the strength of the electric field.
+
+        Returns
+        -------
+        float
+            The strength of the electric field.
+        """
         return self._electric_field
 
     @property
     def ci_calc_orbit(self):
+        """
+        Return the CI calculation orbit.
+
+        Returns
+        -------
+        dict
+            The CI calculation orbit.
+        """
         if hasattr(self, "_ci_calc_orbit"):
             return self._ci_calc_orbit
         return {"occ": 0, "vir": 0}
 
     def _find_real_key(self, k, keys):
+        """
+        Find the real key from a list of keys.
+
+        Parameters
+        ----------
+        k : str
+            The key to find.
+        keys : list
+            The list of keys to search.
+
+        Returns
+        -------
+        str or None
+            The real key if found, otherwise None.
+        """
         for _k in keys:
             if k in _k:
                 return _k
@@ -447,12 +679,20 @@ class Inp(dict, MSONable):
 
     @property
     def wf_tag(self):
+        """
+        Return the wave function tag.
+
+        Returns:
+        str
+             the wave function tag.
+        """
         return self._wf_tag
 
     def _parse_input(self):
         """Parse input from output file
 
-        Returns:
+        Returns
+        -------
             input settings
         """
 
@@ -639,97 +879,44 @@ class Mol(MSONable):
         self.basis_lib = basis_lib
 
     def as_dict(self) -> dict:
+        """Return object as dict."""
         d = {
             "molecule": self.molecule.as_dict(),
+            "@module": self.__class__.__module__,
+            "@class": self.__class__.__name__,
         }
-        d["@module"] = self.__class__.__module__
-        d["@class"] = self.__class__.__name__
 
         return d
 
     @classmethod
     def from_file(cls, filename):
+        """Initialize from file
+
+        Parameters
+        ----------
+        filename: str
+            Filename
+        """
         # TODO, more info from mol file including basis sets.
         with open(filename, "r") as f:
             lines = f.readlines()
         return Mol.from_string(lines)
 
     @classmethod
-    def from_string_TODO(cls, lines):
-        """Parse mol from mol file
-
-         The first 3 lines are arbitrary comment lines. You can leave them
-         blank or write some note to yourself but they have to be there.
-         Line 4 specifies a cartesian GTO basis set (C) and 2 atom types
-         (basis set types).
-
-        Returns:
-            Mol settings
-        """
-
-        #   # start_line = re.compile(r"^Contents of the molecule file\s*")
-        #   #dash_line = re.compile(r"^-+")
-        #   #empty_line = re.compile(r"^$")
-        #   # inp_start_line = re.compile(r"^\*\*DIRAC\s*")
-        #   nuclei_nb_line = re.compile(
-        #       r"\s*(?P<nuclei>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+(?P<nb_atoms>\d+)")
-        #   basis_line = re.compile(r"^\b(?:LARGE|EXPLICIT)\b\s+BASIS\s+(\S+)\s*")
-        #   endline = re.compile(r"^FINISH")
-        #   basis_summary_ptn = re.compile('^\s*(?P<gto_type>C)\s+(?P<nb_bs>\d+)\s*')
-
-        #   # nuclei_nb_line =  r"\s*(?P<nuclei>[-+]?(\d+(\.\d*)?|\d*\.\d+))\s+(?P<nb_atoms>\d+)\s*"
-        #   # coord_line = r"\w\d+\s+(?P<coord>(?:[-+]?(?:\d+(?:\.\d*)?|\d*\.\d+)\s+)+)"
-
-        #   nuclei_id = 0
-        #   nb_atoms = 0
-        #   basis_type = None
-        #   gto_type = 'C'
-        #   nb_basis_set = 0
-        #   coordinates = []
-        #   atoms = []
-
-        #   # the first three lines are comments
-        #   comments = lines[0:3]
-
-        #   m = basis_summary_ptn.match(lines[4])
-        #   if m:
-        #       nb_basis_set = m.group('nb_bs')
-        #       gto_type = m.group('gto_type')
-        #       nb_atoms = nb_basis_set
-
-        #   lines = lines[5:]
-        #   if nb_atoms > 1:
-        #       for i in range(nb_atoms):
-        #           pass
-
-        #   for i, line in enumerate(lines):
-        #       if endline.match(line):
-        #           break
-        #       elif nuclei_nb_line.match(line):
-        #           m = nuclei_nb_line.match(line)
-        #           nuclei_id = int(round(float(m.group('nuclei'))))
-        #           nb_atoms = int(m.group('nb_atoms'))
-        #           # print(cls.nuclei_id, cls.nb_atoms)
-        #       elif basis_line.match(line):
-        #           m = basis_line.match(line)
-        #           if m:
-        #               basis_type = m.group(1)
-        #       else:
-        #           # we do not interest with these lines
-        #           continue
-
-        #   if basis_type is None:
-        #       basis_type = lines[4].strip()
-
-        #   mol_settings = {'nuclei_id': nuclei_id, 'nb_atoms': nb_atoms,
-        #                   'basis_type': basis_type}
-
-    @classmethod
     def from_string(cls, context):
-        """Parse mol from output file
+        """
+        Construct a `Mol` object by parsing the contents of a MOL file.
 
-        Returns:
-            Mol settings
+        Parameters
+        ----------
+        context : list of str
+            The contents of the MOL file as a list of strings.
+
+        Returns
+        -------
+        Mol
+            A `Mol` object representing the molecule.
+
         """
 
         start_line = re.compile(r"^Contents of the molecule file\s*")
@@ -745,13 +932,6 @@ class Mol(MSONable):
         nuclei_id = 0
         nb_atoms = 0
         basis_type = None
-
-        # with open(self.filename, 'r') as f:
-        #     context = f.readlines()
-
-        # for i, line in enumerate(context):
-        #     if start_line.match(line):
-        #         context = context[i + 1:]
 
         for i, line in enumerate(context):
             if endline.match(line):
@@ -777,16 +957,7 @@ class Mol(MSONable):
         basis_type = basis_type
         # TODO: we are doing atomic calculation
         assert nb_atoms == 1
-        molecule = Molecule(
-            atoms=[nuclei_id],
-            corrdinates=[
-                [
-                    0.0,
-                    0.0,
-                    0.0,
-                ]
-            ],
-        )
+        molecule = Molecule(atoms=[nuclei_id], corrdinates=[[0.0, 0.0, 0.0]])
         return cls(basis_type=basis_type, basis_lib="BASIS", molecule=molecule)
 
     @staticmethod
@@ -795,7 +966,30 @@ class Mol(MSONable):
         basis_type: str,
         basis_lib: str = "BASIS",
     ) -> str:
+        """
+        Return a string representation of a molecule in MOL format with the specified
+        atom information and basis.
 
+        Parameters
+        ----------
+        atom_info : Element
+            The atomic information for the molecule.
+        basis_type : str
+            The type of basis.
+        basis_lib : str, optional
+            The type of basis library. Should be either "BASIS" or "EXPLICIT".
+
+        Returns
+        -------
+        str
+            A string representation of the molecule in MOL format.
+
+        Raises
+        ------
+        TypeError
+            If the `basis_lib` parameter is not "BASIS" or "EXPLICIT".
+
+        """
         atom_index = atom_info.Z
         atom_type = atom_info.symbol
 
@@ -818,6 +1012,26 @@ class Mol(MSONable):
 
     @staticmethod
     def get_mol_by_custom_basis(atom_type, atom_index, basis_choice, basis_info):
+        """
+        Return a string representation of a molecule in MOL format with a custom basis.
+
+        Parameters
+        ----------
+        atom_type : str
+            The type of atom.
+        atom_index : int
+            The index of the atom.
+        basis_choice : str
+            The type of basis.
+        basis_info : str
+            The custom basis information.
+
+        Returns
+        -------
+        str
+            A string representation of the molecule in MOL format with the custom basis.
+
+        """
         template = """INTGRL
 {atom} atom
 {basis}
@@ -837,6 +1051,25 @@ C   1    2  X  Y
 
     @staticmethod
     def get_mol_by_default_basis(atom_type, atom_index, basis_type):
+        """
+        Return a string representation of a molecule in MOL format, with the
+        specified atom type, atom index, and basis type.
+
+        Parameters
+        ----------
+        atom_type : str
+            The type of atom.
+        atom_index : int
+            The index of the atom.
+        basis_type : str
+            The type of basis.
+
+        Returns
+        -------
+        str
+            A string representation of the molecule in MOL format.
+
+        """
         template = """INTGRL
 {atom} atom
 {basis}
@@ -852,6 +1085,16 @@ FINISH
         return template
 
     def __str__(self):
+        """
+        Return a string representation of the molecule.
+
+        Returns
+        -------
+        str
+            A string representation of the molecule.
+
+        """
+
         basis_type = self.basis_type or "null"
         if self.basis_lib == "EXPLICIT":
             warnings.warn("No implement {0} yet".format(self.basis_lib))
@@ -859,6 +1102,25 @@ FINISH
         return Mol.get_string(self.molecule.atomic_info, basis_type)
 
     def write_file(self, filename=None):
+        """
+        Write the molecule to a file in MOL format.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The name of the file to write to. If not provided, the file will be
+            named after the atom symbol and basis type.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        NotImplementedError
+            If the molecule contains more than one atom.
+
+        """
         if self.molecule.is_atom:
             fname = filename or self.molecule.atomic_info.symbol + "_" + self.basis_type + ".mol"
             with open(fname, "w") as f:
@@ -870,56 +1132,18 @@ FINISH
             )
 
     def update(self, new_dict):
+        """
+        Update the attributes of the molecule with the values in `new_dict`.
+
+        Parameters
+        ----------
+        new_dict : dict
+            A dictionary of attribute-value pairs to update.
+
+        Returns
+        -------
+        None
+
+        """
         for k, v in new_dict.items():
             setattr(self, k, v)
-
-
-if __name__ == "__main__":
-    # setting = parse_dirac_input()
-    # job = DiracJob(settings=setting)
-
-    # with open('tmp2.inp', 'w') as f:
-    #     f.write(job.get_input())
-
-    def main():
-        import os
-
-        module_dir = os.path.dirname(os.path.abspath(__file__))
-        data_dir = os.path.abspath(os.path.join(module_dir, "../tests/", "data"))
-        dirac_inp = os.path.join(data_dir, "tmp.inp")
-
-        setting = Inp.from_file(dirac_inp)
-        # setting['hello']['xxkk']= {'dfd':'s'}
-        print(setting["WAVE FUNCTIONS"]["KRCICALC"].keys())
-        print(setting)
-        print(dir(setting))
-        # print(setting)
-        # print(Settings(setting))
-        # print(setting.as_dict())
-        # job = DiracJob(settings=setting)
-        # print(job.get_input())
-
-    def main2():
-        molecule = Molecule(["H"], [[0.0, 0.0, 0.0]])
-        mol = Mol(molecule, basis_type="dyall.acv4z")
-
-        print("*" * 80)
-        print(mol)
-        print("*" * 80)
-
-    # main2()
-    def main3():
-        import os
-
-        module_dir = os.path.dirname(os.path.abspath(__file__))
-        data_dir = os.path.abspath(os.path.join(module_dir, "../tests/", "data"))
-        dirac_inp = os.path.join(data_dir, "tmp.inp")
-
-        inp = Inp.from_file(dirac_inp)
-        molecule = Molecule(["H"], [[0.0, 0.0, 0.0]])
-        mol = Mol(molecule, basis_type="dyall.acv4z")
-
-        dirac_input = DiracInput(inp=inp, mol=mol)
-        dirac_input.write_input(os.path.join(data_dir, "dirac_input"), make_dir_if_not_present=True)
-
-    main3()

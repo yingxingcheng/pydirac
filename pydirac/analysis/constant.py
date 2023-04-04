@@ -1,5 +1,7 @@
 from pydirac.core.periodic import Element
 
+__all__ = ["get_keyword", "get_orbital_info"]
+
 
 def get_keyword(element: str, task_type: str, orbital_info: str, delimer: str = "@") -> str:
     """
