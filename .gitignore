@@ -137,7 +137,7 @@ Alkemiems/widgets/data/domin_box_1.txt
 Alkemiems/widgets/data/test/output/*
 
 #dirac output file
-*.out
+# *.out
 
 # script
 # python3 setup.py sdist bdist_wheel
