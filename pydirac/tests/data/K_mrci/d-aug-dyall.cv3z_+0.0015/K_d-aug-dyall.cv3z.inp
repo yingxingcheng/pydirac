@@ -1,0 +1,56 @@
+**DIRAC                                                                                             
+.TITLE                                                                                              
+ K, DOSSSS, SCF                                                                                     
+.WAVE F                                                                                             
+.ANALYZE                                                                                            
+**ANALYZE                                                                                           
+.MULPOP                                                                                             
+*MULPOP                                                                                             
+.VECPOP                                                                                             
+1..oo
+**HAMILTONIAN                                                                                       
+.DOSSSS                                                                                             
+.OPERATOR                                                                                           
+ ZDIPLEN
+ COMFACTOR
+ zff
+**INTEGRALS                                                                                         
+*READINP                                                                                            
+.UNCONTRACT                                                                                         
+**WAVE FUNCTIONS                                                                                    
+.SCF                                                                                                
+.RESOLVE                                                                                            
+.KR CI
+*SCF                                                                                                
+# K atom and Econf: 1s^2 2s^2 2p^6 3s^2 3p^6 4s^1                                                   
+.CLOSED SHELL                                                                                       
+18                                                                                                  
+.OPEN SHELL                                                                                         
+1                                                                                                   
+1/2                                                                                                 
+.EVCCNV                                                                                             
+1.0D-9  5.0D-8                                                                                      
+.MAXITR                                                                                             
+90                                                                                                  
+*KRCICALC
+.CI PROGRAM
+LUCIAREL
+.INACTIVE
+0
+.GAS SHELLS
+3
+10 12 / 6 ! (n-1)s2 (n-2)d10
+17 19 / 4 ! (n-1)p6 (n)s1
+19 19 / 92 ! virtual orbitals
+.CIROOTS
+3 1
+.MAX CI
+120
+.MXCIVE
+60
+.ANALYZ
+.RSTRCI
+0
+.CHECKP
+.NOOCCN
+*END OF                                                                                             
