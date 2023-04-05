@@ -30,6 +30,7 @@ dependencies = [
     "monty",
     "numpy",
     "importlib_resources",
+    "ruamel.yaml",
 ]
 
 [project.urls]
