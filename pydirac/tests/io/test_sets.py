@@ -4,8 +4,9 @@ import importlib_resources
 from pydirac.core.molecule import Molecule
 from pydirac.io.sets import *
 
-dir_out_In = str(
-    importlib_resources.files("pydirac.tests.data.In_q_so") / "d-aug-dyall.acv3z_+0.00001"
+dir_out_He = str(
+    importlib_resources.files("pydirac.tests.data.He_q_so")
+    / "d-aug-dyall.acv3z_+0.00001"
 )
 
 
@@ -77,7 +78,7 @@ def test_atomic_cc_set_mol(cc_set):
 
 def test_atomic_cc_set_from_prev_calc():
     new_cc = AtomicCCSet.from_prev_calc(
-        dir_out_In, no_scf=True, user_mol_settings={"basis_type": "s-aug-ANO-RCC"}
+        dir_out_He, no_scf=True, user_mol_settings={"basis_type": "s-aug-ANO-RCC"}
     )
     assert new_cc.inp is not None
     assert new_cc.mol is not None

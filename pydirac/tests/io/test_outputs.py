@@ -27,27 +27,29 @@ K_mrci_dir = data_root / "K_mrci"
 def test_relcc():
     out_fn = str(
         data_root
-        / "In_q_so"
+        / "He_q_so"
         / "d-aug-dyall.acv3z_+0.00001"
-        / "In_d-aug-dyall.acv3z_In_d-aug-dyall.acv3z_zff=+0.00001.out"
+        / "He_d-aug-dyall.acv3z_He_d-aug-dyall.acv3z_zff=+0.00001.out"
     )
     o = Output(out_fn)
     res = o.as_dict()
-    assert pytest.approx(res["energy_settings"]["scf_e"], -5880.437843209575)
-    assert pytest.approx(res["energy_settings"]["mp2_e"], -5880.923880447164)
-    assert pytest.approx(res["energy_settings"]["ccsd_e"], -5880.889308160236)
-    assert pytest.approx(res["energy_settings"]["ccsd(t)_e"], -5880.905629772904)
+    assert pytest.approx(res["energy_settings"]["scf_e"], -2.861794767985585)
+    assert pytest.approx(res["energy_settings"]["mp2_e"], -2.895006044817857)
+    assert pytest.approx(res["energy_settings"]["ccsd_e"], -2.900862077849925)
+    assert pytest.approx(res["energy_settings"]["ccsd(t)_e"], -2.900862077849925)
     assert res["task_type"] == "Q-4C-DC-CC@d-aug-dyall.acv3z"
 
 
 def test_mrci():
     out_fn = str(
         data_root
-        / "K_mrci"
-        / "d-aug-dyall.cv3z_+0.001/K_d-aug-dyall.cv3z_K_d-aug-dyall.cv3z_zff=+0.001.out"
+        / "He_mrci"
+        / "dyall.acv4z_+0.001/He_dyall.acv4z_He_dyall.acv4z_zff=+0.001.out"
     )
     o = Output(out_fn)
     res = o.as_dict()
-    assert pytest.approx(res["energy_settings"]["scf_e"], -601.5260549871577)
-    assert pytest.approx(res["energy_settings"]["ci_e"]["sym_3_root_1"], -601.7982384883599)
-    assert res["task_type"] == "D-4C-DC-CI@d-aug-dyall.cv3z"
+    assert pytest.approx(res["energy_settings"]["scf_e"], -2.8618113380597565)
+    assert pytest.approx(
+        res["energy_settings"]["ci_e"]["sym_1_root_1"], -2.8975548136776
+    )
+    assert res["task_type"] == "D-4C-DC-CI@dyall.acv4z"

@@ -1,4 +1,3 @@
-import six
 from monty.json import MSONable, jsanitize
 
 __all__ = ["Element"]
@@ -54,30 +53,33 @@ class Element(MSONable):
 
     ROW_SIZES = (2, 8, 8, 18, 18, 32, 32)
 
-    def __init__(self, id):
+    def __init__(self, element):
         """
         Initialize the Element object.
 
         Parameters
         ----------
-        id : str or int
+        element : str or int
             The symbol or atomic number of the element.
         """
-        if isinstance(id, (six.string_types, int)):
-            idx, symbol = self._get_element(id)
+        if isinstance(element, (str, int)):
+            idx, symbol = self._get_element(element)
         else:
-            raise ValueError("Expected a <str> or <int>, got: {0:s}".format(type(id)))
+            raise ValueError(
+                "Expected a <str> or <int>, got: {0:s}".format(type(element))
+            )
 
         self.atomic_number = idx
         self.symbol = symbol
 
-    def _get_element(self, id):
+    @staticmethod
+    def _get_element(element):
         """
         Get the element by the given id (either symbol or atomic number).
 
         Parameters
         ----------
-        id : str or int
+        element : str or int
             The symbol or atomic number of the element.
 
         Returns
@@ -86,12 +88,12 @@ class Element(MSONable):
             A tuple containing the atomic number and symbol of the element.
         """
 
-        def get_symbol(id):
+        def get_symbol(Z):
             """
             Get element by given index.
             """
-            if type(id) == int:
-                return _PERIODIC_TABLE[id]
+            if type(Z) == int:
+                return _PERIODIC_TABLE[Z]
             else:
                 raise RuntimeError("Type id should be int")
 
@@ -106,10 +108,10 @@ class Element(MSONable):
             else:
                 raise RuntimeError("Wrong element type!")
 
-        if isinstance(id, six.string_types):
-            return get_id(id), id
+        if isinstance(element, str):
+            return get_id(element), element
         else:
-            return id, get_symbol(id)
+            return element, get_symbol(element)
 
     @property
     def block(self):
@@ -121,7 +123,10 @@ class Element(MSONable):
         str
             The block character of the element.
         """
-        if (self.is_actinoid or self.is_lanthanoid) and self.atomic_number not in [71, 103]:
+        if (self.is_actinoid or self.is_lanthanoid) and self.atomic_number not in [
+            71,
+            103,
+        ]:
             return "f"
         if self.is_actinoid or self.is_lanthanoid:
             return "d"
@@ -423,9 +428,13 @@ class Element(MSONable):
                     os_str.append("{0}\n".format(nb_os))
                     for i in os_total:
                         if i[0][-1] in ["s", "d"]:
-                            os_str.append("{0}/{1},{2}\n".format(i[-1], nb_dict[i[0][1]], 0))
+                            os_str.append(
+                                "{0}/{1},{2}\n".format(i[-1], nb_dict[i[0][1]], 0)
+                            )
                         else:
-                            os_str.append("{0}/{1},{2}\n".format(i[-1], 0, nb_dict[i[0][1]]))
+                            os_str.append(
+                                "{0}/{1},{2}\n".format(i[-1], 0, nb_dict[i[0][1]])
+                            )
                 else:
                     os_str = None
             if cs_str:
@@ -439,7 +448,9 @@ class Element(MSONable):
 
         res_str = []
         res_dict = {}
-        res_str.append("# {0} atom ".format(self.symbol) + "and Econf: {0}".format(elec_config))
+        res_str.append(
+            "# {0} atom ".format(self.symbol) + "and Econf: {0}".format(elec_config)
+        )
         if closed_shell:
             res_str.append(".CLOSED SHELL")
             res_str.append(closed_shell)

@@ -168,11 +168,17 @@ class DiracInput(dict, MSONable):
         sub_d["optional_files"] = {}
         if optional_files is not None:
             for fname, ftype in optional_files.items():
-                sub_d["optional_files"][fname] = ftype.from_file(os.path.join(input_dir, fname))
+                sub_d["optional_files"][fname] = ftype.from_file(
+                    os.path.join(input_dir, fname)
+                )
         return DiracInput(**sub_d)
 
     def run_dirac(
-        self, run_dir=".", dirac_cmd: list = None, output_file="dirac.out", err_file="dirac.err"
+        self,
+        run_dir=".",
+        dirac_cmd: list = None,
+        output_file="dirac.out",
+        err_file="dirac.err",
     ):
         """
         Write input files and run DIRAC.
@@ -206,7 +212,9 @@ class DiracInput(dict, MSONable):
                 "You need to supply dirac_cmd or set the DIRAC_EXE in .pydirac.yaml to run DIRAC."
             )
         with cd(run_dir):
-            with open(output_file, "w") as f_std, open(err_file, "w", buffering=1) as f_err:
+            with open(output_file, "w") as f_std, open(
+                err_file, "w", buffering=1
+            ) as f_err:
                 subprocess.check_call(dirac_cmd, stdout=f_std, stderr=f_err)
 
 
@@ -395,7 +403,9 @@ class Inp(dict, MSONable):
                     if is_set:
                         curr_value_list = []
                 if len(curr_value_list) > 0:
-                    Inp.add_sub_node(setting, old_dir, old_subdir, old_dotkey, curr_value_list)
+                    Inp.add_sub_node(
+                        setting, old_dir, old_subdir, old_dotkey, curr_value_list
+                    )
 
                 # this is a directory
                 dir_name = line.lstrip("**").rstrip()
@@ -729,7 +739,9 @@ class Inp(dict, MSONable):
                 # self._hamiltonian = "NR-2C"
                 self._hamiltonian = "2C-NR"
             else:
-                warnings.warn("We do not know how many components, " "please check inp file")
+                warnings.warn(
+                    "We do not know how many components, " "please check inp file"
+                )
                 self._hamiltonian = "?C"
 
             if not "NONREL" in inp_settings.hamiltonian:
@@ -957,8 +969,8 @@ class Mol(MSONable):
         basis_type = basis_type
         # TODO: we are doing atomic calculation
         assert nb_atoms == 1
-        molecule = Molecule(atoms=[nuclei_id], corrdinates=[[0.0, 0.0, 0.0]])
-        return cls(basis_type=basis_type, basis_lib="BASIS", molecule=molecule)
+        molecule = Molecule(atoms=[nuclei_id], coordinates=[[0.0, 0.0, 0.0]])
+        return cls(basis_type=basis_type, molecule=molecule)
 
     @staticmethod
     def get_string(
@@ -995,18 +1007,22 @@ class Mol(MSONable):
 
         if basis_lib not in ["EXPLICIT", "BASIS"]:
             raise TypeError(
-                'Basis type should be "BASIS" or "EXPLICIT" ' "for builtin basis or custom basis."
+                'Basis type should be "BASIS" or "EXPLICIT" '
+                "for builtin basis or custom basis."
             )
 
         if basis_lib == "EXPLICIT":
             with open("basis/{0}.dat".format(atom_type), "r") as f:
                 basis_info = f.read()
-            template = Mol.get_mol_by_custom_basis(atom_type, atom_index, basis_lib, basis_info)
+            template = Mol.get_mol_by_custom_basis(
+                atom_type, atom_index, basis_lib, basis_info
+            )
         elif basis_lib == "BASIS":
             template = Mol.get_mol_by_default_basis(atom_type, atom_index, basis_type)
         else:
             raise TypeError(
-                'Basis type should be "BASIS" or "EXPLICIT" ' "for builtin basis or custom basis."
+                'Basis type should be "BASIS" or "EXPLICIT" '
+                "for builtin basis or custom basis."
             )
         return template
 
@@ -1122,7 +1138,10 @@ FINISH
 
         """
         if self.molecule.is_atom:
-            fname = filename or self.molecule.atomic_info.symbol + "_" + self.basis_type + ".mol"
+            fname = (
+                filename
+                or self.molecule.atomic_info.symbol + "_" + self.basis_type + ".mol"
+            )
             with open(fname, "w") as f:
                 basis_type = self.basis_type or "null"
                 f.write(Mol.get_string(self.molecule.atomic_info, basis_type))

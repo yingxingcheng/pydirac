@@ -1,19 +1,31 @@
-import os
-import glob
-from pydirac.analysis.polarizability import *
+import importlib_resources
+import pytest
 
-module_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.abspath(os.path.join(module_dir, "..", "data"))
-# dirac_inp = os.path.join(data_dir, 'tmp.inp')
-In_res_dir = os.path.abspath(os.path.join(data_dir, "In_so_res"))
-In_q_so_dir = os.path.abspath(os.path.join(data_dir, "In_q_so"))
-In_q_mrci_dir = os.path.abspath(os.path.join(data_dir, "In_q_mrci_res"))
+from pydirac.analysis.polarizability import get_polarizability
+from pydirac import Settings
 
 
-def test_calc_dipole_polarizability():
-    current = os.getcwd()
-    os.chdir(In_res_dir)
-    file_list = glob.glob("res_*.dat")
-    print(file_list)
-    # get_dipole_polarizability_from_cc(None, None, file_list, None)
-    os.chdir(current)
+data_root = importlib_resources.files("pydirac.tests.data")
+He_q_so_dir = str(data_root / "He_q_so")
+He_q_mrci_dir = str(data_root / "He_q_mrci")
+He_so_dir = str(data_root / "He_so")
+He_nr_dir = str(data_root / "He_nr")
+He_mrci_dir = str(data_root / "He_mrci")
+He_q_theta_dir = str(data_root / "He_q_theta")
+
+
+@pytest.mark.parametrize(
+    "dirout_and_deepth",
+    [
+        (He_nr_dir, 1),
+        (He_so_dir, 0),
+        (He_mrci_dir, 0),
+        (He_q_theta_dir, 1),
+        (He_q_so_dir, 0),
+        (He_q_mrci_dir, 0),
+    ],
+)
+def test_calc_dipole_polarizability(dirout_and_deepth):
+    res = get_polarizability(dirout_and_deepth[0], deepth=dirout_and_deepth[1])
+    out = Settings(res)
+    print(out)

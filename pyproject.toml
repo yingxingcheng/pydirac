@@ -3,8 +3,8 @@ requires = ["setuptools>=65.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "PyDIRAC"
-version = "2023.4.4"
+name = "pydirac"
+version = "2023.4.5"
 authors = [
   { name="YingXing Cheng", email="yingxing.cheng@ugent.be" },
 ]
@@ -38,3 +38,7 @@ Changelog = "https://github.com/yingxingcheng/pydirac/blob/main/CHANGELOG.md"
 
 [project.scripts]
 pypam = "pydirac.cli.pypam:main"
+
+[tool.setuptools.package-data]
+"pydirac" = ["data/**/*.*"]
+"pydirac.tests" = ["data/**/*.*", "data/**/**/*.*", "data/**/**/**/*.*"]

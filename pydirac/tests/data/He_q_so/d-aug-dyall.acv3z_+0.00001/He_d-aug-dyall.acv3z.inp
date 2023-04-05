@@ -1,0 +1,45 @@
+**DIRAC
+.TITLE
+ He,ffpt RelCC
+.WAVE F
+.4INDEX
+.ANALYZE
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
+1..oo
+**HAMILTONIAN
+.DOSSSS
+.OPERATOR                                                                                           
+ 'Theta quadru field'                                                                    
+ DIAGONAL                                                                                           
+ ZZTHETA                                                                                            
+ COMFACTOR
+ zff
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.RELCCSD
+.RESOLVE
+*SCF
+.CLOSED SHELL
+2
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+60
+**MOLTRA
+.ACTIVE
+energy -10 10 0.0
+**RELCC
+.ENERGY
+.PRINT
+1
+*CCENER
+.MAXIT
+60
+.NTOL
+14
+*END OF

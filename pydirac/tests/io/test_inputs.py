@@ -4,44 +4,45 @@ from pydirac.io.inputs import Inp
 
 
 def test_read_func():
-    dirac_inp = str(importlib_resources.files("pydirac.tests.data") / "B_mrci_dipole.inp")
+    dirac_inp = str(
+        importlib_resources.files("pydirac.tests.data")
+        / "He_mrci"
+        / "dyall.acv4z_+0.001/He_dyall.acv4z.inp"
+    )
     input = Inp.from_file(dirac_inp)
-    assert input["DIRAC"]["TITLE"] == ["B, DOSSSS, KRCI"]
+    print(input["DIRAC"])
+    assert input["DIRAC"]["TITLE"] == [" He, DOSSSS, SCF"]
     assert input["DIRAC"]["ANALYZE"] == True
-    assert input["DIRAC"]["WAVE FUNCTIONS"] == True
+    assert input["DIRAC"]["WAVE F"] == True
 
     assert input["ANALYZE"]["MULPOP"]["_en"] == True
     assert input["ANALYZE"]["MULPOP"]["VECPOP"] == ["1..oo"]
 
     assert input["HAMILTONIAN"]["DOSSSS"] == True
     # not strip, so the space before keywords are kept
-    assert input["HAMILTONIAN"]["OPERATOR"] == [" ZDIPLEN", " COMFACTOR", " 0.01"]
+    assert input["HAMILTONIAN"]["OPERATOR"] == [" ZDIPLEN", " COMFACTOR", " zff"]
     assert input["INTEGRALS"]["READINP"]["UNCONTRACT"] == True
-    assert input["GENERAL"]["PCMOUT"] == True
 
     assert input["WAVE FUNCTIONS"]["KR CI"] == True
     assert input["WAVE FUNCTIONS"]["RESOLVE"] == True
     assert input["WAVE FUNCTIONS"]["SCF"]["_en"] == True
 
-    assert input["WAVE FUNCTIONS"]["SCF"]["CLOSED SHELL"] == ["4"]
-    assert input["WAVE FUNCTIONS"]["SCF"]["OPEN SHELL"] == ["1", "1/6"]
-    assert input["WAVE FUNCTIONS"]["SCF"]["EVCCNV"] == ["1.0D-9 5.0D-8"]
-    assert input["WAVE FUNCTIONS"]["SCF"]["MAXITR"] == ["90"]
+    assert input["WAVE FUNCTIONS"]["SCF"]["CLOSED SHELL"] == ["2"]
+    assert input["WAVE FUNCTIONS"]["SCF"]["EVCCNV"] == ["1.0D-9  5.0D-8"]
+    assert input["WAVE FUNCTIONS"]["SCF"]["MAXITR"] == ["60"]
 
     assert input["WAVE FUNCTIONS"]["KRCICALC"]["CI PROGRAM"] == ["LUCIAREL"]
-    assert input["WAVE FUNCTIONS"]["KRCICALC"]["INACTIVE"] == ["1"]
+    assert input["WAVE FUNCTIONS"]["KRCICALC"]["INACTIVE"] == ["0"]
     assert input["WAVE FUNCTIONS"]["KRCICALC"]["GAS SHELLS"] == [
-        "3",
+        "2",
         "0 2 / 1",
-        "1 3 / 3",
-        "3 3 / 10",
+        "2 2 / 30",
     ]
 
-    assert input["WAVE FUNCTIONS"]["KRCICALC"]["MAX CI"] == ["60"]
+    assert input["WAVE FUNCTIONS"]["KRCICALC"]["MAX CI"] == ["120"]
+    assert input["WAVE FUNCTIONS"]["KRCICALC"]["MXCIVE"] == ["60"]
     assert input["WAVE FUNCTIONS"]["KRCICALC"]["NOOCCN"] == True
-    assert input["WAVE FUNCTIONS"]["KRCICALC"]["DIPMOM"] == True
-    assert input["WAVE FUNCTIONS"]["KRCICALC"]["RSTRCI"] == ["0"]
-    assert input["WAVE FUNCTIONS"]["KRCICALC"]["CIROOTS"] == ["4  3"]
+    assert input["WAVE FUNCTIONS"]["KRCICALC"]["RSTRCI"] == ["rstr"]
 
 
 def test_write():
