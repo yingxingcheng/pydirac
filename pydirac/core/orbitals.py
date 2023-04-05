@@ -1,8 +1,8 @@
-from math import inf
-from monty.json import MSONable, jsanitize
 from enum import Enum
-import numpy as np
+from math import inf
 
+import numpy as np
+from monty.json import MSONable, jsanitize
 
 __all__ = ["OrbitalType", "AtomicOrbital", "MoleculeOrbitals"]
 

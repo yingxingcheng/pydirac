@@ -4,9 +4,9 @@ DIRAC master    (node2302.phanpy.os) starts by allocating     2580000000 r*8 wor
 DIRAC nodes 1 to 47 starts by allocating          2580000000 r*8 words (  19.222 GB) of memory
 DIRAC master    (node2302.phanpy.os) to allocate at most      2680000000 r*8 words (  19.968 GB) of memory
 DIRAC nodes 1 to 47 to allocate at most           2680000000 r*8 words (  19.968 GB) of memory
- 
+
 Note: maximum allocatable memory for master+nodes can be set by -aw (MW)/-ag (GB) flags in pam
- 
+
  *******************************************************************************
  *                                                                             *
  *                                O U T P U T                                  *
@@ -168,10 +168,10 @@ Note: maximum allocatable memory for master+nodes can be set by -aw (MW)/-ag (GB
 Version information
 -------------------
 
-Branch        | 
-Commit hash   | 
-Commit author | 
-Commit date   | 
+Branch        |
+Commit hash   |
+Commit author |
+Commit date   |
 
 
 Configuration and build information
@@ -190,10 +190,10 @@ Fortran compiler version | 8.2.0
 Fortran compiler flags   |  -ilp64 -g -fcray-pointer -fbacktrace -fno-range-check -DVAR_GFORTRAN -DVAR_MFDS  -fdefault-integer-8 -ilp64 -g -fcray-pointer -fbacktrace -fno-range-check -DVAR_GFORTRAN -DVAR_MFDS  -fdefault-integer-8
 C compiler               | /apps/gent/CO7/haswell-ib/software/impi/2018.4.274-iccifort-2019.1.144-GCC-8.2.0-2.31.1/bin64/mpicc
 C compiler version       | 8.2.0
-C compiler flags         |  -ilp64 -g  -ilp64 -g 
+C compiler flags         |  -ilp64 -g  -ilp64 -g
 C++ compiler             | /apps/gent/CO7/haswell-ib/software/impi/2018.4.274-iccifort-2019.1.144-GCC-8.2.0-2.31.1/bin64/mpicxx
 C++ compiler version     | 8.2.0
-C++ compiler flags       |  -ilp64 -g -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused  -ilp64 -g -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused 
+C++ compiler flags       |  -ilp64 -g -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused  -ilp64 -g -Wall -Wno-unknown-pragmas -Wno-sign-compare -Woverloaded-virtual -Wwrite-strings -Wno-unused
 Static linking           | False
 64-bit integers          | True
 MPI parallelization      | True
@@ -210,80 +210,80 @@ Compile definitions      | HAVE_MPI;VAR_MPI;VAR_MPI2;USE_MPI_MOD_F90;SYS_LINUX;P
 Execution time and host
 -----------------------
 
- 
+
      Date and time (Linux)  : Sun Jun 14 14:16:30 2020
-     Host name              : node2302.phanpy.os                      
+     Host name              : node2302.phanpy.os
 
 
 Contents of the input file
 --------------------------
 
-**DIRAC                                                                                             
-.TITLE                                                                                              
- He, DOSSSS, SCF                                                                                    
-.WAVE F                                                                                             
-.ANALYZE                                                                                            
-**ANALYZE                                                                                           
-.MULPOP                                                                                             
-*MULPOP                                                                                             
-.VECPOP                                                                                             
-1..oo                                                                                               
-**HAMILTONIAN                                                                                       
-.DOSSSS                                                                                             
-.OPERATOR                                                                                           
- ZDIPLEN                                                                                            
- COMFACTOR                                                                                          
- +0.001                                                                                             
-**INTEGRALS                                                                                         
-*READINP                                                                                            
-.UNCONTRACT                                                                                         
-**WAVE FUNCTIONS                                                                                    
-.SCF                                                                                                
-.RESOLVE                                                                                            
-.KR CI                                                                                              
-*SCF                                                                                                
-# He atom and Econf: 1s^2                                                                           
-.CLOSED SHELL                                                                                       
-2                                                                                                   
-.EVCCNV                                                                                             
-1.0D-9  5.0D-8                                                                                      
-.MAXITR                                                                                             
-60                                                                                                  
-*KRCICALC                                                                                           
-.CI PROGRAM                                                                                         
-LUCIAREL                                                                                            
-.INACTIVE                                                                                           
-0                                                                                                   
-.GAS SHELLS                                                                                         
-2                                                                                                   
-0 2 / 1                                                                                             
-2 2 / 30                                                                                            
-.CIROOTS                                                                                            
-1 1                                                                                                 
-.MAX CI                                                                                             
-120                                                                                                 
-.MXCIVE                                                                                             
-60                                                                                                  
-.ANALYZ                                                                                             
-.RSTRCI                                                                                             
-0                                                                                                   
-.CHECKP                                                                                             
-.NOOCCN                                                                                             
-*END OF                                                                                             
+**DIRAC
+.TITLE
+ He, DOSSSS, SCF
+.WAVE F
+.ANALYZE
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
+1..oo
+**HAMILTONIAN
+.DOSSSS
+.OPERATOR
+ ZDIPLEN
+ COMFACTOR
+ +0.001
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
+.KR CI
+*SCF
+# He atom and Econf: 1s^2
+.CLOSED SHELL
+2
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+60
+*KRCICALC
+.CI PROGRAM
+LUCIAREL
+.INACTIVE
+0
+.GAS SHELLS
+2
+0 2 / 1
+2 2 / 30
+.CIROOTS
+1 1
+.MAX CI
+120
+.MXCIVE
+60
+.ANALYZ
+.RSTRCI
+0
+.CHECKP
+.NOOCCN
+*END OF
 
 
 Contents of the molecule file
 -----------------------------
 
-INTGRL                                                                                              
-He atom                                                                                             
-dyall.acv4z                                                                                         
-C   1    2  X  Y                                                                                    
-    2.    1                                                                                         
-He    0.0000000000        0.0000000000        0.0000000000                                          
-LARGE BASIS dyall.acv4z                                                                             
-FINISH                                                                                              
-                                                                                                    
+INTGRL
+He atom
+dyall.acv4z
+C   1    2  X  Y
+    2.    1
+He    0.0000000000        0.0000000000        0.0000000000
+LARGE BASIS dyall.acv4z
+FINISH
+
 
 
     **************************************************************************
@@ -299,9 +299,9 @@ FINISH
     ************************** General DIRAC set-up **************************
     **************************************************************************
 
-   CODATA Recommended Values of the Fundamental Physical Constants: 1998  
-                Peter J. Mohr and Barry N. Taylor                         
-   Journal of Physical and Chemical Reference Data, Vol. 28, No. 6, 1999  
+   CODATA Recommended Values of the Fundamental Physical Constants: 1998
+                Peter J. Mohr and Barry N. Taylor
+   Journal of Physical and Chemical Reference Data, Vol. 28, No. 6, 1999
  * The speed of light :        137.0359998
  * Running in four-component mode
  * Parallel run with 47 slaves.
@@ -351,8 +351,8 @@ FINISH
   Title Cards
   -----------
 
-  He atom                                                                 
-  dyall.acv4z                                                             
+  He atom
+  dyall.acv4z
   Nuclear Gaussian exponent for atom of charge   2.000 :    1.1671538870D+09
 
 
@@ -380,7 +380,7 @@ Point group: C2v
      E  |  E   C2z  Oxz  Oyz
     C2z | C2z   E   Oyz  Oxz
     Oxz | Oxz  Oyz   E   C2z
-    Oyz | Oyz  Oxz  C2z   E 
+    Oyz | Oyz  Oxz  C2z   E
 
    * Character table
 
@@ -393,22 +393,22 @@ Point group: C2v
 
    * Direct product table
 
-        | A1   B1   B2   A2 
+        | A1   B1   B2   A2
    -----+--------------------
-    A1  | A1   B1   B2   A2 
-    B1  | B1   A1   A2   B2 
-    B2  | B2   A2   A1   B1 
-    A2  | A2   B2   B1   A1 
+    A1  | A1   B1   B2   A2
+    B1  | B1   A1   A2   B2
+    B2  | B2   A2   A1   B1
+    A2  | A2   B2   B1   A1
 
 
                             **************************
                             *** Output from DBLGRP ***
                             **************************
 
-   * One fermion irrep:   E1 
+   * One fermion irrep:   E1
    * Real group. NZ = 1
    * Direct product decomposition:
-          E1  x E1  : A1  + A2  + B1  + B2 
+          E1  x E1  : A1  + A2  + B1  + B2
 
 
                                  Spinor structure
@@ -453,10 +453,10 @@ Point group: C2v
   Number of atom types :    1
   Total number of atoms:    1
 
-  label    atoms   charge   prim    cont     basis   
+  label    atoms   charge   prim    cont     basis
   ----------------------------------------------------------------------
-  He          1       2      62      62      L  - [12s4p3d2f|12s4p3d2f]                                          
-                            145     145      S  - [4s15p6d3f2g|4s15p6d3f2g]                                      
+  He          1       2      62      62      L  - [12s4p3d2f|12s4p3d2f]
+                            145     145      S  - [4s15p6d3f2g|4s15p6d3f2g]
   ----------------------------------------------------------------------
                              62      62      L  - large components
                             145     145      S  - small components
@@ -471,12 +471,12 @@ Point group: C2v
   -----------------------------
 
   Atom type   1
-   1s:    K.G. Dyall, unpublished.                                                
-   2p-3p: K.G. Dyall, Theor. Chem. Acc. (2016) 135:128.                           
-   4p-6p: K.G. Dyall, Theor. Chem. Acc. (2006) 115:441                            
-      7p: K.G. Dyall, Theor. Chem. Acc. (2012) 131:1172                           
-   Available from the Dirac web site, http://dirac.chem.sdu.dk.                   
-   H                                                                              
+   1s:    K.G. Dyall, unpublished.
+   2p-3p: K.G. Dyall, Theor. Chem. Acc. (2016) 135:128.
+   4p-6p: K.G. Dyall, Theor. Chem. Acc. (2006) 115:441
+      7p: K.G. Dyall, Theor. Chem. Acc. (2012) 131:1172
+   Available from the Dirac web site, http://dirac.chem.sdu.dk.
+   H
 
 
   Cartesian Coordinates (bohr)
@@ -527,12 +527,12 @@ He     0.0000000000   0.0000000000   0.0000000000
                                 -----------------
 
    * Large components:   20
-     1  L He  1 s        2  L He  1 px       3  L He  1 py       4  L He  1 pz       5  L He  1 dxx      6  L He  1 dxy 
+     1  L He  1 s        2  L He  1 px       3  L He  1 py       4  L He  1 pz       5  L He  1 dxx      6  L He  1 dxy
      7  L He  1 dxz      8  L He  1 dyy      9  L He  1 dyz     10  L He  1 dzz     11  L He  1 fxxx    12  L He  1 fxxy
     13  L He  1 fxxz    14  L He  1 fxyy    15  L He  1 fxyz    16  L He  1 fxzz    17  L He  1 fyyy    18  L He  1 fyyz
     19  L He  1 fyzz    20  L He  1 fzzz
    * Small components:   35
-    21  S He  1 s       22  S He  1 px      23  S He  1 py      24  S He  1 pz      25  S He  1 dxx     26  S He  1 dxy 
+    21  S He  1 s       22  S He  1 px      23  S He  1 py      24  S He  1 pz      25  S He  1 dxx     26  S He  1 dxy
     27  S He  1 dxz     28  S He  1 dyy     29  S He  1 dyz     30  S He  1 dzz     31  S He  1 fxxx    32  S He  1 fxxy
     33  S He  1 fxxz    34  S He  1 fxyy    35  S He  1 fxyz    36  S He  1 fxzz    37  S He  1 fyyy    38  S He  1 fyyz
     39  S He  1 fyzz    40  S He  1 fzzz    41  S He  1 g400    42  S He  1 g310    43  S He  1 g301    44  S He  1 g220
@@ -552,7 +552,7 @@ He     0.0000000000   0.0000000000   0.0000000000
     21  S A1 He s       22  S A1 He pz      23  S A1 He dxx     24  S A1 He dyy     25  S A1 He dzz     26  S A1 He fxxz
     27  S A1 He fyyz    28  S A1 He fzzz    29  S A1 He g400    30  S A1 He g220    31  S A1 He g202    32  S A1 He g040
     33  S A1 He g022    34  S A1 He g004    35  S B1 He px      36  S B1 He dxz     37  S B1 He fxxx    38  S B1 He fxyy
-    39  S B1 He fxzz    40  S B1 He g301    41  S B1 He g121    42  S B1 He g103    43  S B2 He py      44  S B2 He dyz 
+    39  S B1 He fxzz    40  S B1 He g301    41  S B1 He g121    42  S B1 He g103    43  S B2 He py      44  S B2 He dyz
     45  S B2 He fxxy    46  S B2 He fyyy    47  S B2 He fyzz    48  S B2 He g211    49  S B2 He g031    50  S B2 He g013
     51  S A2 He dxy     52  S A2 He fxyz    53  S A2 He g310    54  S A2 He g130    55  S A2 He g112
 
@@ -568,45 +568,45 @@ He     0.0000000000   0.0000000000   0.0000000000
 
   Symmetry  A1 ( 1)
 
-       12 functions:    He s   
-        4 functions:    He pz  
-        3 functions:    He dxx 
-        3 functions:    He dyy 
-        3 functions:    He dzz 
+       12 functions:    He s
+        4 functions:    He pz
+        3 functions:    He dxx
+        3 functions:    He dyy
+        3 functions:    He dzz
         2 functions:    He fxxz
         2 functions:    He fyyz
         2 functions:    He fzzz
 
   Symmetry  B1 ( 2)
 
-        4 functions:    He px  
-        3 functions:    He dxz 
+        4 functions:    He px
+        3 functions:    He dxz
         2 functions:    He fxxx
         2 functions:    He fxyy
         2 functions:    He fxzz
 
   Symmetry  B2 ( 3)
 
-        4 functions:    He py  
-        3 functions:    He dyz 
+        4 functions:    He py
+        3 functions:    He dyz
         2 functions:    He fxxy
         2 functions:    He fyyy
         2 functions:    He fyzz
 
   Symmetry  A2 ( 4)
 
-        3 functions:    He dxy 
+        3 functions:    He dxy
         2 functions:    He fxyz
 
 * Small component functions
 
   Symmetry  A1 ( 1)
 
-        4 functions:    He s   
-       15 functions:    He pz  
-        6 functions:    He dxx 
-        6 functions:    He dyy 
-        6 functions:    He dzz 
+        4 functions:    He s
+       15 functions:    He pz
+        6 functions:    He dxx
+        6 functions:    He dyy
+        6 functions:    He dzz
         3 functions:    He fxxz
         3 functions:    He fyyz
         3 functions:    He fzzz
@@ -619,8 +619,8 @@ He     0.0000000000   0.0000000000   0.0000000000
 
   Symmetry  B1 ( 2)
 
-       15 functions:    He px  
-        6 functions:    He dxz 
+       15 functions:    He px
+        6 functions:    He dxz
         3 functions:    He fxxx
         3 functions:    He fxyy
         3 functions:    He fxzz
@@ -630,8 +630,8 @@ He     0.0000000000   0.0000000000   0.0000000000
 
   Symmetry  B2 ( 3)
 
-       15 functions:    He py  
-        6 functions:    He dyz 
+       15 functions:    He py
+        6 functions:    He dyz
         3 functions:    He fxxy
         3 functions:    He fyyy
         3 functions:    He fyzz
@@ -641,7 +641,7 @@ He     0.0000000000   0.0000000000   0.0000000000
 
   Symmetry  A2 ( 4)
 
-        6 functions:    He dxy 
+        6 functions:    He dxy
         3 functions:    He fxyz
         2 functions:    He g310
         2 functions:    He g130
@@ -671,12 +671,12 @@ He     0.0000000000   0.0000000000   0.0000000000
    2: Removal of unphysical solutions (via diagonalization of free particle Hamiltonian)
    - The following finite-field one-electron operators have been added:
 ---------------------------------------------------------------------------
-    Operator no.  1:   ZDIPLEN         
+    Operator no.  1:   ZDIPLEN
 ---------------------------------------------------------------------------
     1  ZDIPLEN              A1      T+
 ...........................................................................
       Operator type DIAGONAL : scalar operator
-      Labels and factors     : ZDIPLEN  +00+     0.100000000E-02 (real)     
+      Labels and factors     : ZDIPLEN  +00+     0.100000000E-02 (real)
 ...........................................................................
 
 
@@ -685,9 +685,9 @@ He     0.0000000000   0.0000000000   0.0000000000
     **************************************************************************
 
  Wave function types requested (in input order):
-     HF        
-     RESOLVE   
-     KR-CI     
+     HF
+     RESOLVE
+     KR-CI
 
  Wave function jobs in execution order (expanded):
  * Hartree-Fock calculation
@@ -719,7 +719,7 @@ He     0.0000000000   0.0000000000   0.0000000000
  * DIIS (in MO basis)
  * DIIS will be activated when convergence reaches : 1.00D+20
    - Maximum size of B-matrix:   10
- * Damping of Fock matrix when DIIS is not activated. 
+ * Damping of Fock matrix when DIIS is not activated.
    Weight of old matrix    : 0.250
  * Maximum number of SCF iterations  :   60
  * No quadratic convergent Hartree-Fock
@@ -736,7 +736,7 @@ He     0.0000000000   0.0000000000   0.0000000000
  * Inactive orbitals     :    0
  * Active orbitals       :   31
  * Active electrons      :    2
- * GAS space setup for   2 GAS space(s) : 
+ * GAS space setup for   2 GAS space(s) :
    - GAS space   1       :    1
     (constraints: min/max active electrons after space :   0/  2)
    - GAS space   2       :   30
@@ -745,8 +745,8 @@ He     0.0000000000   0.0000000000   0.0000000000
  * Convergence of CI function(s) in the following symmetries:
     **   1 eigenstate(s) in symmetry (boson):   a
     -- Allowed interval of 2 * MK :  -2 to   2
- * Using symmetry nomenclature for LUCIAREL. 
-      Boson and Fermion irreps of complex (sub)groups  
+ * Using symmetry nomenclature for LUCIAREL.
+      Boson and Fermion irreps of complex (sub)groups
 
  * Contributions from 2-electron integrals to Fock matrix:
    LL-integrals.
@@ -768,7 +768,7 @@ He     0.0000000000   0.0000000000   0.0000000000
 ===========================================================================
  * General print level   :   0
  * 4-index transformation follows scheme      :   4
- - write (rs)-batches of half-transformed integrals 
+ - write (rs)-batches of half-transformed integrals
  (ij|rs) to disk; parallel scheme
  * Screening threshold : 1.00E-14
  * Gaunt integrals not included.
@@ -786,7 +786,7 @@ He     0.0000000000   0.0000000000   0.0000000000
  * Gross populations
  * Label definitions based on SO-labels
  * Number of spinors analyzed:
-    - Orbitals in fermion ircop E1  :1..oo                                                                   
+    - Orbitals in fermion ircop E1  :1..oo
  * Print level:    1
 
 
@@ -809,7 +809,7 @@ He     0.0000000000   0.0000000000   0.0000000000
 
                     z      0.00000000      0.00000000
 
-                        1 Debye =   2.54177000 a.u. 
+                        1 Debye =   2.54177000 a.u.
 
 Total time used in ONEGEN (CPU)  0.01306400s and (WALL)  0.01406113s
 
@@ -999,7 +999,7 @@ It.    8    -2.861811338060      6.35D-14 -6.29D-08  1.52D-08   DIIS   7    0.07
 It.    9    -2.861811338060     -5.33D-15  6.16D-10  7.14D-10   DIIS   7    0.04988015s   LL SL SS       Sun Jun 14
 --------------------------------------------------------------------------------------------------------------------------------
 * Convergence after    9 iterations.
-* Average elapsed time per iteration: 
+* Average elapsed time per iteration:
       No 2-ints    :    0.08054532s
       LL SL SS     :    0.10864903s
 
@@ -1020,7 +1020,7 @@ It.    9    -2.861811338060     -5.33D-15  6.16D-10  7.14D-10   DIIS   7    0.04
                                    -----------
 
 
-* Fermion symmetry E1 
+* Fermion symmetry E1
   * Closed shell, f = 1.0000
     -0.91799062596  ( 2)
   * Virtual eigenvalues, f = 0.0000
@@ -1054,157 +1054,157 @@ It.    9    -2.861811338060     -5.33D-15  6.16D-10  7.14D-10   DIIS   7    0.04
                                  ----------------
 
 
-* Electronic eigenvalue no.   1: -0.9179906259558       (Occupation : f = 1.0000)           
+* Electronic eigenvalue no.   1: -0.9179906259558       (Occupation : f = 1.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s   
+Gross     Total   |    L A1 He s
 --------------------------------------
  alpha    1.0000  |      1.0000
  beta     0.0000  |      0.0000
 
-* Electronic eigenvalue no.   2:  0.796415885E-01       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   2:  0.796415885E-01       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s   
+Gross     Total   |    L A1 He s
 --------------------------------------
  alpha    1.0000  |      1.0000
  beta     0.0000  |      0.0000
 
-* Electronic eigenvalue no.   3:  0.3481653622339       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   3:  0.3481653622339       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s      L A1 He pz     L B1 He px     L B2 He py  
+Gross     Total   |    L A1 He s      L A1 He pz     L B1 He px     L B2 He py
 -----------------------------------------------------------------------------------
  alpha    0.9993  |      0.0002         0.9991         0.0000         0.0000
  beta     0.0007  |      0.0000         0.0000         0.0004         0.0004
 
-* Electronic eigenvalue no.   4:  0.3481742240493       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   4:  0.3481742240493       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He pz     L B1 He px     L B2 He py  
+Gross     Total   |    L A1 He pz     L B1 He px     L B2 He py
 --------------------------------------------------------------------
  alpha    0.0007  |      0.0007         0.0000         0.0000
  beta     0.9993  |      0.0000         0.4997         0.4996
 
-* Electronic eigenvalue no.   5:  0.3481745504180       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   5:  0.3481745504180       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L B1 He px     L B2 He py  
+Gross     Total   |    L B1 He px     L B2 He py
 -----------------------------------------------------
  alpha    0.0000  |      0.0000         0.0000
  beta     1.0000  |      0.5000         0.5000
 
-* Electronic eigenvalue no.   6:  0.4315082381028       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   6:  0.4315082381028       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s      L A1 He pz  
+Gross     Total   |    L A1 He s      L A1 He pz
 -----------------------------------------------------
  alpha    1.0000  |      0.9998         0.0002
  beta     0.0000  |      0.0000         0.0000
 
-* Electronic eigenvalue no.   7:  1.1883630557960       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   7:  1.1883630557960       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy
 --------------------------------------------------------------------------------------------------
  alpha    0.9462  |      0.2365         0.2365         0.0000         0.0000         0.4731
  beta     0.0538  |      0.0000         0.0000         0.0269         0.0269         0.0000
 
-* Electronic eigenvalue no.   8:  1.1883638744818       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   8:  1.1883638744818       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L A2 He dxy 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L A2 He dxy
 --------------------------------------------------------------------
  alpha    1.0000  |      0.2500         0.2500         0.5000
  beta     0.0000  |      0.0000         0.0000         0.0000
 
-* Electronic eigenvalue no.   9:  1.1883639571993       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.   9:  1.1883639571993       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz
 --------------------------------------------------------------------------------------------------
  alpha    0.2629  |      0.0438         0.0438         0.1753         0.0000         0.0000
  beta     0.7371  |      0.0000         0.0000         0.0000         0.3685         0.3685
 
-* Electronic eigenvalue no.  10:  1.1883646776631       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  10:  1.1883646776631       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy
 --------------------------------------------------------------------------------------------------
  alpha    0.0538  |      0.0134         0.0134         0.0000         0.0000         0.0269
  beta     0.9462  |      0.0000         0.0000         0.4731         0.4731         0.0000
 
-* Electronic eigenvalue no.  11:  1.1883649748229       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  11:  1.1883649748229       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz
 --------------------------------------------------------------------------------------------------
  alpha    0.7371  |      0.1228         0.1228         0.4914         0.0000         0.0000
  beta     0.2629  |      0.0000         0.0000         0.0000         0.1314         0.1314
 
-* Electronic eigenvalue no.  12:  1.4503523900770       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  12:  1.4503523900770       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s      L A1 He pz  
+Gross     Total   |    L A1 He s      L A1 He pz
 -----------------------------------------------------
  alpha    1.0000  |      0.9643         0.0356
  beta     0.0000  |      0.0000         0.0000
 
-* Electronic eigenvalue no.  13:  1.4539099098116       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  13:  1.4539099098116       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s      L A1 He pz     L B1 He px     L B2 He py  
+Gross     Total   |    L A1 He s      L A1 He pz     L B1 He px     L B2 He py
 -----------------------------------------------------------------------------------
  alpha    0.0065  |      0.0002         0.0062         0.0000         0.0000
  beta     0.9935  |      0.0000         0.0000         0.4968         0.4968
 
-* Electronic eigenvalue no.  14:  1.4539271796008       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  14:  1.4539271796008       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L B1 He px     L B2 He py  
+Gross     Total   |    L B1 He px     L B2 He py
 -----------------------------------------------------
  alpha    0.0000  |      0.0000         0.0000
  beta     1.0000  |      0.5000         0.5000
 
-* Electronic eigenvalue no.  15:  1.4540521554975       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  15:  1.4540521554975       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s      L A1 He pz     L B1 He px     L B2 He py  
+Gross     Total   |    L A1 He s      L A1 He pz     L B1 He px     L B2 He py
 -----------------------------------------------------------------------------------
  alpha    0.9936  |      0.0354         0.9582         0.0000         0.0000
  beta     0.0064  |      0.0000         0.0000         0.0032         0.0032
 
-* Electronic eigenvalue no.  16:  3.4238033267532       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  16:  3.4238033267532       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1214,7 +1214,7 @@ Gross     Total   |    L A1 He fxxz   L A1 He fyyz   L B1 He fxxx   L B1 He fxyy
  alpha    0.1382  |      0.0345         0.0345         0.0000         0.0000         0.0000         0.0000         0.0691
  beta     0.8618  |      0.0000         0.0000         0.1077         0.3232         0.3232         0.1077         0.0000
 
-* Electronic eigenvalue no.  17:  3.4238034727463       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  17:  3.4238034727463       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1229,7 +1229,7 @@ Gross  | L B2 He fyzz   L A2 He fxyz
  alpha |   0.0000         0.3595
  beta  |   0.1124         0.0000
 
-* Electronic eigenvalue no.  18:  3.4238035458593       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  18:  3.4238035458593       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1244,7 +1244,7 @@ Gross  | L B2 He fyyy   L B2 He fyzz
  alpha |   0.0000         0.0000
  beta  |   0.0430         0.2293
 
-* Electronic eigenvalue no.  19:  3.4238105530022       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  19:  3.4238105530022       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1254,7 +1254,7 @@ Gross     Total   |    L B1 He fxxx   L B1 He fxyy   L B2 He fxxy   L B2 He fyyy
  alpha    0.0001  |      0.0000         0.0000         0.0000         0.0000
  beta     0.9999  |      0.1250         0.3750         0.3750         0.1250
 
-* Electronic eigenvalue no.  20:  3.4238106749085       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  20:  3.4238106749085       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1264,7 +1264,7 @@ Gross     Total   |    L A1 He fxxz   L A1 He fyyz   L B1 He fxxx   L B1 He fxyy
  alpha    0.8618  |      0.2154         0.2154         0.0000         0.0000         0.0000         0.0000         0.4309
  beta     0.1382  |      0.0000         0.0000         0.0173         0.0518         0.0518         0.0173         0.0000
 
-* Electronic eigenvalue no.  21:  3.4238107558151       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  21:  3.4238107558151       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1279,7 +1279,7 @@ Gross  | L B2 He fyzz   L A2 He fxyz
  alpha |   0.0000         0.1404
  beta  |   0.2876         0.0000
 
-* Electronic eigenvalue no.  22:  3.4238107961572       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  22:  3.4238107961572       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1294,67 +1294,67 @@ Gross  | L B2 He fyyy   L B2 He fyzz
  alpha |   0.0000         0.0000
  beta  |   0.0320         0.1706
 
-* Electronic eigenvalue no.  23:  4.1122691389545       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  23:  4.1122691389545       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He s   
+Gross     Total   |    L A1 He s
 --------------------------------------
  alpha    0.9999  |      0.9999
  beta     0.0001  |      0.0000
 
-* Electronic eigenvalue no.  24:  4.4879825787505       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  24:  4.4879825787505       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy
 --------------------------------------------------------------------------------------------------
  alpha    0.8007  |      0.2002         0.2002         0.0000         0.0000         0.4004
  beta     0.1993  |      0.0000         0.0000         0.0996         0.0996         0.0000
 
-* Electronic eigenvalue no.  25:  4.4879826817344       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  25:  4.4879826817344       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz
 --------------------------------------------------------------------------------------------------
  alpha    0.3996  |      0.0666         0.0666         0.2664         0.0000         0.0000
  beta     0.6004  |      0.0000         0.0000         0.0000         0.3002         0.3002
 
-* Electronic eigenvalue no.  26:  4.4880262239577       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  26:  4.4880262239577       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L A2 He dxy 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L A2 He dxy
 --------------------------------------------------------------------
  alpha    0.9999  |      0.2500         0.2500         0.4999
  beta     0.0001  |      0.0000         0.0000         0.0000
 
-* Electronic eigenvalue no.  27:  4.4880263122608       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  27:  4.4880263122608       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz    L A2 He dxy
 --------------------------------------------------------------------------------------------------
  alpha    0.1993  |      0.0498         0.0498         0.0000         0.0000         0.0996
  beta     0.8007  |      0.0000         0.0000         0.4003         0.4004         0.0000
 
-* Electronic eigenvalue no.  28:  4.4880263563447       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  28:  4.4880263563447       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz 
+Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz    L B2 He dyz
 --------------------------------------------------------------------------------------------------
  alpha    0.6004  |      0.1001         0.1001         0.4002         0.0000         0.0000
  beta     0.3996  |      0.0000         0.0000         0.0000         0.1998         0.1998
 
-* Electronic eigenvalue no.  29:  5.0998105675670       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  29:  5.0998105675670       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1364,27 +1364,27 @@ Gross     Total   |    L A1 He pz     L B1 He px     L B2 He py     A1 He _small
  alpha    0.3331  |      0.3330         0.0000         0.0000         0.0002
  beta     0.6669  |      0.0000         0.3334         0.3334         0.0000
 
-* Electronic eigenvalue no.  30:  5.1000362995979       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  30:  5.1000362995979       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L B1 He px     L B2 He py  
+Gross     Total   |    L B1 He px     L B2 He py
 -----------------------------------------------------
  alpha    0.0001  |      0.0000         0.0000
  beta     0.9999  |      0.5000         0.4999
 
-* Electronic eigenvalue no.  31:  5.1000364021315       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  31:  5.1000364021315       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
 
-Gross     Total   |    L A1 He pz     L B1 He px     L B2 He py  
+Gross     Total   |    L A1 He pz     L B1 He px     L B2 He py
 --------------------------------------------------------------------
  alpha    0.6669  |      0.6669         0.0000         0.0000
  beta     0.3331  |      0.0000         0.1664         0.1665
 
-* Electronic eigenvalue no.  32:  10.993026984161       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  32:  10.993026984161       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1394,7 +1394,7 @@ Gross     Total   |    L A1 He s      A1 He _small   B1 He _small   B2 He _small
  alpha    0.9998  |      0.9996         0.0001         0.0000         0.0000
  beta     0.0002  |      0.0000         0.0000         0.0001         0.0001
 
-* Electronic eigenvalue no.  33:  12.902589522887       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  33:  12.902589522887       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1409,7 +1409,7 @@ Gross  | A1 He _small   A2 He _small
  alpha |   0.0002         0.0002
  beta  |   0.0000         0.0000
 
-* Electronic eigenvalue no.  34:  12.902589558032       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  34:  12.902589558032       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1424,7 +1424,7 @@ Gross  | L B2 He fyzz   L A2 He fxyz   B1 He _small   B2 He _small
  alpha |   0.0000         0.3571         0.0000         0.0000
  beta  |   0.1142         0.0000         0.0001         0.0001
 
-* Electronic eigenvalue no.  35:  12.902589575605       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  35:  12.902589575605       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1439,7 +1439,7 @@ Gross  | L B2 He fyyy   L B2 He fyzz   A1 He _small
  alpha |   0.0000         0.0000         0.0002
  beta  |   0.0428         0.2285         0.0000
 
-* Electronic eigenvalue no.  36:  12.902824573848       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  36:  12.902824573848       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1449,7 +1449,7 @@ Gross     Total   |    L B1 He fxxx   L B1 He fxyy   L B2 He fxxy   L B2 He fyyy
  alpha    0.0003  |      0.0000         0.0000         0.0000         0.0000         0.0002         0.0002
  beta     0.9997  |      0.1250         0.3749         0.3748         0.1249         0.0000         0.0000
 
-* Electronic eigenvalue no.  37:  12.902824603141       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  37:  12.902824603141       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1464,7 +1464,7 @@ Gross  | B1 He _small   B2 He _small
  alpha |   0.0000         0.0000
  beta  |   0.0001         0.0001
 
-* Electronic eigenvalue no.  38:  12.902824622657       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  38:  12.902824622657       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1479,7 +1479,7 @@ Gross  | L B2 He fyzz   L A2 He fxyz   A1 He _small   A2 He _small
  alpha |   0.0000         0.1430         0.0001         0.0001
  beta  |   0.2855         0.0000         0.0000         0.0000
 
-* Electronic eigenvalue no.  39:  12.902824632430       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  39:  12.902824632430       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1494,7 +1494,7 @@ Gross  | L B2 He fyyy   L B2 He fyzz   A1 He _small
  alpha |   0.0000         0.0000         0.0002
  beta  |   0.0322         0.1715         0.0000
 
-* Electronic eigenvalue no.  40:  16.556952191727       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  40:  16.556952191727       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1504,7 +1504,7 @@ Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz 
  alpha    0.7996  |      0.1999         0.1999         0.0000         0.0000         0.3998         0.0000         0.0000
  beta     0.2004  |      0.0000         0.0000         0.0999         0.1000         0.0000         0.0002         0.0002
 
-* Electronic eigenvalue no.  41:  16.556952218798       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  41:  16.556952218798       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1514,7 +1514,7 @@ Gross     Total   |    L A1 He dxx    L A1 He dyy    L A1 He dzz    L B1 He dxz 
  alpha    0.4001  |      0.0666         0.0666         0.2665         0.0000         0.0000         0.0003
  beta     0.5999  |      0.0000         0.0000         0.0000         0.2999         0.2999         0.0000
 
-* Electronic eigenvalue no.  42:  16.557805576851       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  42:  16.557805576851       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1524,7 +1524,7 @@ Gross     Total   |    L A1 He dxx    L A1 He dyy    L A2 He dxy    B1 He _small
  alpha    0.9996  |      0.2499         0.2499         0.4997         0.0000         0.0000
  beta     0.0004  |      0.0000         0.0000         0.0000         0.0002         0.0002
 
-* Electronic eigenvalue no.  43:  16.557805600075       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  43:  16.557805600075       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1534,7 +1534,7 @@ Gross     Total   |    L A1 He dxx    L A1 He dyy    L B1 He dxz    L B2 He dyz 
  alpha    0.2002  |      0.0499         0.0500         0.0000         0.0000         0.1000         0.0002         0.0002
  beta     0.7998  |      0.0000         0.0000         0.3997         0.3999         0.0000         0.0000         0.0000
 
-* Electronic eigenvalue no.  44:  16.557805611670       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  44:  16.557805611670       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1549,7 +1549,7 @@ Gross  | B2 He _small
  alpha |   0.0000
  beta  |   0.0001
 
-* Electronic eigenvalue no.  45:  18.526101182805       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  45:  18.526101182805       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1559,7 +1559,7 @@ Gross     Total   |    L A1 He pz     L B1 He px     L B2 He py     A1 He _small
  alpha    0.3337  |      0.3331         0.0000         0.0000         0.0006
  beta     0.6663  |      0.0000         0.3331         0.3331         0.0000
 
-* Electronic eigenvalue no.  46:  18.528888090760       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  46:  18.528888090760       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1569,7 +1569,7 @@ Gross     Total   |    L B1 He px     L B2 He py     A1 He _small   A2 He _small
  alpha    0.0005  |      0.0000         0.0000         0.0002         0.0002
  beta     0.9995  |      0.4997         0.4997         0.0000         0.0000
 
-* Electronic eigenvalue no.  47:  18.528888111226       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  47:  18.528888111226       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1579,7 +1579,7 @@ Gross     Total   |    L A1 He pz     L B1 He px     L B2 He py     A1 He _small
  alpha    0.6665  |      0.6663         0.0000         0.0000         0.0002         0.0000         0.0000
  beta     0.3335  |      0.0000         0.1666         0.1666         0.0000         0.0002         0.0002
 
-* Electronic eigenvalue no.  48:  29.418243256723       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  48:  29.418243256723       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1589,7 +1589,7 @@ Gross     Total   |    L A1 He s      A1 He _small   B1 He _small   B2 He _small
  alpha    0.9994  |      0.9991         0.0003         0.0000         0.0000
  beta     0.0006  |      0.0000         0.0000         0.0003         0.0003
 
-* Electronic eigenvalue no.  49:  81.899986901117       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  49:  81.899986901117       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1599,7 +1599,7 @@ Gross     Total   |    L A1 He s      A1 He _small   B1 He _small   B2 He _small
  alpha    0.9984  |      0.9976         0.0008         0.0000         0.0000
  beta     0.0016  |      0.0000         0.0000         0.0008         0.0008
 
-* Electronic eigenvalue no.  50:  244.62543931965       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  50:  244.62543931965       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1609,7 +1609,7 @@ Gross     Total   |    L A1 He s      A1 He _small   B1 He _small   B2 He _small
  alpha    0.9953  |      0.9930         0.0023         0.0000         0.0000
  beta     0.0047  |      0.0000         0.0000         0.0023         0.0023
 
-* Electronic eigenvalue no.  51:  809.68549915599       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  51:  809.68549915599       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1619,7 +1619,7 @@ Gross     Total   |    L A1 He s      A1 He _small   B1 He _small   B2 He _small
  alpha    0.9855  |      0.9782         0.0073         0.0000         0.0000
  beta     0.0145  |      0.0000         0.0000         0.0073         0.0073
 
-* Electronic eigenvalue no.  52:  3083.5641364620       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  52:  3083.5641364620       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1629,7 +1629,7 @@ Gross     Total   |    L A1 He s      A1 He _small   B1 He _small   B2 He _small
  alpha    0.9516  |      0.9274         0.0242         0.0000         0.0000
  beta     0.0484  |      0.0000         0.0000         0.0242         0.0242
 
-* Electronic eigenvalue no.  53:  14008.837401463       (Occupation : f = 0.0000)           
+* Electronic eigenvalue no.  53:  14008.837401463       (Occupation : f = 0.0000)
 ============================================================================================
 
 * Gross populations greater than 0.00010
@@ -1642,7 +1642,7 @@ Gross     Total   |    L A1 He s      A1 He _small   B1 He _small   B2 He _small
 
 *** Total gross population ***
 
-Gross      Total    |    L A1 He s   
+Gross      Total    |    L A1 He s
 --------------------------------------
  total     2.00000  |      1.99992
 
@@ -1662,19 +1662,19 @@ Gross      Total    |    L A1 He s
    - a relativistic four-component CI wave function program.
 
 
-   General structure: 
-     Stefan Knecht and Hans Joergen Aa. Jensen 
+   General structure:
+     Stefan Knecht and Hans Joergen Aa. Jensen
 
-   Integral transformation: 
+   Integral transformation:
      Luuk Visscher, Jon K. Laerdahl, and Trond Saue
 
-   GASCIP CI code: 
+   GASCIP CI code:
      Joern Thyssen and Hans Joergen Aa. Jensen
 
-   LUCIAREL CI code: 
+   LUCIAREL CI code:
      Timo Fleig and Jeppe Olsen
 
-   Parallel LUCIAREL CI code: 
+   Parallel LUCIAREL CI code:
      Stefan Knecht, Hans Joergen Aa. Jensen and Timo Fleig
 
    Linear symmetry implementation (CI and MCSCF):
@@ -1702,11 +1702,11 @@ Gross      Total    |    L A1 He s
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
   //  LUCIAREL called
-  //  CIRUN = NDET  
+  //  CIRUN = NDET
   //  The number of CI determinants will be computed
 
-  Number of determinants per double group irrep 
-  ============================================= 
+  Number of determinants per double group irrep
+  =============================================
                  961                 930                   0                   0
 
  (RSETCI) Number of determinants:          961 (dimension          961)
@@ -1714,9 +1714,9 @@ Gross      Total    |    L A1 He s
  CPU (Wall) time for generation of determinants:  0.15679300s( 0.17104096s)
 
  (RSETWOP) Orbital classes:
-     Inactive orbitals   :                                                   
-     Active orbitals     :    1..  31                                        
-     Secondary orbitals  :  -53..  -1,  32..  53                             
+     Inactive orbitals   :
+     Active orbitals     :    1..  31
+     Secondary orbitals  :  -53..  -1,  32..  53
 
  (ROPTST)  Start orbitals read from file DFCOEF
 
@@ -1790,7 +1790,7 @@ Gross      Total    |    L A1 He s
  - Finished symmetrization after           1.10 seconds
 
 
------- Timing report (in CPU seconds) of module  integral transformation      
+------ Timing report (in CPU seconds) of module  integral transformation
 
 
 
@@ -1810,10 +1810,10 @@ Gross      Total    |    L A1 He s
  (RTRACTL1) Total CPU (wall) time used :   00:00:01 (   00:00:01)
             Transformation ended Sun Jun 14 14:16:33 2020
   //  LUCIAREL called
-  //  CIRUN = KR-CI 
+  //  CIRUN = KR-CI
   //  Running large-scale CI calculation
 
-* REAFCK: Fock matrix read from file DFFCK1                                                      
+* REAFCK: Fock matrix read from file DFFCK1
 * Heading : He, DOSSSS, SCF                                  Sun Jun 14 14:16:30 2020
   Allocating for             5797 diagonal integrals.
 
@@ -1821,7 +1821,7 @@ Gross      Total    |    L A1 He s
   Allocating for          2713864 integrals.
 
  Number of integrals/CC amplitudes:          2713864
- (including imaginary parts) 
+ (including imaginary parts)
 
 
        ===================================================
@@ -1844,7 +1844,7 @@ Gross      Total    |    L A1 He s
   **********************************************************
 
                     ================================
-                     Summation of even distribution 
+                     Summation of even distribution
                     ================================
 
   CPU    0  computes      1 blocks with a total weight of                 12
@@ -1854,14 +1854,14 @@ Gross      Total    |    L A1 He s
 
    ==============================================================
    ==> allocation of two CI vectors and one resolution vector <==
-  
+
    current available free memory in double words:      2577227264
    allocate two CI vectors each of length:                    961
    allocate resolution vector of length:                     1800
    ==============================================================
 
-   
-   
+
+
 
     6 start vectors based on lowest diagonal elements of H_CI
          1           -2.861811
@@ -2018,7 +2018,7 @@ Gross      Total    |    L A1 He s
   **********************************************************
 
                     ================================
-                     Summation of even distribution 
+                     Summation of even distribution
                     ================================
 
   CPU    0  computes      1 blocks with a total weight of                 12
@@ -2028,7 +2028,7 @@ Gross      Total    |    L A1 He s
 
    ==============================================================
    ==> allocation of two CI vectors and one resolution vector <==
-  
+
    current available free memory in double words:      2579968256
    allocate two CI vectors each of length:                    961
    allocate resolution vector of length:                     1800
@@ -2175,7 +2175,7 @@ Gross      Total    |    L A1 He s
 
   Norm of printed CI vector ..  0.99874514E+00
 
-   Magnitude of CI coefficients 
+   Magnitude of CI coefficients
   ==============================
   10- 1 TO 10- 0           1  0.99195960E+00    0.99195960E+00
   10- 2 TO 10- 1          27  0.67855329E-02    0.99874514E+00
@@ -2184,7 +2184,7 @@ Gross      Total    |    L A1 He s
   10- 5 TO 10- 4          18  0.35320526E-07    0.10000000E+01
  Number of coefficients less than  10- 6 IS         818
 
-   Magnitude of CI coefficients for each excitation level 
+   Magnitude of CI coefficients for each excitation level
   =========================================================
 
        Occupation of active sets :  0  2
@@ -2211,9 +2211,9 @@ Gross      Total    |    L A1 He s
   10- 4 TO 10- 3           0  0.00000000E+00    0.99195960E+00
   10- 5 TO 10- 4           0  0.00000000E+00    0.99195960E+00
 
-   Total weight and number of SD's (> 10 ** -, 6)  : 
+   Total weight and number of SD's (> 10 ** -, 6)  :
   =================================================
-         N      Weight      Acc. Weight   Occupation 
+         N      Weight      Acc. Weight   Occupation
   ===================================================
        128   .8011E-02       .8011E-02    0  2
         14   .2954E-04       .8040E-02    1  1
@@ -2245,7 +2245,7 @@ Gross      Total    |    L A1 He s
 
   Norm of printed CI vector ..  0.00000000E+00
 
-   Magnitude of CI coefficients 
+   Magnitude of CI coefficients
   ==============================
   10- 1 TO 10- 0           0  0.00000000E+00    0.00000000E+00
   10- 2 TO 10- 1           0  0.00000000E+00    0.00000000E+00
@@ -2254,12 +2254,12 @@ Gross      Total    |    L A1 He s
   10- 5 TO 10- 4           0  0.00000000E+00    0.00000000E+00
  Number of coefficients less than  10- 6 IS           0
 
-   Magnitude of CI coefficients for each excitation level 
+   Magnitude of CI coefficients for each excitation level
   =========================================================
 
-   Total weight and number of SD's (> 10 ** -, 6)  : 
+   Total weight and number of SD's (> 10 ** -, 6)  :
   =================================================
-         N      Weight      Acc. Weight   Occupation 
+         N      Weight      Acc. Weight   Occupation
   ===================================================
 
  ----------------------------------------------
@@ -2288,7 +2288,7 @@ Gross      Total    |    L A1 He s
 
   Norm of printed CI vector ..  0.00000000E+00
 
-   Magnitude of CI coefficients 
+   Magnitude of CI coefficients
   ==============================
   10- 1 TO 10- 0           0  0.00000000E+00    0.00000000E+00
   10- 2 TO 10- 1           0  0.00000000E+00    0.00000000E+00
@@ -2297,12 +2297,12 @@ Gross      Total    |    L A1 He s
   10- 5 TO 10- 4           0  0.00000000E+00    0.00000000E+00
  Number of coefficients less than  10- 6 IS           0
 
-   Magnitude of CI coefficients for each excitation level 
+   Magnitude of CI coefficients for each excitation level
   =========================================================
 
-   Total weight and number of SD's (> 10 ** -, 6)  : 
+   Total weight and number of SD's (> 10 ** -, 6)  :
   =================================================
-         N      Weight      Acc. Weight   Occupation 
+         N      Weight      Acc. Weight   Occupation
   ===================================================
 
   I have completed task ANALYZ in  0.05874617s (wall time)
@@ -2313,7 +2313,7 @@ Gross      Total    |    L A1 He s
   ************* Natural orbital occupation numbers ************
   *************************************************************
   //  LUCIAREL called
-  //  CIRUN = DENS1 
+  //  CIRUN = DENS1
   //  Computing only 1-particle density matrices
   Allocating for             5797 diagonal integrals.
 
@@ -2321,7 +2321,7 @@ Gross      Total    |    L A1 He s
   Allocating for             1922 integrals.
 
  Number of integrals/CC amplitudes:             1922
- (including imaginary parts) 
+ (including imaginary parts)
 
 
        ===================================================
@@ -2344,7 +2344,7 @@ Gross      Total    |    L A1 He s
   **********************************************************
 
                     ================================
-                     Summation of even distribution 
+                     Summation of even distribution
                     ================================
 
   CPU    0  computes      1 blocks with a total weight of                  4
@@ -2354,81 +2354,81 @@ Gross      Total    |    L A1 He s
 
    ==============================================================
    ==> allocation of two CI vectors and one resolution vector <==
-  
+
    current available free memory in double words:      2579938304
    allocate two CI vectors each of length:                    961
    allocate resolution vector of length:                     1800
    ==============================================================
 
-  
-             ==================================== 
-             PARALLEL 1p DENSITY MAT. CALCULATION 
-             ==================================== 
-  
-  
+
+             ====================================
+             PARALLEL 1p DENSITY MAT. CALCULATION
+             ====================================
+
+
    Computing spin-dependent one-particle density
-  
+
 
  Allocating 4-index array of length            7688
 
  =======================================
  Density matrix for root    1
  =======================================
-   
-   
+
+
   Writing densities in reordered form (for MCSCF):
-   - a+ a b b+  
+   - a+ a b b+
   (means sign multiplied to all 2-particle densities)
    (done in GET_HX_RELA)
-   
-  Real density elements     : 
+
+  Real density elements     :
   -------------------------------
-   
+
  Excitation type ...    1
   -------------------------
-   
+
  Excitation type ...    2
   -------------------------
-   
+
  Excitation type ...    3
   -------------------------
-   
+
  Excitation type ...    4
   -------------------------
-   
+
  Excitation type ...    5
   -------------------------
-   
+
  Excitation type ...    6
   -------------------------
-   
+
  Excitation type ...    7
   -------------------------
-   
+
  Excitation type ...    8
   -------------------------
-   
+
  Excitation type ...    9
   -------------------------
-   
+
  Excitation type ...   10
   -------------------------
-   
+
  Excitation type ...   11
   -------------------------
-   
+
  Excitation type ...   12
   -------------------------
-   
+
  Excitation type ...   13
   -------------------------
-   
+
  Excitation type ...   14
   -------------------------
-   
+
  Excitation type ...   15
   -------------------------
-   
+
  Excitation type ...   16
   -------------------------
 
@@ -2460,13 +2460,13 @@ Gross      Total    |    L A1 He s
                57         58         59         60
                61         62
 
-  Real part     : 
+  Real part     :
   -------------------
 
  Excitation type ...    1
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2479,7 +2479,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    2
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2492,7 +2492,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    3
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2505,7 +2505,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    4
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2518,7 +2518,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    5
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2531,7 +2531,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    6
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2544,7 +2544,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    7
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2557,7 +2557,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    8
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2570,7 +2570,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    9
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1         -1          0          0
@@ -2614,7 +2614,7 @@ Gross      Total    |    L A1 He s
    0.000001746   0.000000719   0.000000719   0.000000719   0.000000363
    0.000000000
   //  LUCIAREL called
-  //  CIRUN = DENS1 
+  //  CIRUN = DENS1
   //  Computing only 1-particle density matrices
   Allocating for             5797 diagonal integrals.
 
@@ -2622,7 +2622,7 @@ Gross      Total    |    L A1 He s
   Allocating for             1922 integrals.
 
  Number of integrals/CC amplitudes:             1922
- (including imaginary parts) 
+ (including imaginary parts)
 
 
        ===================================================
@@ -2645,7 +2645,7 @@ Gross      Total    |    L A1 He s
   **********************************************************
 
                     ================================
-                     Summation of even distribution 
+                     Summation of even distribution
                     ================================
 
   CPU    0  computes      1 blocks with a total weight of                  4
@@ -2655,81 +2655,81 @@ Gross      Total    |    L A1 He s
 
    ==============================================================
    ==> allocation of two CI vectors and one resolution vector <==
-  
+
    current available free memory in double words:      2579938304
    allocate two CI vectors each of length:                    961
    allocate resolution vector of length:                     1800
    ==============================================================
 
-  
-             ==================================== 
-             PARALLEL 1p DENSITY MAT. CALCULATION 
-             ==================================== 
-  
-  
+
+             ====================================
+             PARALLEL 1p DENSITY MAT. CALCULATION
+             ====================================
+
+
    Computing spin-dependent one-particle density
-  
+
 
  Allocating 4-index array of length            7688
 
  =======================================
  Density matrix for root    1
  =======================================
-   
-   
+
+
   Writing densities in reordered form (for MCSCF):
-   - a+ a b b+  
+   - a+ a b b+
   (means sign multiplied to all 2-particle densities)
    (done in GET_HX_RELA)
-   
-  Real density elements     : 
+
+  Real density elements     :
   -------------------------------
-   
+
  Excitation type ...    1
   -------------------------
-   
+
  Excitation type ...    2
   -------------------------
-   
+
  Excitation type ...    3
   -------------------------
-   
+
  Excitation type ...    4
   -------------------------
-   
+
  Excitation type ...    5
   -------------------------
-   
+
  Excitation type ...    6
   -------------------------
-   
+
  Excitation type ...    7
   -------------------------
-   
+
  Excitation type ...    8
   -------------------------
-   
+
  Excitation type ...    9
   -------------------------
-   
+
  Excitation type ...   10
   -------------------------
-   
+
  Excitation type ...   11
   -------------------------
-   
+
  Excitation type ...   12
   -------------------------
-   
+
  Excitation type ...   13
   -------------------------
-   
+
  Excitation type ...   14
   -------------------------
-   
+
  Excitation type ...   15
   -------------------------
-   
+
  Excitation type ...   16
   -------------------------
 
@@ -2761,13 +2761,13 @@ Gross      Total    |    L A1 He s
                57         58         59         60
                61         62
 
-  Real part     : 
+  Real part     :
   -------------------
 
  Excitation type ...    1
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2780,7 +2780,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    2
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2793,7 +2793,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    3
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2806,7 +2806,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    4
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1          1          0          0
@@ -2819,7 +2819,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    5
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2832,7 +2832,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    6
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2845,7 +2845,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    7
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2858,7 +2858,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    8
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1           -1         -1          0          0
@@ -2871,7 +2871,7 @@ Gross      Total    |    L A1 He s
  Excitation type ...    9
   -------------------------
 
-  LABEL array (for integral indices!):  
+  LABEL array (for integral indices!):
   Internally, LABEL is reord. for operators.
 
    1            1         -1          0          0
@@ -2926,35 +2926,35 @@ Gross      Total    |    L A1 He s
 *****************************************************
 
 
- 
+
      Date and time (Linux)  : Sun Jun 14 14:16:37 2020
-     Host name              : node2302.phanpy.os                      
+     Host name              : node2302.phanpy.os
 
 >>>> Node 0, utime: 6, stime: 0, minflt: 14436, majflt: 0, nvcsw: 3673, nivcsw: 702, maxrss: 224948
 >>>> Total WALL time used in DIRAC: 7s
-  
+
   Dynamical Memory Usage Summary for Master
-  
+
   Mean allocation size (Mb) :       568.72
-  
+
   Largest                   10  allocations
-  
-    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in KRCI_CALC                         
-    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in RESOLV                            
-    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PAMANA                            
-    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PSISCF                            
-    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PAMSET - 2                        
-    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in GMOTRA                            
-    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PAMSET - 1                        
+
+    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in KRCI_CALC
+    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in RESOLV
+    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PAMANA
+    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PSISCF
+    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PAMSET - 2
+    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in GMOTRA
+    19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for WORK in PAMSET - 1
     19683.84 Mb at subroutine __allocator_track_if_MOD_allocator_registe for test allocation of work array in DIRAC mai
-        3.81 Mb at subroutine __allocator_track_if_MOD_allocator_registe for unnamed variable                          
-        3.81 Mb at subroutine __allocator_track_if_MOD_allocator_registe for unnamed variable                          
-  
+        3.81 Mb at subroutine __allocator_track_if_MOD_allocator_registe for unnamed variable
+        3.81 Mb at subroutine __allocator_track_if_MOD_allocator_registe for unnamed variable
+
   Peak memory usage:     19699.22 MB
   Peak memory usage:       19.238 GB
        reached at subroutine : __allocator_track_if_MOD_allocator_registe
-              for variable   : unnamed variable                          
-  
+              for variable   : unnamed variable
+
  MEMGET high-water mark:     0.00 MB
 
 *****************************************************

@@ -1,5 +1,6 @@
 import tempfile
-from pydirac import Molecule, AtomicDHFSet, AtomicCCSet
+
+from pydirac import AtomicCCSet, AtomicDHFSet, Molecule
 
 molecule = Molecule(["Mc"], [[0.0, 0.0, 0.0]])
 dhf = AtomicDHFSet(

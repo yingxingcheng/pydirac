@@ -1,9 +1,11 @@
 import re
 import warnings
-from monty.json import MSONable, jsanitize
+
 import numpy as np
+from monty.json import MSONable, jsanitize
+
+from pydirac.core.orbitals import AtomicOrbital, MoleculeOrbitals, OrbitalType
 from pydirac.io.inputs import Inp, Mol
-from pydirac.core.orbitals import OrbitalType, AtomicOrbital, MoleculeOrbitals
 
 __all__ = ["Output"]
 
@@ -74,7 +76,7 @@ class Output:
         inp_start_line = re.compile(r"^\*\*DIRAC\s*")
         endline = re.compile(r"^\s*\*END OF")
 
-        with open(self.filename, "r") as f:
+        with open(self.filename) as f:
             context = f.readlines()
 
         for i, line in enumerate(context):
@@ -116,7 +118,7 @@ class Output:
 
         basis_type = None
 
-        with open(self.filename, "r") as f:
+        with open(self.filename) as f:
             context = f.readlines()
 
         if atomic_calc_ptn.search("".join(context), re.MULTILINE | re.DOTALL):
@@ -226,7 +228,7 @@ class Output:
         number_line_ptn = re.compile(r"\s+[-+]?(\d+(\.\d+)?|\d*\.\d+) .*")
         endline_ptn = re.compile(r"^\* HOMO - LUMO")
 
-        with open(self.filename, "r") as f:
+        with open(self.filename) as f:
             lines = f.readlines()
 
         for i, l in enumerate(lines):
@@ -296,7 +298,7 @@ class Output:
 
         """
         end_pattern = re.compile(r"\s*\*+\s+E N D\s+of\s+D I R A C\s+output\s+\*+")
-        with open(self.filename, "r") as f:
+        with open(self.filename) as f:
             context = f.read()
         if end_pattern.search(context):
             self.is_ok = True
@@ -337,7 +339,7 @@ class Output:
         )
         end_line = re.compile(r"^$")
 
-        with open(self.filename, "r") as f:
+        with open(self.filename) as f:
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if start_pattern.match(line):
@@ -379,7 +381,7 @@ class Output:
         vir_pattern = re.compile(r"^\s*Spinor class : virtual\s+((?:\d+\s+)+)")
         orb_end_pattern = re.compile(r"^\s*Configuration in abelian subgroup")
 
-        with open(self.filename, "r") as f:
+        with open(self.filename) as f:
             lines = f.readlines()
             for i, line in enumerate(lines):
                 if orb_start_pattern.match(line):
@@ -437,7 +439,7 @@ class Output:
             r"\s*Electronic energy\s*:\s*(?P<energy>[-+]?(\d+(\.\d*)?|\d*\.\d+))"
         )
 
-        with open(self.filename, "r") as fin:
+        with open(self.filename) as fin:
             context = fin.read()
 
         energy_l = energy_line.findall(context, re.MULTILINE | re.DOTALL)

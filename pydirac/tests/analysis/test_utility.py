@@ -1,10 +1,10 @@
-import importlib_resources
-import os
 import glob
+import os
+
+import importlib_resources
 
 from pydirac.analysis.utility import *
 from pydirac.io.outputs import Output
-
 
 data_root = importlib_resources.files("pydirac.tests.data")
 He_q_so_dir = str(data_root / "He_q_so")
@@ -37,19 +37,17 @@ def test_get_energy():
                 outfiles = glob.glob("*.out")
                 if len(outfiles) > 1:
                     raise RuntimeError(
-                        "There are two output file in current "
-                        "directory: {0}".format(calc_dir)
+                        "There are two output file in current " "directory: {}".format(calc_dir)
                     )
                 else:
                     outfile = outfiles[0]
                     energy = get_energy(outfile, method="CCSD(T)")
-                    print("{0} CCSD(T): {1}".format(calc_dir, energy))
+                    print(f"{calc_dir} CCSD(T): {energy}")
             os.chdir("..")
     os.chdir(current)
 
 
 def test_output_object():
-
     current = os.getcwd()
     os.chdir(He_q_so_dir)
     for calc_dir in glob.glob("*"):
@@ -59,8 +57,7 @@ def test_output_object():
                 outfiles = glob.glob("*.out")
                 if len(outfiles) > 1:
                     raise RuntimeError(
-                        "There are two output file in current "
-                        "directory: {0}".format(calc_dir)
+                        "There are two output file in current " "directory: {}".format(calc_dir)
                     )
                 else:
                     outfile = outfiles[0]
@@ -71,7 +68,6 @@ def test_output_object():
 
 
 def test_output_object_CI():
-
     current = os.getcwd()
     os.chdir(He_mrci_dir)
     for calc_dir in glob.glob("dyall*"):
@@ -81,8 +77,7 @@ def test_output_object_CI():
                 outfiles = glob.glob("*.out")
                 if len(outfiles) > 1:
                     raise RuntimeError(
-                        "There are two output file in current "
-                        "directory: {0}".format(calc_dir)
+                        "There are two output file in current " "directory: {}".format(calc_dir)
                     )
                 else:
                     outfile = outfiles[0]

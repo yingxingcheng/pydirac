@@ -29,6 +29,7 @@ classifiers = [
 dependencies = [
     "monty",
     "numpy",
+    "importlib_resources",
 ]
 
 [project.urls]

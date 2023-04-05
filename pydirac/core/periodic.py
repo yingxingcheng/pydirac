@@ -65,9 +65,7 @@ class Element(MSONable):
         if isinstance(element, (str, int)):
             idx, symbol = self._get_element(element)
         else:
-            raise ValueError(
-                "Expected a <str> or <int>, got: {0:s}".format(type(element))
-            )
+            raise ValueError(f"Expected a <str> or <int>, got: {type(element):s}")
 
         self.atomic_number = idx
         self.symbol = symbol
@@ -227,7 +225,7 @@ class Element(MSONable):
         str
             The group symbol of the element.
         """
-        return "group-{0}".format(self.group)
+        return f"group-{self.group}"
 
     @property
     def Z(self):
@@ -406,13 +404,13 @@ class Element(MSONable):
                 if cs_total == 0:
                     cs_str = None
                 else:
-                    cs_str.append("{0}".format(cs_total))
+                    cs_str.append(f"{cs_total}")
                 if not len(os_total):
                     os_str = None
                 else:
-                    os_str.append("{0}".format(nb_os))
+                    os_str.append(f"{nb_os}")
                     for i in os_total:
-                        os_str.append("{0}/{1}".format(i[-1], nb_dict[i[0][1]]))
+                        os_str.append(f"{i[-1]}/{nb_dict[i[0][1]]}")
             else:
                 # for closed shell: 10, 10
                 # for open shell:
@@ -420,21 +418,17 @@ class Element(MSONable):
                 # 5/10,0
                 # 1/2,0
                 if cs_total:
-                    cs_str.append("{0} {1}\n".format(cs_even, cs_odd))
+                    cs_str.append(f"{cs_even} {cs_odd}\n")
                 else:
                     cs_str = None
 
                 if nb_os:
-                    os_str.append("{0}\n".format(nb_os))
+                    os_str.append(f"{nb_os}\n")
                     for i in os_total:
                         if i[0][-1] in ["s", "d"]:
-                            os_str.append(
-                                "{0}/{1},{2}\n".format(i[-1], nb_dict[i[0][1]], 0)
-                            )
+                            os_str.append(f"{i[-1]}/{nb_dict[i[0][1]]},{0}\n")
                         else:
-                            os_str.append(
-                                "{0}/{1},{2}\n".format(i[-1], 0, nb_dict[i[0][1]])
-                            )
+                            os_str.append(f"{i[-1]}/{0},{nb_dict[i[0][1]]}\n")
                 else:
                     os_str = None
             if cs_str:
@@ -448,9 +442,7 @@ class Element(MSONable):
 
         res_str = []
         res_dict = {}
-        res_str.append(
-            "# {0} atom ".format(self.symbol) + "and Econf: {0}".format(elec_config)
-        )
+        res_str.append(f"# {self.symbol} atom " + f"and Econf: {elec_config}")
         if closed_shell:
             res_str.append(".CLOSED SHELL")
             res_str.append(closed_shell)

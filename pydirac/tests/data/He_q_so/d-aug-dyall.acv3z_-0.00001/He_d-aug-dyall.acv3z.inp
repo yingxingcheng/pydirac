@@ -11,10 +11,10 @@
 1..oo
 **HAMILTONIAN
 .DOSSSS
-.OPERATOR                                                                                           
- 'Theta quadru field'                                                                    
- DIAGONAL                                                                                           
- ZZTHETA                                                                                            
+.OPERATOR
+ 'Theta quadru field'
+ DIAGONAL
+ ZZTHETA
  COMFACTOR
  zff
 **INTEGRALS

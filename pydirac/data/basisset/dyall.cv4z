@@ -1,18 +1,18 @@
-$ 
+$
 $ Elements Supported
 $ H  He Li Be Na Mg
-$ K  Ca Rb Sr Cs Ba Fr Ra 
+$ K  Ca Rb Sr Cs Ba Fr Ra
 $ B  C  N  O  F  Ne Al Si P  S  Cl Ar
-$ Ga Ge As Se Br Kr In Sn Sb Te I  Xe Tl Pb Bi Po At Rn 
+$ Ga Ge As Se Br Kr In Sn Sb Te I  Xe Tl Pb Bi Po At Rn
 $ Nh Fl Mc Lv Ts Og
 $ Sc Ti V  Cr Mn Fe Co Ni Cu Zn
-$ Y  Zr Nb Mo Tc Ru Rh Pd Ag Cd Hf Ta W  Re Os Ir Pt Au Hg 
+$ Y  Zr Nb Mo Tc Ru Rh Pd Ag Cd Hf Ta W  Re Os Ir Pt Au Hg
 $ Rf Db Sg Bh Hs Mt Ds Rg Cn
-$ Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr 
-$ La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu 
-$ 
+$ Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr
+$ La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu
+$
 $  REFERENCE
-$ 
+$
 $ 1s-3s: K.G. Dyall, Theor. Chem. Acc. (2016) 135:128.
 $ 4s-7s: K.G. Dyall, J. Phys. Chem. A. (2009) 113:12638
 $ 2p-3p: K.G. Dyall, Theor. Chem. Acc. (2016) 135:128.
@@ -27,9 +27,9 @@ $        127:369
 $    5f: K.G. Dyall, Theor. Chem. Acc. (2007) 117:491
 $ Available from the Dirac web site, http://dirac.chem.sdu.dk.
 $
-$ 
-$ 
-$ H 
+$
+$
+$ H
 a 1
 $ s functions
    11    0    0
@@ -186,7 +186,7 @@ $ g functions
     1    0    0
     4.02897899E-01
 
-$ B 
+$ B
 a 5
 $ s functions
    18    0    0
@@ -236,7 +236,7 @@ $ g functions
     1    0    0
     6.69308844E-01
 
-$ C 
+$ C
 a 6
 $ s functions
    18    0    0
@@ -286,7 +286,7 @@ $ g functions
     1    0    0
     9.84486214E-01
 
-$ N 
+$ N
 a 7
 $ s functions
    18    0    0
@@ -336,7 +336,7 @@ $ g functions
     1    0    0
     1.36664075E+00
 
-$ O 
+$ O
 a 8
 $ s functions
    18    0    0
@@ -386,7 +386,7 @@ $ g functions
     1    0    0
     1.82371624E+00
 
-$ F 
+$ F
 a 9
 $ s functions
    18    0    0
@@ -757,7 +757,7 @@ $ g functions
     1.94340326E+00
     4.46635512E-01
 
-$ P 
+$ P
 a 15
 $ s functions
    24    0    0
@@ -823,7 +823,7 @@ $ g functions
     2.37602689E+00
     5.51482785E-01
 
-$ S 
+$ S
 a 16
 $ s functions
    24    0    0
@@ -1021,7 +1021,7 @@ $ g functions
     4.09341564E+00
     1.01086986E+00
 
-$ K 
+$ K
 a 19
 $ s functions
    31    0    0
@@ -1367,7 +1367,7 @@ $ h functions
     5.68097113E-01
     1.38487767E-01
 
-$ V 
+$ V
 a 23
 $ s functions
    30    0    0
@@ -2809,7 +2809,7 @@ $ h functions
     1    0    0
     1.25080540E+01
 
-$ Y 
+$ Y
 a 39
 $ s functions
    33    0    0
@@ -4275,7 +4275,7 @@ $ h functions
     1    0    0
     3.24762180E+00
 
-$ I 
+$ I
 a 53
 $ s functions
    33    0    0
@@ -6817,7 +6817,7 @@ $ i functions
     1    0    0
     1.01408740E+01
 
-$ W 
+$ W
 a 74
 $ s functions
    34    0    0
@@ -9082,7 +9082,7 @@ $ i functions
     1.80002640E+00
     3.03305830E-01
 
-$ U 
+$ U
 a 92
 $ s functions
    37    0    0
@@ -12793,4 +12793,3 @@ $ g functions
 $ h functions
     1    0    0
     1.75149780E+00
-

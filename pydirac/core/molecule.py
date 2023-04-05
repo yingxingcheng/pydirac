@@ -1,4 +1,5 @@
 from monty.json import MSONable
+
 from pydirac.core.periodic import Element
 
 __all__ = ["Molecule"]

@@ -1,37 +1,37 @@
-**DIRAC                                                                                             
-.TITLE                                                                                              
- K, DOSSSS, SCF                                                                                     
-.WAVE F                                                                                             
-.ANALYZE                                                                                            
-**ANALYZE                                                                                           
-.MULPOP                                                                                             
-*MULPOP                                                                                             
-.VECPOP                                                                                             
+**DIRAC
+.TITLE
+ K, DOSSSS, SCF
+.WAVE F
+.ANALYZE
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
 1..oo
-**HAMILTONIAN                                                                                       
-.DOSSSS                                                                                             
-.OPERATOR                                                                                           
+**HAMILTONIAN
+.DOSSSS
+.OPERATOR
  ZDIPLEN
  COMFACTOR
  zff
-**INTEGRALS                                                                                         
-*READINP                                                                                            
-.UNCONTRACT                                                                                         
-**WAVE FUNCTIONS                                                                                    
-.SCF                                                                                                
-.RESOLVE                                                                                            
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
 .KR CI
-*SCF                                                                                                
-# K atom and Econf: 1s^2 2s^2 2p^6 3s^2 3p^6 4s^1                                                   
-.CLOSED SHELL                                                                                       
-18                                                                                                  
-.OPEN SHELL                                                                                         
-1                                                                                                   
-1/2                                                                                                 
-.EVCCNV                                                                                             
-1.0D-9  5.0D-8                                                                                      
-.MAXITR                                                                                             
-90                                                                                                  
+*SCF
+# K atom and Econf: 1s^2 2s^2 2p^6 3s^2 3p^6 4s^1
+.CLOSED SHELL
+18
+.OPEN SHELL
+1
+1/2
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+90
 *KRCICALC
 .CI PROGRAM
 LUCIAREL
@@ -53,4 +53,4 @@ LUCIAREL
 0
 .CHECKP
 .NOOCCN
-*END OF                                                                                             
+*END OF

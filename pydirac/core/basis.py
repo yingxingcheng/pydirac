@@ -1,5 +1,6 @@
 import os
 import re
+
 import importlib_resources
 
 from pydirac.core.periodic import Element
@@ -23,7 +24,7 @@ def basis_helper(filename="ANO-RCC"):
         The name of the file containing the basis set information. Default value is "ANO-RCC".
 
     """
-    with open(filename, "r") as f:
+    with open(filename) as f:
         textlines = f.readlines()
 
     textlines = textlines[43:-1]
@@ -44,7 +45,7 @@ def basis_helper(filename="ANO-RCC"):
 
         elif first_word == "H":
             nb_exp = int(line.strip().split()[1])
-            tmp_str = "f{0:4d}{1:5d}\n".format(nb_exp, 0)
+            tmp_str = f"f{nb_exp:4d}{0:5d}\n"
             element_mess.append(tmp_str)
             continue
         else:
@@ -58,9 +59,9 @@ def basis_helper(filename="ANO-RCC"):
     assert len(res_list) == 96
     for i in range(1, 97):
         symbol = Element(i).symbol
-        with open("basis/{0}.dat".format(symbol), "w") as f:
+        with open(f"basis/{symbol}.dat", "w") as f:
             nb_block = res_list[i - 1].count("functions")
-            f.write("LARGE EXPLICIT {0} {1}\n".format(nb_block, "1 " * nb_block))
+            f.write("LARGE EXPLICIT {} {}\n".format(nb_block, "1 " * nb_block))
             f.write(res_list[i - 1])
             f.write("FINISH\n")
 
@@ -123,7 +124,7 @@ def get_custom_basis_from_ele(ele_type, basis_type, fname_out=None):
     get_explicit_basis_default_basis(input_strings, fname_out=fname_out)
 
 
-class DyallBasisHelper(object):
+class DyallBasisHelper:
     def __init__(self):
         pass
 
@@ -155,7 +156,7 @@ class DyallBasisHelper(object):
 
         lines = lines[i_start:]
         for j, line in enumerate(lines):
-            match = re.match(r"^\$ {}\s*\n?$".format(e.symbol), line)
+            match = re.match(rf"^\$ {e.symbol}\s*\n?$", line)
             # if line.startswith('$ {}'.format(e.symbol)):
             if match:
                 j_start = j
@@ -179,7 +180,7 @@ class DyallBasisHelper(object):
         return dyall_basis
 
 
-class DyallBasis(object):
+class DyallBasis:
     def __init__(self, ele_Z, sym_dict):
         self.e = Element(ele_Z)
         self.symbol = self.e.symbol
@@ -213,11 +214,11 @@ class DyallBasis(object):
         # tmp_strings.append('a {}'.format(self.Z))
         for sym in "spdfghi":
             if sym in self.sym_dict:
-                tmp_strings.append("$ {} functions".format(sym))
+                tmp_strings.append(f"$ {sym} functions")
                 nb_exp = len(self.sym_dict[sym])
-                tmp_strings.append("f{0:>4}    0    0".format(nb_exp))
+                tmp_strings.append(f"f{nb_exp:>4}    0    0")
                 for exp in self.sym_dict[sym]:
-                    tmp_strings.append("    {0:10.8E}".format(float(exp)))
+                    tmp_strings.append(f"    {float(exp):10.8E}")
         return "\n".join(tmp_strings)
 
     def __str__(self):

@@ -1,12 +1,11 @@
 import re
+
 from pydirac.core.periodic import Element
 
 __all__ = ["get_keyword", "get_orbital_info", "get_energy", "get_symbol_and_charge"]
 
 
-def get_keyword(
-    element: str, task_type: str, orbital_info: str, delimer: str = "@"
-) -> str:
+def get_keyword(element: str, task_type: str, orbital_info: str, delimer: str = "@") -> str:
     """
     Constructs a keyword for a given element, task type, and orbital information.
 
@@ -78,7 +77,7 @@ def get_symbol_and_charge(filename="atom.mol"):
     [('C', 6.0), ('H', 1.0), ('H', 1.0), ('H', 1.0)]
     """
 
-    with open(filename, "r") as f:
+    with open(filename) as f:
         context = f.read()
 
     # Regular expression to match the symbol and charge of each atom in the file
@@ -123,7 +122,7 @@ def get_energy(filename, method="CCSD(T)"):
     -245.186792800
     """
 
-    with open(filename, "r") as f:
+    with open(filename) as f:
         context = f.read()
 
     # Regular expression to match the energy for the specified method
@@ -136,6 +135,4 @@ def get_energy(filename, method="CCSD(T)"):
     if energy:
         return float(energy[-1])
     else:
-        raise RuntimeError(
-            "Did not find energy for {0} in {1}".format(method, filename)
-        )
+        raise RuntimeError(f"Did not find energy for {method} in {filename}")

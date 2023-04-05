@@ -1,5 +1,6 @@
 import argparse
 import sys
+
 from pydirac.cli.pypam_atom_db import get_atomDB
 from pydirac.core.basis import get_custom_basis_from_ele
 

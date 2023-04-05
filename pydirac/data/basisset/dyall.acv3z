@@ -1,12 +1,12 @@
-$ 
+$
 $ Elements Supported
 $ H  He
 $ B  C  N  O  F  Ne Al Si P  S  Cl Ar
-$ Ga Ge As Se Br Kr In Sn Sb Te I  Xe Tl Pb Bi Po At Rn 
+$ Ga Ge As Se Br Kr In Sn Sb Te I  Xe Tl Pb Bi Po At Rn
 $ Nh Fl Mc Lv Ts Og
-$ 
+$
 $  REFERENCE
-$ 
+$
 $ 1s:    K.G. Dyall, unpublished.
 $ 2p-3p: K.G. Dyall, Theor. Chem. Acc. (2016) 135:128
 $ 4p-6p: K.G. Dyall, Theor. Chem. Acc. (2002) 108:335;
@@ -14,9 +14,9 @@ $        revision K.G. Dyall, Theor. Chem. Acc. (2006) 115:441
 $    7p: K.G. Dyall, Theor. Chem. Acc. (2012) 131:1172.
 $ Available from the Dirac web site, http://dirac.chem.sdu.dk.
 $
-$ 
-$ 
-$ H 
+$
+$
+$ H
 a 1
 $ s functions
    10    0    0
@@ -64,7 +64,7 @@ $ d functions
     1.95612906E+00
     5.33588733E-01
 
-$ B 
+$ B
 a 5
 $ s functions
    15    0    0
@@ -105,7 +105,7 @@ $ f functions
     5.29163721E-01
     1.62919094E-01
 
-$ C 
+$ C
 a 6
 $ s functions
    15    0    0
@@ -146,7 +146,7 @@ $ f functions
     7.21638135E-01
     2.29788622E-01
 
-$ N 
+$ N
 a 7
 $ s functions
    15    0    0
@@ -187,7 +187,7 @@ $ f functions
     1.02136377E+00
     3.36667695E-01
 
-$ O 
+$ O
 a 8
 $ s functions
    15    0    0
@@ -228,7 +228,7 @@ $ f functions
     1.40715844E+00
     4.86905176E-01
 
-$ F 
+$ F
 a 9
 $ s functions
    15    0    0
@@ -414,7 +414,7 @@ $ f functions
     3.21961182E-01
     1.09458727E-01
 
-$ P 
+$ P
 a 15
 $ s functions
    19    0    0
@@ -466,7 +466,7 @@ $ f functions
     4.24814897E-01
     1.54616589E-01
 
-$ S 
+$ S
 a 16
 $ s functions
    19    0    0
@@ -1392,7 +1392,7 @@ $ g functions
     1    0    0
     2.81868980E+00
 
-$ I 
+$ I
 a 53
 $ s functions
    29    0    0
@@ -2838,4 +2838,3 @@ $ f functions
 $ g functions
     1    0    0
     1.60011630E+00
-

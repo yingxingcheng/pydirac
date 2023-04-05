@@ -1,12 +1,11 @@
-import pytest
 import importlib_resources
+import pytest
 
 from pydirac.core.molecule import Molecule
 from pydirac.io.sets import *
 
 dir_out_He = str(
-    importlib_resources.files("pydirac.tests.data.He_q_so")
-    / "d-aug-dyall.acv3z_+0.00001"
+    importlib_resources.files("pydirac.tests.data.He_q_so") / "d-aug-dyall.acv3z_+0.00001"
 )
 
 

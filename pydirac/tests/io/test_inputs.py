@@ -1,4 +1,5 @@
 import importlib_resources
+
 from pydirac.core.settings import Settings
 from pydirac.io.inputs import Inp
 

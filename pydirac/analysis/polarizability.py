@@ -1,11 +1,12 @@
-import os
 import glob
-import numpy as np
+import os
 import warnings
+
+import numpy as np
 from monty.os import cd
 
+from pydirac.analysis.utility import get_keyword, get_orbital_info
 from pydirac.io.outputs import Output
-from pydirac.analysis.utility import get_orbital_info, get_keyword
 
 __all__ = [
     "PolarizabilityCalculator",
@@ -85,7 +86,7 @@ class PolarizabilityCalculator:
                 return np.array([np.power(f, 1) / 2.0, -np.power(f, 2) / 8.0])
             else:
                 raise TypeError(
-                    'calc_type {0} is not valid, please use "dipole" '
+                    'calc_type {} is not valid, please use "dipole" '
                     'or "quadrupole"'.format(self.calc_type)
                 )
 
@@ -108,7 +109,7 @@ class PolarizabilityCalculator:
                 )
             else:
                 raise TypeError(
-                    'calc_type {0} is not valid, please use "dipole" '
+                    'calc_type {} is not valid, please use "dipole" '
                     'or "quadrupole"'.format(self.calc_type)
                 )
         else:
@@ -177,7 +178,7 @@ class PolarizabilityCalculator:
         array_like of float
             The coefficients.
         """
-        with open(filename, "r") as f:
+        with open(filename) as f:
             context = f.readlines()
 
         if len(context) < 3:
@@ -230,7 +231,7 @@ def get_polarizability(
 
     # for debug
     if verbos:
-        print("cd {0}".format(dirname))
+        print(f"cd {dirname}")
 
     all_res = {}
     curr_dir_output_lis = []
@@ -254,17 +255,15 @@ def get_polarizability(
                 outs = glob.glob("*.out")
                 if len(outs) > 1:
                     warnings.warn(
-                        "there are more than two output file in this directory {0}, and we take "
-                        "the first one {1}".format(clc_d, outs[0])
+                        "there are more than two output file in this directory {}, and we take "
+                        "the first one {}".format(clc_d, outs[0])
                     )
                 elif len(outs) == 1:
                     obj = Output(filename=outs[0])
                     if obj.is_ok:
                         calc_dir_output_lis.append(obj)
                 else:
-                    warnings.warn(
-                        "there is no output file in this directory {0}".format(clc_d)
-                    )
+                    warnings.warn(f"there is no output file in this directory {clc_d}")
 
         all_res["curr_dir"] = {}
         if is_valid(curr_dir_output_lis):
@@ -284,9 +283,7 @@ def get_polarizability(
         # ------------------------------
         all_res["sub_dir"] = {}
         if do_sub_dir:
-            sub_dirs = [
-                d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs
-            ]
+            sub_dirs = [d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs]
 
             for sd in sub_dirs:
                 res = get_polarizability(
@@ -318,8 +315,8 @@ def do_one_basis(output_lis):
     for o in output_lis:
         if o.inp.calc_type != ct:
             warnings.warn(
-                "we found a error output whose calc_type {0} is "
-                "different with the first one {1}".format(o.inp.calc_type, ct)
+                "we found a error output whose calc_type {} is "
+                "different with the first one {}".format(o.inp.calc_type, ct)
             )
             continue
 
@@ -354,8 +351,8 @@ def do_one_basis(output_lis):
     for k, v in energies.items():
         if len(v) != len(fields):
             warnings.warn(
-                'The length of energy set "{0}" {1} does '
-                "not equal the length of field {2}".format(k, len(v), len(fields))
+                'The length of energy set "{}" {} does '
+                "not equal the length of field {}".format(k, len(v), len(fields))
             )
             del_k_lis.append(k)
     for k in del_k_lis:
@@ -374,9 +371,7 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=Tr
     all_basis_res = {}
     for o in output_lis:
         task_type, orbit = o.task_type, o.calc_orbit
-        obt_info = (
-            get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
-        )
+        obt_info = get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
         k = get_keyword(o.mol.molecule.atomic_info.symbol, task_type, obt_info)
         if k not in all_basis_res:
             all_basis_res[k] = []
@@ -419,7 +414,5 @@ def is_valid(output_lis, verbos=False):
     else:
         if verbos:
             print(task_record)
-            warnings.warn(
-                "the maximum of output objects with the same type is less than 3"
-            )
+            warnings.warn("the maximum of output objects with the same type is less than 3")
         return False

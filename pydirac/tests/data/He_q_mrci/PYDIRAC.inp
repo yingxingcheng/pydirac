@@ -1,36 +1,36 @@
-**DIRAC                                                                                             
-.TITLE                                                                                              
- He, DOSSSS, SCF                                                                                    
-.WAVE F                                                                                             
-.ANALYZE                                                                                            
-**ANALYZE                                                                                           
-.MULPOP                                                                                             
-*MULPOP                                                                                             
-.VECPOP                                                                                             
+**DIRAC
+.TITLE
+ He, DOSSSS, SCF
+.WAVE F
+.ANALYZE
+**ANALYZE
+.MULPOP
+*MULPOP
+.VECPOP
 1..oo
-**HAMILTONIAN                                                                                       
-.DOSSSS                                                                                             
-.OPERATOR                                                                                           
- 'Theta quadru-field'                                                                               
- DIAGONAL                                                                                           
- ZZTHETA                                                                                            
+**HAMILTONIAN
+.DOSSSS
+.OPERATOR
+ 'Theta quadru-field'
+ DIAGONAL
+ ZZTHETA
  COMFACTOR
  zff
-**INTEGRALS                                                                                         
-*READINP                                                                                            
-.UNCONTRACT                                                                                         
-**WAVE FUNCTIONS                                                                                    
-.SCF                                                                                                
-.RESOLVE                                                                                            
+**INTEGRALS
+*READINP
+.UNCONTRACT
+**WAVE FUNCTIONS
+.SCF
+.RESOLVE
 .KR CI
-*SCF                                                                                                
-# He atom and Econf: 1s^2                                                                           
-.CLOSED SHELL                                                                                       
-2                                                                                                   
-.EVCCNV                                                                                             
-1.0D-9  5.0D-8                                                                                      
-.MAXITR                                                                                             
-60                                                                                                  
+*SCF
+# He atom and Econf: 1s^2
+.CLOSED SHELL
+2
+.EVCCNV
+1.0D-9  5.0D-8
+.MAXITR
+60
 *KRCICALC
 .CI PROGRAM
 LUCIAREL
@@ -49,4 +49,4 @@ LUCIAREL
 rstr
 .CHECKP
 .NOOCCN
-*END OF                                                                                             
+*END OF

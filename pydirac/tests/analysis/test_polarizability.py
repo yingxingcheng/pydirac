@@ -1,9 +1,8 @@
 import importlib_resources
 import pytest
 
-from pydirac.analysis.polarizability import get_polarizability
 from pydirac import Settings
-
+from pydirac.analysis.polarizability import get_polarizability
 
 data_root = importlib_resources.files("pydirac.tests.data")
 He_q_so_dir = str(data_root / "He_q_so")

@@ -1,19 +1,19 @@
 import abc
-from pathlib import Path
-from copy import deepcopy
-import shutil
 import glob
-import warnings
 import os
+import shutil
+import warnings
+from copy import deepcopy
+from pathlib import Path
 
 import importlib_resources
-from monty.serialization import loadfn
 from monty.json import MSONable
+from monty.serialization import loadfn
 
-from pydirac.io.inputs import DiracInput, Mol, Inp
-from pydirac.io.outputs import Output
 from pydirac.core.molecule import Molecule
 from pydirac.core.settings import Settings
+from pydirac.io.inputs import DiracInput, Inp, Mol
+from pydirac.io.outputs import Output
 
 __all__ = ["DiracInput", "AtomicDHFSet", "AtomicCCSet", "AtomicCISet"]
 
@@ -320,7 +320,7 @@ class AtomicDHFSet(DictSet):
 
         if self.ff_mode not in AtomicDHFSet.SUPPORTED_FF_MODES:
             raise ValueError(
-                "{0} not one of the support modes : {1}".format(
+                "{} not one of the support modes : {}".format(
                     self.ff_mode, AtomicDHFSet.SUPPORTED_FF_MODES
                 )
             )
@@ -372,11 +372,11 @@ class AtomicDHFSet(DictSet):
                             " DIAGONAL",
                             " ZZTHETA",
                             " COMFACTOR",
-                            " {0}".format(zff),
+                            f" {zff}",
                         ]
                     }
                 else:
-                    operator_dict = {"OPERATOR": [" ZDIPLEN", " COMFACTOR", " {0}".format(zff)]}
+                    operator_dict = {"OPERATOR": [" ZDIPLEN", " COMFACTOR", f" {zff}"]}
                 parent_inp["HAMILTONIAN"].update(operator_dict)
         return parent_inp
 
@@ -513,7 +513,7 @@ class AtomicCCSet(AtomicDHFSet):
         # s.integrals.readinp.uncontract = True
         s.INTEGRALS.READINP = "UNCONTRACT"
         if "active" not in s.MOLTRA:
-            s.MOLTRA.ACTIVE = "{0} {1} {2}".format(self.e_min, self.e_max, self.e_error)
+            s.MOLTRA.ACTIVE = f"{self.e_min} {self.e_max} {self.e_error}"
 
         # RELCC setup
         RELCC = Settings()
@@ -819,20 +819,20 @@ class AtomicCISet(AtomicDHFSet):
                 # He
                 nb_active_elec = 2
                 gas1 = "0 2 / 1"
-                gas2 = "2 2 / {0}".format(nb_vir_shell // 2)
+                gas2 = f"2 2 / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2])
             elif period == 2:
                 # Be
                 nb_active_elec = 4
                 gas1 = "2 4 / 2"
-                gas2 = "4 4 / {0}".format(nb_vir_shell // 2)
+                gas2 = f"4 4 / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2])
             elif period == 3:
                 # Mg
                 nb_active_elec = 10
                 gas1 = "0 2 / 1"
                 gas2 = "8 10 / 4"
-                gas3 = "10 10 / {0}".format(nb_vir_shell // 2)
+                gas3 = f"10 10 / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2, gas3])
                 pass
             else:
@@ -841,7 +841,7 @@ class AtomicCISet(AtomicDHFSet):
                 nb_active_elec = 20
                 gas1 = "10 12 / 6 ! (n-1)s2 (n-2)d10"
                 gas2 = "18 20 / 4 ! (n-1)p6 (n)s2"
-                gas3 = "20 20 / {0} ! virtual orbitals".format(nb_vir_shell // 2)
+                gas3 = f"20 20 / {nb_vir_shell // 2} ! virtual orbitals"
                 gas_list.extend([gas1, gas2, gas3])
         else:
             # for s-block open-shell elements
@@ -851,27 +851,27 @@ class AtomicCISet(AtomicDHFSet):
                 nb_active_elec = 19
                 gas1 = "10 12 / 6 ! (n-1)s2 (n-2)d10"
                 gas2 = "17 19 / 4 ! (n-1)p6 (n)s1"
-                gas3 = "19 19 / {0} ! virtual orbitals".format(nb_vir_shell // 2)
+                gas3 = f"19 19 / {nb_vir_shell // 2} ! virtual orbitals"
                 gas_list.extend([gas1, gas2, gas3])
             elif period == 3:
                 # for Na
                 nb_active_elec = 9
                 gas1 = "0 2 / 1"
                 gas2 = "7 9 / 4"
-                gas3 = "9 9 / {0}".format(nb_vir_shell // 2)
+                gas3 = f"9 9 / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2, gas3])
             elif period == 2:
                 # for Li
                 nb_active_elec = 3
                 gas1 = "1 3 / 2 ! 1s"
-                gas2 = "3 3 / {0}".format(nb_vir_shell // 2)
+                gas2 = f"3 3 / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2])
             else:
                 # H
                 assert period == 1
                 nb_active_elec = 1
                 gas1 = "0 1 / 1 ! 1s"
-                gas2 = "1 1 / {0}".format(nb_vir_shell // 2)
+                gas2 = f"1 1 / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2])
 
         # specify many roots should we compute
@@ -886,7 +886,7 @@ class AtomicCISet(AtomicDHFSet):
             root_list.extend([ciroot1])
         else:
             raise RuntimeError(
-                "The number of electrons in open shell " "is wrong: {0}".format(nb_open_elec)
+                "The number of electrons in open shell " "is wrong: {}".format(nb_open_elec)
             )
 
         return nb_active_elec, gas_list, root_list
@@ -949,7 +949,7 @@ class AtomicCISet(AtomicDHFSet):
                 nb_active_elec = 10
                 gas1 = "2 4 / 2"
                 gas2 = "8 10 / 3"
-                gas3 = "10 10 / {0}".format(nb_vir_shell // 2)
+                gas3 = f"10 10 / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2, gas3])
             else:
                 # Ar, Kr, Xe, Rn, Og
@@ -957,7 +957,7 @@ class AtomicCISet(AtomicDHFSet):
                 nb_active_elec = 18
                 gas1 = "10 12 / 6 ! (n-1)s2 (n-2)d10"
                 gas2 = "16 18 / 3 ! (n-1)p6"
-                gas3 = "18 18 / {0} ! virtual orbitals".format(nb_vir_shell // 2)
+                gas3 = f"18 18 / {nb_vir_shell // 2} ! virtual orbitals"
                 gas_list.extend([gas1, gas2, gas3])
         else:
             # for p-block open-shell elements
@@ -965,8 +965,8 @@ class AtomicCISet(AtomicDHFSet):
                 # including d electrons
                 nb_active_elec = 10 + 2 + nb_open_elec
                 gas1 = "10 12 / 6 ! (n-1)s2 (n-2)d10"
-                gas2 = "{0} {1} / 3 ! (n-1)p6".format(nb_open_elec + 10, nb_open_elec + 12)
-                gas3 = "{0} {1} / {2} ! virtual orbitals".format(
+                gas2 = f"{nb_open_elec + 10} {nb_open_elec + 12} / 3 ! (n-1)p6"
+                gas3 = "{} {} / {} ! virtual orbitals".format(
                     nb_open_elec + 12, nb_open_elec + 12, nb_vir_shell // 2
                 )
                 gas_list.extend([gas1, gas2, gas3])
@@ -974,8 +974,8 @@ class AtomicCISet(AtomicDHFSet):
                 # for Al Si P S Cl
                 nb_active_elec = 2 + nb_open_elec
                 gas1 = "0 2 / 1"
-                gas2 = "{0} {1} / 3".format(nb_open_elec, nb_open_elec + 2)
-                gas3 = "{0} {1} / {2}".format(nb_open_elec + 2, nb_open_elec + 2, nb_vir_shell // 2)
+                gas2 = f"{nb_open_elec} {nb_open_elec + 2} / 3"
+                gas3 = f"{nb_open_elec + 2} {nb_open_elec + 2} / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2, gas3])
             else:
                 # without d electrons
@@ -983,8 +983,8 @@ class AtomicCISet(AtomicDHFSet):
                 # for B C N O F
                 nb_active_elec = nb_total_elec
                 gas1 = "2 4 / 2 ! 1s2s"
-                gas2 = "{0} {1} / 3 ! 2p".format(nb_total_elec - 2, nb_total_elec)
-                gas3 = "{0} {1} / {2}".format(nb_total_elec, nb_total_elec, nb_vir_shell // 2)
+                gas2 = f"{nb_total_elec - 2} {nb_total_elec} / 3 ! 2p"
+                gas3 = f"{nb_total_elec} {nb_total_elec} / {nb_vir_shell // 2}"
                 gas_list.extend([gas1, gas2, gas3])
 
         # specify many roots should we compute
@@ -1048,7 +1048,7 @@ class AtomicCISet(AtomicDHFSet):
             root_list.extend([ciroot1])
         else:
             raise RuntimeError(
-                "The number of electrons in open shell " "is wrong: {0}".format(nb_open_elec)
+                "The number of electrons in open shell " "is wrong: {}".format(nb_open_elec)
             )
 
         return nb_active_elec, gas_list, root_list
@@ -1105,7 +1105,7 @@ class AtomicCISet(AtomicDHFSet):
             nb_active_elec = 12
             gas1 = "8 10 / 5 ! (n-1)d10"
             gas2 = "10 12 / 1 ! (n)s2"
-            gas3 = "12 12 / {0} ! virtual orbitals".format(nb_vir_shell // 2)
+            gas3 = f"12 12 / {nb_vir_shell // 2} ! virtual orbitals"
             gas_list.extend([gas1, gas2, gas3])
         else:
             # for d-block open-shell elements
@@ -1116,7 +1116,7 @@ class AtomicCISet(AtomicDHFSet):
                 nb_active_elec = 11
                 gas1 = "8 10 / 5 ! (n-1)d10"
                 gas2 = "9 11 / 1 ! (n)s1"
-                gas3 = "11 11 / {0} ! virtual orbitals".format(nb_vir_shell // 2)
+                gas3 = f"11 11 / {nb_vir_shell // 2} ! virtual orbitals"
                 gas_list.extend([gas1, gas2, gas3])
             elif nb_open_shell == 10:
                 # d is open
@@ -1124,7 +1124,7 @@ class AtomicCISet(AtomicDHFSet):
                 # normally there is no this case, since in DIRAC (n-1)d locates
                 # before (n)s shells
                 gas1 = "0 2 / 1 ! (n)s2"
-                gas2 = "{0} {1} / 5 ! (n-1)d10".format(nb_open_elec, nb_open_elec + 2)
+                gas2 = f"{nb_open_elec} {nb_open_elec + 2} / 5 ! (n-1)d10"
                 gas3 = "{0} {0} / {1} ! virtual orbitals".format(
                     nb_open_elec + 2, nb_vir_shell // 2
                 )
@@ -1132,11 +1132,11 @@ class AtomicCISet(AtomicDHFSet):
             elif nb_open_shell == 12:
                 # s + d are open
                 nb_active_elec = nb_open_elec
-                gas1 = "{0} {1} / 6 ! (n-1)d10 (n)s2".format(nb_open_elec - 2, nb_open_elec)
+                gas1 = f"{nb_open_elec - 2} {nb_open_elec} / 6 ! (n-1)d10 (n)s2"
                 gas2 = "{0} {0} / {1} ! virtual orbitals".format(nb_open_elec, nb_vir_shell // 2)
                 gas_list.extend([gas1, gas2])
             else:
-                raise RuntimeError("Unknown number of open shell: {0}".format(nb_open_shell))
+                raise RuntimeError(f"Unknown number of open shell: {nb_open_shell}")
 
         # specify many roots should we compute
         if nb_open_elec == 1:
@@ -1150,9 +1150,7 @@ class AtomicCISet(AtomicDHFSet):
                     "For two open-shell d elements, " "there is no implement!"
                 )
             else:
-                raise RuntimeError(
-                    "the number of open shell {0} " "is error!".format(nb_open_shell)
-                )
+                raise RuntimeError("the number of open shell {} " "is error!".format(nb_open_shell))
         elif nb_open_elec == 0:
             # closed-shell elementss
             ciroot1 = "1 1"
@@ -1280,7 +1278,7 @@ class AtomicCISet(AtomicDHFSet):
             "NOOCCN": True,
         }
         for i in range(nb_root_sym):
-            krci_setup["CIROOTS_id_{0}".format(i)] = root_list[i]
+            krci_setup[f"CIROOTS_id_{i}"] = root_list[i]
 
         inp = out.inp
         if "HAMILTONIAN" in inp and "OPERATOR" in inp["HAMILTONIAN"]:
@@ -1313,7 +1311,7 @@ def get_diracrun_output(path) -> Output:
     path = Path(path)
     outputs = list(glob.glob(str(path / "*.out")))
     if len(outputs) == 0:
-        raise ValueError("Unable to get *.out from prev calculation in ${0}".format(path))
+        raise ValueError(f"Unable to get *.out from prev calculation in ${path}")
     outfile = sorted(outputs)[-1]
     return Output(outfile)
 

@@ -11,6 +11,4 @@ def get_atomDB(args):
 
     for d in dirname_lis:
         dir_fullname = os.path.abspath(d)
-        get_polarizability(
-            dir_fullname, calc_dir_patters=args.patterns, deepth=args.deepth
-        )
+        get_polarizability(dir_fullname, calc_dir_patters=args.patterns, deepth=args.deepth)

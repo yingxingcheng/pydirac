@@ -1,8 +1,8 @@
 # NOTE: This file is from the ACM Palm package. Please reference it if you use this
 #       class in your project.
 
-import textwrap
 import contextlib
+import textwrap
 from functools import wraps
 
 __all__ = ["Settings"]
