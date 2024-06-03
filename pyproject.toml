@@ -44,3 +44,8 @@ pypam = "pydirac.cli.pypam:main"
 [tool.setuptools.package-data]
 "pydirac" = ["data/**/*.*"]
 # "pydirac.tests" = ["data/**/*.*", "data/**/**/*.*", "data/**/**/**/*.*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = "-v"
