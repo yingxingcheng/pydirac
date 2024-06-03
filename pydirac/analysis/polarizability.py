@@ -136,7 +136,7 @@ class PolarizabilityCalculator:
             A[i, :] = self.get_coeff(v)
         return A
 
-    def get_svd_from_array(self, energy, field):
+    def get_svd_from_array(self, energy, field, rcond=None):
         """
         Calculate the SVD-based solution for the least-squares problem.
 
@@ -161,38 +161,62 @@ class PolarizabilityCalculator:
         A = self.get_A(np.asarray(field))
         b = np.asarray(energy) - e_ref
 
-        x_svd = np.linalg.lstsq(A, b, rcond=1e-8)[0]
-        return x_svd
+        # x_svd = np.linalg.lstsq(A, b, rcond=1e-8)[0]
+        # x_svd = np.linalg.lstsq(A, b, rcond=None)[0]
+        # print(x_svd)
 
-    def get_res_svd(self, filename):
-        """
-        Calculate the SVD-based solution for the least-squares problem using the data from a file.
+        # Solve the least squares problem using SVD
+        x_svd, residuals, rank, s = np.linalg.lstsq(A, b, rcond=rcond)
 
-        Parameters
-        ----------
-        filename : str
-            The name of the file containing the electric field strengths and energy values.
+        # Manually calculate residuals if not provided by np.linalg.lstsq
+        if residuals.size == 0:
+            residuals = b - np.dot(A, x_svd)
+            residual_sum_of_squares = np.sum(residuals**2)
+        else:
+            residual_sum_of_squares = residuals[0]
+            # residuals2 = b - np.dot(A, x_svd)
+            # residual_sum_of_squares2 = np.sum(residuals2**2)
+            # assert np.allclose(residual_sum_of_squares, residual_sum_of_squares2)
+            # print("assert True")
 
-        Returns
-        -------
-        array_like of float
-            The coefficients.
-        """
-        with open(filename) as f:
-            context = f.readlines()
+        # Calculate the covariance matrix of the coefficients
+        # Assuming homoscedasticity (constant variance of residuals)
+        MSE = residual_sum_of_squares / (len(energy) - len(x_svd))  # Mean Squared Error
+        cov_matrix = np.linalg.inv(np.dot(A.T, A)) * MSE
 
-        if len(context) < 3:
-            raise ValueError(f"Data points in {filename} is less than 3")
+        # Standard errors are the square roots of the diagonal elements of the covariance matrix
+        standard_errors = np.sqrt(np.diag(cov_matrix))
+        return x_svd, standard_errors
 
-        filed_energy = [tuple(c.split()) for c in context]
-        energy, field = [], []
-        for f, e in filed_energy:
-            f = float(f)
-            energy.append(float(e))
-            field.append(f)
+    # def get_res_svd(self, filename):
+    #     """
+    #     Calculate the SVD-based solution for the least-squares problem using the data from a file.
 
-        x_svd = self.get_svd_from_array(energy, field)
-        return x_svd
+    #     Parameters
+    #     ----------
+    #     filename : str
+    #         The name of the file containing the electric field strengths and energy values.
+
+    #     Returns
+    #     -------
+    #     array_like of float
+    #         The coefficients.
+    #     """
+    #     with open(filename) as f:
+    #         context = f.readlines()
+
+    #     if len(context) < 3:
+    #         raise ValueError(f"Data points in {filename} is less than 3")
+
+    #     filed_energy = [tuple(c.split()) for c in context]
+    #     energy, field = [], []
+    #     for f, e in filed_energy:
+    #         f = float(f)
+    #         energy.append(float(e))
+    #         field.append(f)
+
+    #     x_svd = self.get_svd_from_array(energy, field)
+    #     return x_svd
 
 
 def get_polarizability(
@@ -283,7 +307,9 @@ def get_polarizability(
         # ------------------------------
         all_res["sub_dir"] = {}
         if do_sub_dir:
-            sub_dirs = [d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs]
+            sub_dirs = [
+                d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs
+            ]
 
             for sd in sub_dirs:
                 res = get_polarizability(
@@ -331,7 +357,7 @@ def do_one_basis(output_lis):
         elif o.inp.calc_method == "CI":
             # check all roots converged
             for i in o.energy_settings["ci_converged"]:
-                if not np.alltrue(np.asarray(i)):
+                if not np.all(np.asarray(i)):
                     raise RuntimeError("Not all roots are converged!")
 
             for k, v in o.energy_settings["ci_e"].items():
@@ -360,10 +386,17 @@ def do_one_basis(output_lis):
 
     # {'scf': alpha_scf, 'mp2':alpha_scf, 'ccsd':alpha_ccsd}
     res = {}
+    res_error = {}
     for k, energy in energies.items():
         polar_key = k.strip("_e")
-        res[polar_key] = pc.get_svd_from_array(energy, fields)
-    res_all = {"energy": {"energies": energies, "fields": fields}, "polar": res}
+        _polar, _error = pc.get_svd_from_array(energy, fields)
+        res[polar_key] = _polar
+        res_error[polar_key] = _error
+    res_all = {
+        "energy": {"energies": energies, "fields": fields},
+        "polar": res,
+        "polar_error": res_error,
+    }
     return res_all
 
 
@@ -371,7 +404,9 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=Tr
     all_basis_res = {}
     for o in output_lis:
         task_type, orbit = o.task_type, o.calc_orbit
-        obt_info = get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
+        obt_info = (
+            get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
+        )
         k = get_keyword(o.mol.molecule.atomic_info.symbol, task_type, obt_info)
         if k not in all_basis_res:
             all_basis_res[k] = []
@@ -414,5 +449,7 @@ def is_valid(output_lis, verbos=False):
     else:
         if verbos:
             print(task_record)
-            warnings.warn("the maximum of output objects with the same type is less than 3")
+            warnings.warn(
+                "the maximum of output objects with the same type is less than 3"
+            )
         return False

@@ -33,10 +33,10 @@ def test_relcc():
     )
     o = Output(out_fn)
     res = o.as_dict()
-    assert pytest.approx(res["energy_settings"]["scf_e"], -2.861794767985585)
-    assert pytest.approx(res["energy_settings"]["mp2_e"], -2.895006044817857)
-    assert pytest.approx(res["energy_settings"]["ccsd_e"], -2.900862077849925)
-    assert pytest.approx(res["energy_settings"]["ccsd(t)_e"], -2.900862077849925)
+    assert res["energy_settings"]["scf_e"] == pytest.approx(-2.861794767985585)
+    assert res["energy_settings"]["mp2_e"] == pytest.approx(-2.895006044817857)
+    assert res["energy_settings"]["ccsd_e"] == pytest.approx(-2.900862077849925)
+    assert res["energy_settings"]["ccsd(t)_e"] == pytest.approx(-2.900862077849925)
     assert res["task_type"] == "Q-4C-DC-CC@d-aug-dyall.acv3z"
 
 
@@ -46,6 +46,6 @@ def test_mrci():
     )
     o = Output(out_fn)
     res = o.as_dict()
-    assert pytest.approx(res["energy_settings"]["scf_e"], -2.8618113380597565)
-    assert pytest.approx(res["energy_settings"]["ci_e"]["sym_1_root_1"], -2.8975548136776)
+    assert res["energy_settings"]["scf_e"] == pytest.approx(-2.8618113380597565)
+    assert res["energy_settings"]["ci_e"]["sym_1_root_1"] == pytest.approx(-2.8975548136776)
     assert res["task_type"] == "D-4C-DC-CI@dyall.acv4z"
