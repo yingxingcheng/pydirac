@@ -1,11 +1,13 @@
-import importlib_resources
+import importlib.resources as pkg_resources
 import pytest
 
 from pydirac.core.molecule import Molecule
 from pydirac.io.sets import *
 
+import tests.data  # Ensure your tests/data is a Python package (i.e., it contains an __init__.py file)
+
 dir_out_He = str(
-    importlib_resources.files("pydirac.tests.data.He_q_so") / "d-aug-dyall.acv3z_+0.00001"
+    pkg_resources.files(tests.data) / "He_q_so" / "d-aug-dyall.acv3z_+0.00001"
 )
 
 

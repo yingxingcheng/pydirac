@@ -43,4 +43,4 @@ pypam = "pydirac.cli.pypam:main"
 
 [tool.setuptools.package-data]
 "pydirac" = ["data/**/*.*"]
-"pydirac.tests" = ["data/**/*.*", "data/**/**/*.*", "data/**/**/**/*.*"]
+# "pydirac.tests" = ["data/**/*.*", "data/**/**/*.*", "data/**/**/**/*.*"]

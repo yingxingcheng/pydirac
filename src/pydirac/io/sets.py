@@ -17,7 +17,7 @@ from pydirac.io.outputs import Output
 
 __all__ = ["DiracInput", "AtomicDHFSet", "AtomicCCSet", "AtomicCISet"]
 
-dir_path = os.path.dirname(os.path.abspath(__file__))
+dir_path = os.path.dirname(__file__)
 
 MODULE_DIR = Path(__file__).resolve().parent
 
@@ -1320,7 +1320,7 @@ if __name__ == "__main__":
     import tempfile
 
     def main2():
-        module_dir = os.path.dirname(os.path.abspath(__file__))
+        module_dir = os.path.dirname(__file__)
         output = str(Path(module_dir) / "../tests/data/Rn_q_so/d-aug-dyall.acv3z_+0.00001")
 
         # Use a temporary directory to store the output files

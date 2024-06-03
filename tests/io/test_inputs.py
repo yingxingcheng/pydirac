@@ -1,14 +1,17 @@
-import importlib_resources
+import importlib.resources as pkg_resources
 
 from pydirac.core.settings import Settings
 from pydirac.io.inputs import Inp
 
+import tests.data  # Ensure your tests/data is a Python package (i.e., it contains an __init__.py file)
+
 
 def test_read_func():
     dirac_inp = str(
-        importlib_resources.files("pydirac.tests.data")
+        pkg_resources.files(tests.data)
         / "He_mrci"
-        / "dyall.acv4z_+0.001/He_dyall.acv4z.inp"
+        / "dyall.acv4z_+0.001"
+        / "He_dyall.acv4z.inp"
     )
     input = Inp.from_file(dirac_inp)
     print(input["DIRAC"])

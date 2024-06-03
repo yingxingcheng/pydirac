@@ -307,9 +307,7 @@ def get_polarizability(
         # ------------------------------
         all_res["sub_dir"] = {}
         if do_sub_dir:
-            sub_dirs = [
-                d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs
-            ]
+            sub_dirs = [d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs]
 
             for sd in sub_dirs:
                 res = get_polarizability(
@@ -404,9 +402,7 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=Tr
     all_basis_res = {}
     for o in output_lis:
         task_type, orbit = o.task_type, o.calc_orbit
-        obt_info = (
-            get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
-        )
+        obt_info = get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
         k = get_keyword(o.mol.molecule.atomic_info.symbol, task_type, obt_info)
         if k not in all_basis_res:
             all_basis_res[k] = []
@@ -449,7 +445,5 @@ def is_valid(output_lis, verbos=False):
     else:
         if verbos:
             print(task_record)
-            warnings.warn(
-                "the maximum of output objects with the same type is less than 3"
-            )
+            warnings.warn("the maximum of output objects with the same type is less than 3")
         return False
