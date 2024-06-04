@@ -136,7 +136,7 @@ class PolarizabilityCalculator:
             A[i, :] = self.get_coeff(v)
         return A
 
-    def get_svd_from_array(self, energy, field, rcond=None):
+    def get_svd_from_array(self, energy, field, rcond=None, threshold=0.005):
         """
         Calculate the SVD-based solution for the least-squares problem.
 
@@ -152,6 +152,12 @@ class PolarizabilityCalculator:
         array_like of float
             The coefficients
         """
+        field = np.asarray(field)
+        energy = np.asarray(energy)
+        mask = field <= threshold + 1e-8
+        field = field[mask]
+        energy = energy[mask]
+
         e_ref = 0.0
         for e, f in zip(energy, field):
             if np.isclose(f, 0.0):
@@ -220,7 +226,7 @@ class PolarizabilityCalculator:
 
 
 def get_polarizability(
-    dirname: str = "./", calc_dir_patters=None, deepth: int = 0, verbos=False
+    dirname: str = "./", calc_dir_patters=None, deepth: int = 0, verbos=False, threshold=0.005
 ) -> dict:
     """Get polarizability from a directory
 
@@ -292,14 +298,14 @@ def get_polarizability(
         all_res["curr_dir"] = {}
         if is_valid(curr_dir_output_lis):
             e_dict = get_polarizability_from_output_list(
-                dirname, curr_dir_output_lis, tag="curr_dir", verbos=verbos
+                dirname, curr_dir_output_lis, tag="curr_dir", verbos=verbos, threshold=threshold
             )
             all_res["curr_dir"] = e_dict
 
         all_res["calc_dir"] = {}
         if is_valid(calc_dir_output_lis):
             e_dict = get_polarizability_from_output_list(
-                dirname, calc_dir_output_lis, tag="clc_dir", verbos=verbos
+                dirname, calc_dir_output_lis, tag="clc_dir", verbos=verbos, threshold=threshold
             )
             all_res["calc_dir"] = e_dict
 
@@ -307,7 +313,9 @@ def get_polarizability(
         # ------------------------------
         all_res["sub_dir"] = {}
         if do_sub_dir:
-            sub_dirs = [d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs]
+            sub_dirs = [
+                d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs
+            ]
 
             for sd in sub_dirs:
                 res = get_polarizability(
@@ -315,13 +323,14 @@ def get_polarizability(
                     calc_dir_patters,
                     deepth - 1,
                     verbos=verbos,
+                    threshold=threshold
                 )
                 if sd not in all_res["sub_dir"] and len(res) > 0:
                     all_res["sub_dir"][os.path.basename(sd)] = res
     return all_res
 
 
-def do_one_basis(output_lis):
+def do_one_basis(output_lis, threshold=0.005):
     if not len(output_lis):
         warnings.warn("there is no valid output file here")
         return
@@ -387,7 +396,7 @@ def do_one_basis(output_lis):
     res_error = {}
     for k, energy in energies.items():
         polar_key = k.strip("_e")
-        _polar, _error = pc.get_svd_from_array(energy, fields)
+        _polar, _error = pc.get_svd_from_array(energy, fields, threshold)
         res[polar_key] = _polar
         res_error[polar_key] = _error
     res_all = {
@@ -398,11 +407,13 @@ def do_one_basis(output_lis):
     return res_all
 
 
-def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=True):
+def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=True, threshold=0.005):
     all_basis_res = {}
     for o in output_lis:
         task_type, orbit = o.task_type, o.calc_orbit
-        obt_info = get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
+        obt_info = (
+            get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
+        )
         k = get_keyword(o.mol.molecule.atomic_info.symbol, task_type, obt_info)
         if k not in all_basis_res:
             all_basis_res[k] = []
@@ -410,7 +421,7 @@ def get_polarizability_from_output_list(dirname, output_lis, tag=None, verbos=Tr
 
     e_res = {}
     for k, v in all_basis_res.items():
-        one_res = do_one_basis(v)
+        one_res = do_one_basis(v, threshold=threshold)
         if one_res:
             e_res[k] = one_res
     return e_res
@@ -445,5 +456,7 @@ def is_valid(output_lis, verbos=False):
     else:
         if verbos:
             print(task_record)
-            warnings.warn("the maximum of output objects with the same type is less than 3")
+            warnings.warn(
+                "the maximum of output objects with the same type is less than 3"
+            )
         return False
