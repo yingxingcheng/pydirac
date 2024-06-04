@@ -1,3 +1,9 @@
+## [2024-6-4]
+
+### Added
+
+- Threshold of electric field when computing dipole polarizability.
+
 ## [2024-6-3]
 
 ### Changed
