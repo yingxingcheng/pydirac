@@ -19,6 +19,7 @@ repos:
   rev: 'v0.0.265'
   hooks:
     - id: ruff
+      args: [ "--line-length=100" ]
 - repo: https://github.com/nbQA-dev/nbQA
   rev: "1.7.0"
   hooks:

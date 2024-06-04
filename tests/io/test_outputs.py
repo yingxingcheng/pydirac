@@ -1,9 +1,9 @@
 import importlib.resources as pkg_resources
+
 import pytest
 
-from pydirac.io.outputs import Output
-
 import tests.data  # Ensure your tests/data is a Python package (i.e., it contains an __init__.py file)
+from pydirac.io.outputs import Output
 
 data_root = pkg_resources.files(tests.data)
 K_mrci_dir = data_root / "K_mrci"
@@ -44,14 +44,10 @@ def test_relcc():
 
 def test_mrci():
     out_fn = str(
-        data_root
-        / "He_mrci"
-        / "dyall.acv4z_+0.001/He_dyall.acv4z_He_dyall.acv4z_zff=+0.001.out"
+        data_root / "He_mrci" / "dyall.acv4z_+0.001/He_dyall.acv4z_He_dyall.acv4z_zff=+0.001.out"
     )
     o = Output(out_fn)
     res = o.as_dict()
     assert res["energy_settings"]["scf_e"] == pytest.approx(-2.8618113380597565)
-    assert res["energy_settings"]["ci_e"]["sym_1_root_1"] == pytest.approx(
-        -2.8975548136776
-    )
+    assert res["energy_settings"]["ci_e"]["sym_1_root_1"] == pytest.approx(-2.8975548136776)
     assert res["task_type"] == "D-4C-DC-CI@dyall.acv4z"

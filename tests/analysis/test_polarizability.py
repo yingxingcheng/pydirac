@@ -1,10 +1,10 @@
 import importlib.resources as pkg_resources
+
 import pytest
 
+import tests.data  # Ensure your tests/data is a Python package (i.e., it contains an __init__.py file)
 from pydirac import Settings
 from pydirac.analysis.polarizability import get_polarizability
-
-import tests.data  # Ensure your tests/data is a Python package (i.e., it contains an __init__.py file)
 
 # Use pkg_resources to get the paths to the data directories
 He_q_so_dir = str(pkg_resources.files(tests.data) / "He_q_so")
