@@ -136,7 +136,7 @@ class PolarizabilityCalculator:
             A[i, :] = self.get_coeff(v)
         return A
 
-    def get_svd_from_array(self, energy, field, rcond=None, threshold=0.005):
+    def get_svd_from_array(self, energy, field, rcond=None, threshold=None):
         """
         Calculate the SVD-based solution for the least-squares problem.
 
@@ -226,7 +226,11 @@ class PolarizabilityCalculator:
 
 
 def get_polarizability(
-    dirname: str = "./", calc_dir_patters=None, deepth: int = 0, verbos=False, threshold=0.005
+    dirname: str = "./",
+    calc_dir_patters=None,
+    deepth: int = 0,
+    verbos=False,
+    threshold=None,
 ) -> dict:
     """Get polarizability from a directory
 
@@ -298,14 +302,22 @@ def get_polarizability(
         all_res["curr_dir"] = {}
         if is_valid(curr_dir_output_lis):
             e_dict = get_polarizability_from_output_list(
-                dirname, curr_dir_output_lis, tag="curr_dir", verbos=verbos, threshold=threshold
+                dirname,
+                curr_dir_output_lis,
+                tag="curr_dir",
+                verbos=verbos,
+                threshold=threshold,
             )
             all_res["curr_dir"] = e_dict
 
         all_res["calc_dir"] = {}
         if is_valid(calc_dir_output_lis):
             e_dict = get_polarizability_from_output_list(
-                dirname, calc_dir_output_lis, tag="clc_dir", verbos=verbos, threshold=threshold
+                dirname,
+                calc_dir_output_lis,
+                tag="clc_dir",
+                verbos=verbos,
+                threshold=threshold,
             )
             all_res["calc_dir"] = e_dict
 
@@ -313,7 +325,9 @@ def get_polarizability(
         # ------------------------------
         all_res["sub_dir"] = {}
         if do_sub_dir:
-            sub_dirs = [d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs]
+            sub_dirs = [
+                d for d in glob.glob("*") if os.path.isdir(d) and d not in clc_dirs
+            ]
 
             for sd in sub_dirs:
                 res = get_polarizability(
@@ -328,7 +342,7 @@ def get_polarizability(
     return all_res
 
 
-def do_one_basis(output_lis, threshold=0.005):
+def do_one_basis(output_lis, threshold=None):
     if not len(output_lis):
         warnings.warn("there is no valid output file here")
         return
@@ -394,7 +408,7 @@ def do_one_basis(output_lis, threshold=0.005):
     res_error = {}
     for k, energy in energies.items():
         polar_key = k.strip("_e")
-        _polar, _error = pc.get_svd_from_array(energy, fields, threshold)
+        _polar, _error = pc.get_svd_from_array(energy, fields, threshold=threshold)
         res[polar_key] = _polar
         res_error[polar_key] = _error
     res_all = {
@@ -406,12 +420,14 @@ def do_one_basis(output_lis, threshold=0.005):
 
 
 def get_polarizability_from_output_list(
-    dirname, output_lis, tag=None, verbos=True, threshold=0.005
+    dirname, output_lis, tag=None, verbos=True, threshold=None
 ):
     all_basis_res = {}
     for o in output_lis:
         task_type, orbit = o.task_type, o.calc_orbit
-        obt_info = get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
+        obt_info = (
+            get_orbital_info(orbit["occ"], orbit["vir"]) if len(orbit) else "null"
+        )
         k = get_keyword(o.mol.molecule.atomic_info.symbol, task_type, obt_info)
         if k not in all_basis_res:
             all_basis_res[k] = []
@@ -454,5 +470,7 @@ def is_valid(output_lis, verbos=False):
     else:
         if verbos:
             print(task_record)
-            warnings.warn("the maximum of output objects with the same type is less than 3")
+            warnings.warn(
+                "the maximum of output objects with the same type is less than 3"
+            )
         return False

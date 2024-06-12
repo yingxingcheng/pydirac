@@ -1,3 +1,4 @@
+import numpy as np
 from monty.json import MSONable, jsanitize
 
 __all__ = ["Element"]
@@ -62,7 +63,7 @@ class Element(MSONable):
         element : str or int
             The symbol or atomic number of the element.
         """
-        if isinstance(element, (str, int)):
+        if isinstance(element, (str, int, np.integer)):
             idx, symbol = self._get_element(element)
         else:
             raise ValueError(f"Expected a <str> or <int>, got: {type(element):s}")
@@ -90,7 +91,9 @@ class Element(MSONable):
             """
             Get element by given index.
             """
-            if type(Z) == int:
+            if isinstance(Z, (int, np.integer)):
+                if Z < 0 or Z > 118:
+                    raise ValueError(f"Wrong atomic number: {Z}")
                 return _PERIODIC_TABLE[Z]
             else:
                 raise RuntimeError("Type id should be int")
@@ -100,6 +103,8 @@ class Element(MSONable):
             Get element number by given element type.
             """
 
+            if symbol not in _PERIODIC_TABLE:
+                raise ValueError(f"Wrong atomic symbol {symbol}")
             idx = _PERIODIC_TABLE.index(symbol)
             if idx >= 0:
                 return idx
@@ -193,6 +198,9 @@ class Element(MSONable):
             The group of the element in the periodic table.
         """
         z = self.atomic_number
+        if (self.is_actinoid or self.is_lanthanoid) and z not in [71, 103]:
+            return None
+
         if z == 1:
             return 1
         if z == 2:
@@ -209,11 +217,22 @@ class Element(MSONable):
                 return 18
             return (z - 18) % 18
 
-        if (z - 54) % 32 == 0:
+        assert z >= 54
+        rest = (z - 54) % 32
+        # group 18
+        if rest == 0:
             return 18
-        if (z - 54) % 32 >= 18:
-            return (z - 54) % 32 - 14
-        return (z - 54) % 32
+        # group 1 and 2
+        elif 1 <= rest <= 2:
+            return rest
+        #  group 3-12
+        elif 2 < rest < 16:
+            return None
+        # group 13-17
+        elif rest >= 16:
+            return rest - 14
+        else:
+            raise ValueError(f"You found a bug!")
 
     @property
     def group_symbol(self):
