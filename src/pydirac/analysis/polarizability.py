@@ -61,8 +61,8 @@ class PolarizabilityCalculator:
             raise ValueError("Wrong calculation type!")
         self.calc_type = _ct
 
-        if nb_coeffs not in (2, 3):
-            raise ValueError("nb_coeffs must be 2 or 3!")
+        if nb_coeffs not in (1, 2, 3):
+            raise ValueError("nb_coeffs must be 1, 2 or 3!")
         self.nb_coeffs = nb_coeffs
 
     def get_coeff(self, f):
@@ -79,43 +79,97 @@ class PolarizabilityCalculator:
         array_like of float
             The coefficients.
         """
-        if self.nb_coeffs == 2:
-            if self.calc_type == "dipole":
-                return np.array([-np.power(f, 2) / 2.0, -np.power(f, 4) / 24.0])
-            elif self.calc_type == "quadrupole":
-                return np.array([np.power(f, 1) / 2.0, -np.power(f, 2) / 8.0])
-            else:
-                raise TypeError(
-                    'calc_type {} is not valid, please use "dipole" '
-                    'or "quadrupole"'.format(self.calc_type)
-                )
+        coeffs = {
+            "dipole": {
+                1: [-np.power(f, 2) / 2.0],
+                2: [-np.power(f, 2) / 2.0, -np.power(f, 4) / 24.0],
+                3: [
+                    -np.power(f, 2) / 2.0,
+                    -np.power(f, 4) / 24.0,
+                    -np.power(f, 6) / 720.0,
+                ],
+            },
+            "quadrupole": {
+                1: [np.power(f, 1) / 2.0],
+                2: [np.power(f, 1) / 2.0, -np.power(f, 2) / 8.0],
+                3: [np.power(f, 1) / 2.0, -np.power(f, 2) / 8.0, np.power(f, 3) / 24.0],
+            },
+        }
 
-        elif self.nb_coeffs == 3:
-            if self.calc_type == "dipole":
-                return np.array(
-                    [
-                        -np.power(f, 2) / 2.0,
-                        -np.power(f, 4) / 24.0,
-                        -np.power(f, 3) / 144.0,
-                    ]
-                )
-            elif self.calc_type == "quadrupole":
-                return np.array(
-                    [
-                        -np.power(f, 1) / 2.0,
-                        -np.power(f, 2) / 8.0,
-                        -np.power(f, 3) / 24.0,
-                    ]
-                )
-            else:
-                raise TypeError(
-                    'calc_type {} is not valid, please use "dipole" '
-                    'or "quadrupole"'.format(self.calc_type)
-                )
-        else:
-            raise ValueError(
-                f"calc_type {self.calc_type} is not valid, please use 'dipole' or 'quadrupole'."
+        if self.calc_type not in coeffs:
+            raise TypeError(
+                f'calc_type {self.calc_type} is not valid, please use "dipole" or "quadrupole".'
             )
+
+        if self.nb_coeffs not in coeffs[self.calc_type]:
+            raise ValueError(
+                f"nb_coeffs {self.nb_coeffs} is not valid for calc_type {self.calc_type}."
+            )
+
+        return np.array(coeffs[self.calc_type][self.nb_coeffs])
+
+    # def get_coeff(self, f):
+    #     """
+    #     Return the coefficients for a given electric field strength.
+
+    #     Parameters
+    #     ----------
+    #     f : float
+    #         The electric field strength.
+
+    #     Returns
+    #     -------
+    #     array_like of float
+    #         The coefficients.
+    #     """
+    #     if self.nb_coeffs == 1:
+    #         if self.calc_type == "dipole":
+    #             return np.array([-np.power(f, 2) / 2.0])
+    #         elif self.calc_type == "quadrupole":
+    #             return np.array([np.power(f, 1) / 2.0])
+    #         else:
+    #             raise TypeError(
+    #                 'calc_type {} is not valid, please use "dipole" '
+    #                 'or "quadrupole"'.format(self.calc_type)
+    #             )
+
+    #     elif self.nb_coeffs == 2:
+    #         if self.calc_type == "dipole":
+    #             return np.array([-np.power(f, 2) / 2.0, -np.power(f, 4) / 24.0])
+    #         elif self.calc_type == "quadrupole":
+    #             return np.array([np.power(f, 1) / 2.0, -np.power(f, 2) / 8.0])
+    #         else:
+    #             raise TypeError(
+    #                 'calc_type {} is not valid, please use "dipole" '
+    #                 'or "quadrupole"'.format(self.calc_type)
+    #             )
+
+    #     elif self.nb_coeffs == 3:
+    #         if self.calc_type == "dipole":
+    #             return np.array(
+    #                 [
+    #                     -np.power(f, 2) / 2.0,
+    #                     -np.power(f, 4) / 24.0,
+    #                     -np.power(f, 3) / 144.0,
+    #                 ]
+    #             )
+    #         elif self.calc_type == "quadrupole":
+    #             return np.array(
+    #                 [
+    #                     -np.power(f, 1) / 2.0,
+    #                     -np.power(f, 2) / 8.0,
+    #                     -np.power(f, 3) / 24.0,
+    #                 ]
+    #             )
+    #         else:
+    #             raise TypeError(
+    #                 'calc_type {} is not valid, please use "dipole" '
+    #                 'or "quadrupole"'.format(self.calc_type)
+    #             )
+    #     else:
+    #         raise ValueError(
+    #             f"calc_type {self.calc_type} is not valid, please use 'dipole' or 'quadrupole'."
+    #         )
 
     def get_A(self, field):
         """
@@ -154,22 +208,29 @@ class PolarizabilityCalculator:
         """
         field = np.asarray(field)
         energy = np.asarray(energy)
-        mask = field <= threshold + 1e-8
+
+        # Reference energy for zero field
+        zero_field_mask = np.isclose(field, 0.0)
+        if np.any(zero_field_mask):
+            e_ref = energy[zero_field_mask][0]
+        else:
+            raise ValueError("No field value is close to zero.")
+
+        # Create a mask to filter out values where the field is 0 or larger than the threshold
+        mask = (field != 0.0) & (field <= threshold + 1e-8)
+
+        # Apply the mask to both field and energy arrays
         field = field[mask]
         energy = energy[mask]
 
-        e_ref = 0.0
-        for e, f in zip(energy, field):
-            if np.isclose(f, 0.0):
-                e_ref = e
+        # Sort the field array and use the same indices to sort the energy array
+        sort_indices = np.argsort(field)
+        field = field[sort_indices]
+        energy = energy[sort_indices]
 
         # define a matrix
-        A = self.get_A(np.asarray(field))
-        b = np.asarray(energy) - e_ref
-
-        # x_svd = np.linalg.lstsq(A, b, rcond=1e-8)[0]
-        # x_svd = np.linalg.lstsq(A, b, rcond=None)[0]
-        # print(x_svd)
+        A = self.get_A(field)
+        b = energy - e_ref
 
         # Solve the least squares problem using SVD
         x_svd, residuals, rank, s = np.linalg.lstsq(A, b, rcond=rcond)
@@ -185,10 +246,19 @@ class PolarizabilityCalculator:
             # assert np.allclose(residual_sum_of_squares, residual_sum_of_squares2)
             # print("assert True")
 
-        # Calculate the covariance matrix of the coefficients
-        # Assuming homoscedasticity (constant variance of residuals)
-        MSE = residual_sum_of_squares / (len(energy) - len(x_svd))  # Mean Squared Error
-        cov_matrix = np.linalg.inv(np.dot(A.T, A)) * MSE
+        # Check for degrees of freedom
+        degrees_of_freedom = len(energy) - len(x_svd)
+        if degrees_of_freedom == 0:
+            # This implies an exact fit; no error to estimate.
+            MSE = 0
+            cov_matrix = np.zeros(
+                (len(x_svd), len(x_svd))
+            )  # Covariance matrix is not defined
+        else:
+            # Calculate the covariance matrix of the coefficients
+            # Assuming homoscedasticity (constant variance of residuals)
+            MSE = residual_sum_of_squares / degrees_of_freedom  # Mean Squared Error
+            cov_matrix = np.linalg.inv(np.dot(A.T, A)) * MSE
 
         # Standard errors are the square roots of the diagonal elements of the covariance matrix
         standard_errors = np.sqrt(np.diag(cov_matrix))
