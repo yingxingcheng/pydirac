@@ -3,6 +3,8 @@ import os
 import warnings
 
 import numpy as np
+from scipy.linalg import lstsq
+from scipy.special import factorial
 from monty.os import cd
 
 from pydirac.analysis.utility import get_keyword, get_orbital_info
@@ -15,6 +17,147 @@ __all__ = [
     "do_one_basis",
     "is_valid",
 ]
+
+
+def calc_mat(fields, nb_coeffs, calc_type):
+    assert calc_type in ["dipole", "quadrupole"]
+    if calc_type == "dipole":
+        f_list = []
+        for i in range(nb_coeffs):
+            order = 2 * i + 2
+            f_list.append(-1 / factorial(order) * fields**order)
+    elif calc_type == "quadrupole":
+        assert 1 <= nb_coeffs <= 3
+        if nb_coeffs == 1:
+            f_list = [1 / 2 * fields]
+        elif nb_coeffs == 2:
+            f_list = [1 / 2 * fields, -1 / 8 * fields**2]
+        elif nb_coeffs == 3:
+            f_list = [1 / 2 * fields, -1 / 8 * fields**2, 1 / 24 * fields**3]
+        else:
+            raise RuntimeError(
+                f"nb_coeffs={nb_coeffs} should be less than 4 and larger than 0"
+            )
+    else:
+        raise NotImplementedError()
+
+    A = np.column_stack(f_list)
+    return A
+
+
+def check_results(x_svd, errors, nb_coeffs, atol=0.1):
+    if nb_coeffs > 1:
+        if np.isclose(x_svd[1], 0.0):
+            assert np.allclose(x_svd[1:], 0.0) and np.allclose(errors[1:], 0.0)
+            return True
+
+        # The hyperpolarizability of atom should be positive.
+        if x_svd[1] < 0:
+            return False
+
+        # The errors are too large
+        if errors[1] / x_svd[1] < atol:
+            return False
+    return True
+
+
+def fit_ff_eq(
+    energy,
+    field,
+    calc_mat,
+    nb_coeffs,
+    rcond,
+    threshold,
+    calc_type,
+    check_hyper_polar,
+):
+    """
+    Calculate the SVD-based solution for the least-squares problem.
+
+    Parameters
+    ----------
+    energy : array_like of float
+        The energy values.
+    field : array_like of float
+        The electric field strengths.
+
+    Returns
+    -------
+    array_like of float
+        The coefficients
+    """
+    assert calc_type in ["dipole", "quadrupole"]
+    field = np.asarray(field)
+    energy = np.asarray(energy)
+
+    # Reference energy for zero field
+    zero_field_mask = np.isclose(field, 0.0)
+    if np.any(zero_field_mask):
+        e_ref = energy[zero_field_mask][0]
+    else:
+        raise ValueError("No field value is close to zero.")
+
+    # Create a mask to filter out values where the field is 0 or larger than the threshold
+    mask = (field != 0.0) & (field <= threshold + 1e-8)
+
+    # Apply the mask to both field and energy arrays
+    reduced_field = field[mask]
+    reduced_energy = energy[mask]
+
+    # Sort the field array and use the same indices to sort the energy array
+    sort_indices = np.argsort(reduced_field)
+    sorted_field = reduced_field[sort_indices]
+    sorted_energy = reduced_energy[sort_indices]
+
+    # Define the matrix
+    A = calc_mat(sorted_field, nb_coeffs, calc_type)
+    b = sorted_energy - e_ref
+
+    # Normalize the columns of A
+    norms = np.linalg.norm(A, axis=0)
+    A_normalized = A / norms
+
+    # Solve the least squares problem using SVD on the normalized matrix
+    x_svd_normalized, residuals, rank, s = lstsq(A_normalized, b, cond=rcond)
+
+    # Adjust the solution to account for the normalization
+    x_svd = x_svd_normalized / norms
+
+    # Calculate the residual sum of squares
+    residual_sum_of_squares = np.sum(residuals**2)
+
+    # Check for degrees of freedom
+    degrees_of_freedom = len(reduced_energy) - len(x_svd)
+    if degrees_of_freedom == 0:
+        # This implies an exact fit; no error to estimate.
+        MSE = 0
+        # Covariance matrix is not defined
+        cov_matrix = np.zeros((len(x_svd), len(x_svd)))
+    else:
+        # Calculate the covariance matrix of the coefficients
+        # Assuming homoscedasticity (constant variance of residuals)
+        MSE = residual_sum_of_squares / degrees_of_freedom  # Mean Squared Error
+        cov_matrix = np.linalg.inv(np.dot(A.T, A)) * MSE
+
+    # Standard errors are the square roots of the diagonal elements of the covariance matrix
+    standard_errors = np.sqrt(np.diag(cov_matrix))
+
+    if check_hyper_polar:
+        if check_results(x_svd, standard_errors, nb_coeffs):
+            return x_svd, standard_errors
+        elif nb_coeffs > 1:
+            x_svd, standard_errors = fit_ff_eq(
+                energy, field, calc_mat, 1, rcond, threshold, calc_type
+            )
+            tmp_svd = np.zeros((nb_coeffs,))
+            tmp_errors = np.zeros((nb_coeffs,))
+            tmp_svd[0] = x_svd[0]
+            tmp_errors[0] = standard_errors[0]
+            return tmp_svd, tmp_errors
+        else:
+            raise RuntimeError("You found a bug!")
+    else:
+        return x_svd, standard_errors
 
 
 class PolarizabilityCalculator:
@@ -108,69 +251,6 @@ class PolarizabilityCalculator:
 
         return np.array(coeffs[self.calc_type][self.nb_coeffs])
 
-    # def get_coeff(self, f):
-    #     """
-    #     Return the coefficients for a given electric field strength.
-
-    #     Parameters
-    #     ----------
-    #     f : float
-    #         The electric field strength.
-
-    #     Returns
-    #     -------
-    #     array_like of float
-    #         The coefficients.
-    #     """
-    #     if self.nb_coeffs == 1:
-    #         if self.calc_type == "dipole":
-    #             return np.array([-np.power(f, 2) / 2.0])
-    #         elif self.calc_type == "quadrupole":
-    #             return np.array([np.power(f, 1) / 2.0])
-    #         else:
-    #             raise TypeError(
-    #                 'calc_type {} is not valid, please use "dipole" '
-    #                 'or "quadrupole"'.format(self.calc_type)
-    #             )
-
-    #     elif self.nb_coeffs == 2:
-    #         if self.calc_type == "dipole":
-    #             return np.array([-np.power(f, 2) / 2.0, -np.power(f, 4) / 24.0])
-    #         elif self.calc_type == "quadrupole":
-    #             return np.array([np.power(f, 1) / 2.0, -np.power(f, 2) / 8.0])
-    #         else:
-    #             raise TypeError(
-    #                 'calc_type {} is not valid, please use "dipole" '
-    #                 'or "quadrupole"'.format(self.calc_type)
-    #             )
-
-    #     elif self.nb_coeffs == 3:
-    #         if self.calc_type == "dipole":
-    #             return np.array(
-    #                 [
-    #                     -np.power(f, 2) / 2.0,
-    #                     -np.power(f, 4) / 24.0,
-    #                     -np.power(f, 3) / 144.0,
-    #                 ]
-    #             )
-    #         elif self.calc_type == "quadrupole":
-    #             return np.array(
-    #                 [
-    #                     -np.power(f, 1) / 2.0,
-    #                     -np.power(f, 2) / 8.0,
-    #                     -np.power(f, 3) / 24.0,
-    #                 ]
-    #             )
-    #         else:
-    #             raise TypeError(
-    #                 'calc_type {} is not valid, please use "dipole" '
-    #                 'or "quadrupole"'.format(self.calc_type)
-    #             )
-    #     else:
-    #         raise ValueError(
-    #             f"calc_type {self.calc_type} is not valid, please use 'dipole' or 'quadrupole'."
-    #         )
-
     def get_A(self, field):
         """
         Create the matrix A for the given electric field strengths.
@@ -190,7 +270,7 @@ class PolarizabilityCalculator:
             A[i, :] = self.get_coeff(v)
         return A
 
-    def get_svd_from_array(self, energy, field, rcond=None, threshold=None):
+    def get_svd_from_array_old(self, energy, field, rcond=1e-8, threshold=None):
         """
         Calculate the SVD-based solution for the least-squares problem.
 
@@ -228,32 +308,45 @@ class PolarizabilityCalculator:
         field = field[sort_indices]
         energy = energy[sort_indices]
 
-        # define a matrix
+        # Define the matrix
         A = self.get_A(field)
         b = energy - e_ref
 
-        # Solve the least squares problem using SVD
-        x_svd, residuals, rank, s = np.linalg.lstsq(A, b, rcond=rcond)
+        # Normalize the columns of A
+        norms = np.linalg.norm(A, axis=0)
+        A_normalized = A / norms
 
-        # Manually calculate residuals if not provided by np.linalg.lstsq
-        if residuals.size == 0:
-            residuals = b - np.dot(A, x_svd)
-            residual_sum_of_squares = np.sum(residuals**2)
+        # Solve the least squares problem using SVD on the normalized matrix
+        x_svd_normalized, residuals, rank, s = lstsq(A_normalized, b, cond=rcond)
+
+        # Adjust the solution to account for the normalization
+        x_svd = x_svd_normalized / norms
+
+        # Check condition to fit only the first coefficient
+        if self.nb_coeffs > 1 and (x_svd[1] < 0 or x_svd[1] > 1e7):
+            # Fit only the first coefficient
+            A_normalized = A_normalized[:, [0]]  # Reduce A_normalized to single column
+            x_svd_normalized, residuals, rank, s = lstsq(A_normalized, b, cond=rcond)
+            x_svd = np.zeros(self.nb_coeffs)
+            x_svd[0] = x_svd_normalized[0] / norms[0]  # Adjust the first coefficient
+
+            # Update the residuals for the single coefficient fit
+            residuals = b - np.dot(A[:, [0]], x_svd[:1])
         else:
-            residual_sum_of_squares = residuals[0]
-            # residuals2 = b - np.dot(A, x_svd)
-            # residual_sum_of_squares2 = np.sum(residuals2**2)
-            # assert np.allclose(residual_sum_of_squares, residual_sum_of_squares2)
-            # print("assert True")
+            # Manually calculate residuals if not provided by scipy.linalg.lstsq
+            if np.ndim(residuals) == 0:  # Scalar residual case
+                residuals = b - np.dot(A, x_svd)
+
+        # Calculate the residual sum of squares
+        residual_sum_of_squares = np.sum(residuals**2)
 
         # Check for degrees of freedom
         degrees_of_freedom = len(energy) - len(x_svd)
         if degrees_of_freedom == 0:
             # This implies an exact fit; no error to estimate.
             MSE = 0
-            cov_matrix = np.zeros(
-                (len(x_svd), len(x_svd))
-            )  # Covariance matrix is not defined
+            # Covariance matrix is not defined
+            cov_matrix = np.zeros((len(x_svd), len(x_svd)))
         else:
             # Calculate the covariance matrix of the coefficients
             # Assuming homoscedasticity (constant variance of residuals)
@@ -264,35 +357,19 @@ class PolarizabilityCalculator:
         standard_errors = np.sqrt(np.diag(cov_matrix))
         return x_svd, standard_errors
 
-    # def get_res_svd(self, filename):
-    #     """
-    #     Calculate the SVD-based solution for the least-squares problem using the data from a file.
-
-    #     Parameters
-    #     ----------
-    #     filename : str
-    #         The name of the file containing the electric field strengths and energy values.
-
-    #     Returns
-    #     -------
-    #     array_like of float
-    #         The coefficients.
-    #     """
-    #     with open(filename) as f:
-    #         context = f.readlines()
-
-    #     if len(context) < 3:
-    #         raise ValueError(f"Data points in {filename} is less than 3")
-
-    #     filed_energy = [tuple(c.split()) for c in context]
-    #     energy, field = [], []
-    #     for f, e in filed_energy:
-    #         f = float(f)
-    #         energy.append(float(e))
-    #         field.append(f)
-
-    #     x_svd = self.get_svd_from_array(energy, field)
-    #     return x_svd
+    def get_svd_from_array(
+        self, energy, field, rcond=None, threshold=None, check_hyper_polar=False
+    ):
+        return fit_ff_eq(
+            energy=energy,
+            field=field,
+            calc_mat=calc_mat,
+            nb_coeffs=self.nb_coeffs,
+            rcond=rcond,
+            threshold=threshold,
+            calc_type=self.calc_type,
+            check_hyper_polar=check_hyper_polar,
+        )
 
 
 def get_polarizability(
