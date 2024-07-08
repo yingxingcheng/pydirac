@@ -1,3 +1,9 @@
+## [2024-7-8]
+
+### Changed
+
+- The least-squares procedure for fitting dipole polarizability.
+
 ## [2024-6-4]
 
 ### Added

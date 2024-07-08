@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pydirac"
-version = "2024.6.4"
+version = "2024.7.8"
 authors = [
   { name="YingXing Cheng", email="yingxing.cheng@ugent.be" },
 ]
